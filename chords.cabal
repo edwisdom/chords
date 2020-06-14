@@ -1,0 +1,67 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 28ebe0f0c77b29cc6ae61096d482b4002c53ff521bbbac43d80e81ce83b22a4a
+
+name:           chords
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/chords#readme>
+homepage:       https://github.com/githubuser/chords#readme
+bug-reports:    https://github.com/githubuser/chords/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/chords
+
+library
+  exposed-modules:
+      Lib
+      Chord
+      Parser
+      CanonicalChord
+  other-modules:
+      Paths_chords
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5,
+      containers,
+      parsec                    
+  default-language: Haskell2010
+
+executable chords-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_chords
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , chords
+  default-language: Haskell2010
+
+test-suite chords-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_chords
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , chords
+  default-language: Haskell2010
