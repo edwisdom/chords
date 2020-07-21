@@ -17,7 +17,6 @@ module Lib
   , jumpIntervalFromNote
   , Scale(..)
   , scaleToIntervals
-  , scaleToPitchSet
   , (<+>)
   , (<->)
   ) where
@@ -29,9 +28,10 @@ import Data.Set (Set)
 import qualified Data.Set as S
 import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)
+import Debug.Trace
 
 
-chordToNotes :: CC.Chord -> [CC.Root]
+chordToNotes :: CC.Chord -> [Root]
 chordToNotes chord@(CC.Chord root _ _ _ _) = 
   (flip jumpIntervalFromNote root) <$> (S.toList $ chordToIntervals chord)
 
@@ -76,10 +76,6 @@ scaleToIntervals scale =
     scaleToTuples SDiminishedQuality = 
       [(IPerfect, 1), (IMajor, 2), (IMinor, 3), (IPerfect, 4), 
        ((IDiminished 1), 5), (IMinor, 6), ((IDiminished 1), 7)]
-
-
-scaleToPitchSet :: CC.Root -> Scale -> [CC.Root]
-scaleToPitchSet root scale = map ($ root) (jumpIntervalFromNote <$> (scaleToIntervals scale))
 
 
 qualityToIntervals :: Quality -> HeliotonicScale
@@ -249,27 +245,24 @@ intervalToDistance (Interval q i) =
     subIntervalToDistance _ = Nothing
 
 
-jumpIntervalFromNote :: Interval -> CC.Root -> CC.Root
-jumpIntervalFromNote (Interval iQual iNum) (CC.Root note acc) = 
+jumpIntervalFromNote :: Interval -> Root -> Root
+jumpIntervalFromNote (Interval iQual iNum) (Root note acc) = 
   let 
-    new_note = nextNthNote note (iNum - 1)
-    curr_dist = (pitchClassToInt (rootToPitchClass(CC.Root new_note CC.AccNatural))
-              - pitchClassToInt (rootToPitchClass(CC.Root note acc))) `mod` 12
-    wanted_dist =
+    newNote = nextNthNote note (iNum - 1)
+    currDist = (pitchClassToInt (rootToPitchClass(Root newNote AccNatural))
+              - pitchClassToInt (rootToPitchClass(Root note acc)))
+    wantedDist = 
       case intervalToDistance (Interval iQual iNum) of
         Just (dist) -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
-    diff =  wanted_dist - curr_dist
-    new_acc = 
-      if diff > 0 then
-        CC.AccSharp
-      else if diff < 0 then
-        CC.AccFlat
-      else 
-        CC.AccNatural
-  in CC.Root new_note new_acc
+    diff = wantedDist - currDist
+    newAcc = 
+      case (signum diff) of
+        1 -> AccSharp diff 
+        -1 -> AccFlat diff 
+        0 -> AccNatural 
+  in Root newNote newAcc
   
-
 
 data PitchClass = PitchClass Int
   deriving (Show, Eq, Ord)
@@ -284,47 +277,22 @@ pitchClassToInt (PitchClass i) = i
 shiftPitchClassBy :: Int -> PitchClass -> PitchClass
 shiftPitchClassBy by (PitchClass i) = pitchClass (by + i)
 
-pitchClassToRoot :: PitchClass -> CC.Root
-pitchClassToRoot (PitchClass i) = pitch i
-  where
-    pitch 0 = CC.Root C CC.AccNatural
-    pitch 1 = CC.Root D CC.AccFlat
-    pitch 2 = CC.Root D CC.AccNatural
-    pitch 3 = CC.Root E CC.AccFlat
-    pitch 4 = CC.Root E CC.AccNatural
-    pitch 5 = CC.Root F CC.AccNatural
-    pitch 6 = CC.Root G CC.AccFlat
-    pitch 7 = CC.Root G CC.AccNatural
-    pitch 8 = CC.Root A CC.AccFlat
-    pitch 9 = CC.Root A CC.AccNatural
-    pitch 10 = CC.Root B CC.AccFlat
-    pitch 11 = CC.Root B CC.AccNatural
-    _ = error "Pitch class out of bounds"
 
 canonicalizeChord :: Chord -> CC.Chord
 canonicalizeChord (Chord root mqual highNat ext sus) =
-  let ccroot = canonicalizeRoot root
-      ccqual = canonicalizeQuality mqual highNat
+  let ccqual = canonicalizeQuality mqual highNat
   in
-    CC.Chord ccroot ccqual highNat ext sus
+    CC.Chord root ccqual highNat ext sus
 
 canonicalizeQuality :: (Maybe Quality) -> HighestNatural -> Quality
 canonicalizeQuality Nothing (HighestNatural _ i) = if i < 7 then QMajor else QDominant
 canonicalizeQuality (Just q) _ = q
 
-canonicalizeRoot :: Root -> CC.Root
-canonicalizeRoot (Root note acc) =
-  pitchClassToRoot $ shiftPitchClassBy (accidentalToModifier acc) (noteToPitchClass note)
 
 accidentalToModifier :: Accidental -> Int
 accidentalToModifier (AccSharp i) = i
 accidentalToModifier (AccFlat i) = -i
 accidentalToModifier AccNatural = 0
-
-ccaccidentalToModifier :: CC.Accidental -> Int
-ccaccidentalToModifier CC.AccSharp = 1
-ccaccidentalToModifier CC.AccFlat = -1
-ccaccidentalToModifier CC.AccNatural = 0
 
 
 noteToPitchClass :: Note -> PitchClass
@@ -336,6 +304,6 @@ noteToPitchClass G = pitchClass 7
 noteToPitchClass A = pitchClass 9
 noteToPitchClass B = pitchClass 11
 
-rootToPitchClass :: CC.Root -> PitchClass
-rootToPitchClass (CC.Root note acc) =
-  shiftPitchClassBy (ccaccidentalToModifier acc) (noteToPitchClass note) 
+rootToPitchClass :: Root -> PitchClass
+rootToPitchClass (Root note acc) =
+  shiftPitchClassBy (accidentalToModifier acc) (noteToPitchClass note) 

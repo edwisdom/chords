@@ -33,7 +33,9 @@ data Quality
 
 data Root
   = Root Note Accidental
- deriving Show
+
+instance Show Root where
+  show (Root note acc) = (show note) ++ (show acc)
 
 data Note
  = A
@@ -44,6 +46,18 @@ data Note
  | F
  | G
  deriving (Show, Read, Enum, Bounded)
+
+
+data Accidental
+ = AccSharp Int
+ | AccFlat Int
+ | AccNatural
+
+instance Show Accidental where 
+  show (AccSharp i) = concat $ replicate i "#"
+  show (AccFlat i) = concat $ replicate i "b"
+  show AccNatural = ""
+
 
 nextNote :: Note -> Note 
 nextNote G = A
@@ -60,8 +74,3 @@ prevNthNote :: Note -> Int -> Note
 prevNthNote note i = iterate prevNote note !! i
 
 
-data Accidental
- = AccSharp Int
- | AccFlat Int
- | AccNatural
- deriving Show
