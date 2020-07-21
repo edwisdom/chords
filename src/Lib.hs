@@ -2,7 +2,6 @@ module Lib
   ( parseChord
   , parserChord
   , parse
-  , canonicalizeChord
   , nExtendIntervals
   , nHighestNaturalToIntervals
   , chordToIntervals
@@ -21,8 +20,7 @@ module Lib
   ) where
 
 import Parser
-import Chord
-import qualified CanonicalChord as CC
+import CanonicalChord
 import PitchClass (rootToPitchClass, pitchClassToInt)
 import Data.Set (Set)
 import qualified Data.Set as S
@@ -31,13 +29,13 @@ import Data.Maybe (fromJust)
 import Debug.Trace
 
 
-chordToNotes :: CC.Chord -> [Root]
-chordToNotes chord@(CC.Chord root _ _ _ _) = 
+chordToNotes :: Chord -> [Root]
+chordToNotes chord@(Chord root _ _ _ _) = 
   (flip jumpIntervalFromNote root) <$> (S.toList $ chordToIntervals chord)
 
 
-chordToIntervals :: CC.Chord -> Set Interval 
-chordToIntervals (CC.Chord root quality highNat exts sus) =
+chordToIntervals :: Chord -> Set Interval 
+chordToIntervals (Chord root quality highNat exts sus) =
   let
     baseScale = nHighestNaturalToIntervals highNat $ qualityToIntervals quality  
     intervals = nSusIntervals (nExtendIntervals baseScale exts) sus
@@ -263,15 +261,4 @@ jumpIntervalFromNote (Interval iQual iNum) (Root note acc) =
         0 -> AccNatural 
   in Root newNote newAcc
   
-
-canonicalizeChord :: Chord -> CC.Chord
-canonicalizeChord (Chord root mqual highNat ext sus) =
-  let ccqual = canonicalizeQuality mqual highNat
-  in
-    CC.Chord root ccqual highNat ext sus
-
-canonicalizeQuality :: (Maybe Quality) -> HighestNatural -> Quality
-canonicalizeQuality Nothing (HighestNatural _ i) = if i < 7 then QMajor else QDominant
-canonicalizeQuality (Just q) _ = q
-
 
