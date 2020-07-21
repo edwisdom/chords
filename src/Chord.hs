@@ -35,7 +35,7 @@ data Root
   = Root Note Accidental
 
 instance Show Root where
-  show (Root note acc) = (show note) ++ (show acc)
+  show (Root note acc) = show note ++ show acc
 
 data Note
  = A
@@ -53,13 +53,13 @@ data Accidental
  | AccFlat Int
  | AccNatural
 
-instance Show Accidental where 
+instance Show Accidental where
   show (AccSharp i) = concat $ replicate i "#"
   show (AccFlat i) = concat $ replicate i "b"
   show AccNatural = ""
 
 
-nextNote :: Note -> Note 
+nextNote :: Note -> Note
 nextNote G = A
 nextNote n = succ n
 
@@ -67,10 +67,8 @@ prevNote :: Note -> Note
 prevNote A = G
 prevNote n = pred n
 
-nextNthNote :: Note -> Int -> Note 
+nextNthNote :: Note -> Int -> Note
 nextNthNote note i = iterate nextNote note !! i
 
-prevNthNote :: Note -> Int -> Note 
+prevNthNote :: Note -> Int -> Note
 prevNthNote note i = iterate prevNote note !! i
-
-

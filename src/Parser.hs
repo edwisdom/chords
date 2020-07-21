@@ -16,13 +16,13 @@ import Data.Maybe (fromMaybe)
 
 parseChord :: String -> Maybe Chord
 parseChord s =
-  case (parse parserChord "" s) of
+  case parse parserChord "" s of
     Left err  -> Nothing
     Right xs  -> Just xs
 
 
 (<||>) :: Parser a -> Parser a -> Parser a
-p <||> q = (try p) <|> q
+p <||> q = try p <|> q
 
 parserAccidental :: Parser Accidental
 parserAccidental =
@@ -39,8 +39,7 @@ parserRoot =
   do
     noteChar <- oneOf "ABCDEFG"
     let note = read [noteChar]
-    acc <- parserAccidental
-    return $ Root note acc
+    Root note <$> parserAccidental
 
 parserQuality :: Parser Quality
 parserQuality =
@@ -79,9 +78,7 @@ parserSus :: Parser Sus
 parserSus =
   do
     msus <- optionMaybe parserSusPresent
-    let sus = case msus of
-          Just i -> Sus i
-          Nothing -> NoSus
+    let sus = maybe NoSus Sus msus
     return sus
   where
     parserSusPresent :: Parser Int
@@ -89,7 +86,7 @@ parserSus =
       do
         _ <- string "sus"
         number <- optionMaybe (many1 digit)
-        return $ fromMaybe 2 (read <$> number)
+        return $ maybe 2 read number
 
 parserExtension :: Parser Extension
 parserExtension =
