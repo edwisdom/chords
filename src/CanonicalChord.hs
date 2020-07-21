@@ -7,10 +7,16 @@ data Chord
 
 data Root
   = Root Note Accidental
- deriving Show
 
+instance Show Root where
+  show (Root note acc) = (show note) ++ (show acc)
+    
 data Accidental
  = AccSharp
  | AccFlat
  | AccNatural
- deriving Show
+
+instance Show Accidental where 
+  show AccSharp = "#"
+  show AccFlat = "b"
+  show AccNatural = ""

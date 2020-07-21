@@ -16,4 +16,4 @@ readEvalPrint chordStr =
     let xs = parseChord chordStr
     _ <- print xs
     _ <- print $ Lib.canonicalizeChord <$> xs
-    print $ pitchClassesToString <$> Lib.chordToPitchClasses <$> Lib.canonicalizeChord <$> xs
+    print $ show <$> Lib.chordToNotes <$> Lib.canonicalizeChord <$> xs

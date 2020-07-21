@@ -43,7 +43,22 @@ data Note
  | E
  | F
  | G
- deriving (Show, Read)
+ deriving (Show, Read, Enum, Bounded)
+
+nextNote :: Note -> Note 
+nextNote G = A
+nextNote n = succ n
+
+prevNote :: Note -> Note
+prevNote A = G
+prevNote n = pred n
+
+nextNthNote :: Note -> Int -> Note 
+nextNthNote note i = iterate nextNote note !! i
+
+prevNthNote :: Note -> Int -> Note 
+prevNthNote note i = iterate prevNote note !! i
+
 
 data Accidental
  = AccSharp Int
