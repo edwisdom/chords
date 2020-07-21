@@ -1,33 +1,17 @@
 module Lib
-  ( parseChord
-  , parserChord
-  , parse
-  , nExtendIntervals
-  , nHighestNaturalToIntervals
-  , chordToIntervals
+  ( chordToIntervals
   , chordToNotes
-  , nSusIntervals
-  , qualityToIntervals
-  , intervalToDistance
-  , Interval(..)
-  , IQuality(..)
-  , defaultIQuality
-  , jumpIntervalFromNote
-  , Scale(..)
-  , scaleToIntervals
-  , (<+>)
-  , (<->)
   ) where
 
-import Parser
+
 import CanonicalChord
 import Interval (Interval(..), IQuality(..), (<+>), (<->))
 import Interval (defaultIQuality, jumpIntervalFromNote, intervalToDistance)
-import Data.Set (Set)
+import Scale (Scale(..), scaleToIntervals)
+import Data.Set(Set(..))
 import qualified Data.Set as S
 import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)
-import Debug.Trace
 
 
 chordToNotes :: Chord -> [Root]
@@ -38,43 +22,13 @@ chordToNotes chord@(Chord root _ _ _ _) =
 chordToIntervals :: Chord -> Set Interval 
 chordToIntervals (Chord root quality highNat exts sus) =
   let
-    baseScale = nHighestNaturalToIntervals highNat $ qualityToIntervals quality  
-    intervals = nSusIntervals (nExtendIntervals baseScale exts) sus
+    baseScale = highestNaturalToIntervals highNat $ qualityToIntervals quality  
+    intervals = susIntervals (extendIntervals baseScale exts) sus
   in 
     foldr (\int -> \intSet -> S.insert int intSet) S.empty intervals
 
 
 type HeliotonicScale = Map Int Interval
-
-
-data Scale
-  = SLydian
-  | SDorian
-  | SMixolydian
-  | SAugmentedQuality
-  | SDiminishedQuality    
-
-
-scaleToIntervals :: Scale -> [Interval]
-scaleToIntervals scale =  
-  uncurry Interval <$> scaleToTuples scale   
-  where
-    scaleToTuples :: Scale -> [(IQuality, Int)]
-    scaleToTuples SLydian = 
-      [(IPerfect, 1), (IMajor, 2), (IMajor, 3), ((IAugmented 1), 4), 
-       (IPerfect, 5), (IMajor, 6), (IMajor, 7)]
-    scaleToTuples SDorian = 
-      [(IPerfect, 1), (IMajor, 2), (IMinor, 3), (IPerfect, 4), 
-       (IPerfect, 5), (IMajor, 6), (IMinor, 7)]
-    scaleToTuples SMixolydian =
-      [(IPerfect, 1), (IMajor, 2), (IMajor, 3), (IPerfect, 4), 
-       (IPerfect, 5), (IMajor, 6), (IMinor, 7)]
-    scaleToTuples SAugmentedQuality =
-      [(IPerfect, 1), (IMajor, 2), (IMajor, 3), ((IAugmented 1), 4), 
-       ((IAugmented 1), 5), (IMajor, 6), (IMinor, 7)]
-    scaleToTuples SDiminishedQuality = 
-      [(IPerfect, 1), (IMajor, 2), (IMinor, 3), (IPerfect, 4), 
-       ((IDiminished 1), 5), (IMinor, 6), ((IDiminished 1), 7)]
 
 
 qualityToIntervals :: Quality -> HeliotonicScale
@@ -88,22 +42,21 @@ qualityToIntervals qual = fromList $ zip [1..7] (scaleToIntervals (qualityToScal
     qualityToScale QDiminished = SDiminishedQuality
 
 
+susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
+susIntervals scale NoSus = scale
+susIntervals scale (Sus i) = insert i (Interval (defaultIQuality i) i) $ delete 3 scale
 
 
-nSusIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-nSusIntervals scale NoSus = scale
-nSusIntervals scale (Sus i) = insert i (Interval (defaultIQuality i) i) $ delete 3 scale
-
-nExtendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
-nExtendIntervals scale exts = foldr (\ext -> \scale -> extendInterval scale ext) scale exts 
-
-extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-extendInterval scale (ExtSharp i) = insert i ((Interval (defaultIQuality i) i) <+> 1) scale
-extendInterval scale (ExtFlat i) = insert i ((Interval (defaultIQuality i) i) <-> 1) scale
+extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
+extendIntervals scale exts = foldr (\ext -> \scale -> extendInterval scale ext) scale exts
+  where 
+  extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
+  extendInterval scale (ExtSharp i) = insert i ((Interval (defaultIQuality i) i) <+> 1) scale
+  extendInterval scale (ExtFlat i) = insert i ((Interval (defaultIQuality i) i) <-> 1) scale
         
 
-nHighestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
-nHighestNaturalToIntervals (HighestNatural major i) scale = 
+highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
+highestNaturalToIntervals (HighestNatural major i) scale = 
   insertMajor major $ getIntervals subset scale 
   where 
     subset = 

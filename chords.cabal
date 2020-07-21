@@ -33,6 +33,7 @@ library
       CanonicalChord
       PitchClass
       Interval
+      Scale
   other-modules:
       Paths_chords
   hs-source-dirs:
