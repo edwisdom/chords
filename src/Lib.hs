@@ -13,7 +13,6 @@ module Lib
   , Interval(..)
   , IQuality(..)
   , defaultIQuality
-  , rootToPitchClass
   , jumpIntervalFromNote
   , Scale(..)
   , scaleToIntervals
@@ -24,6 +23,7 @@ module Lib
 import Parser
 import Chord
 import qualified CanonicalChord as CC
+import PitchClass (rootToPitchClass, pitchClassToInt)
 import Data.Set (Set)
 import qualified Data.Set as S
 import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
@@ -255,28 +255,14 @@ jumpIntervalFromNote (Interval iQual iNum) (Root note acc) =
       case intervalToDistance (Interval iQual iNum) of
         Just (dist) -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
-    diff = wantedDist - currDist
+    diff = (((wantedDist - currDist) + 6) `mod` 12) - 6
     newAcc = 
       case (signum diff) of
         1 -> AccSharp diff 
-        -1 -> AccFlat diff 
+        -1 ->  AccFlat (-diff) 
         0 -> AccNatural 
   in Root newNote newAcc
   
-
-data PitchClass = PitchClass Int
-  deriving (Show, Eq, Ord)
-
-pitchClass :: Int -> PitchClass
-pitchClass i = PitchClass (i `mod` 12)
-
-pitchClassToInt :: PitchClass -> Int
-pitchClassToInt (PitchClass i) = i
-
-
-shiftPitchClassBy :: Int -> PitchClass -> PitchClass
-shiftPitchClassBy by (PitchClass i) = pitchClass (by + i)
-
 
 canonicalizeChord :: Chord -> CC.Chord
 canonicalizeChord (Chord root mqual highNat ext sus) =
@@ -289,21 +275,3 @@ canonicalizeQuality Nothing (HighestNatural _ i) = if i < 7 then QMajor else QDo
 canonicalizeQuality (Just q) _ = q
 
 
-accidentalToModifier :: Accidental -> Int
-accidentalToModifier (AccSharp i) = i
-accidentalToModifier (AccFlat i) = -i
-accidentalToModifier AccNatural = 0
-
-
-noteToPitchClass :: Note -> PitchClass
-noteToPitchClass C = pitchClass 0
-noteToPitchClass D = pitchClass 2
-noteToPitchClass E = pitchClass 4
-noteToPitchClass F = pitchClass 5
-noteToPitchClass G = pitchClass 7
-noteToPitchClass A = pitchClass 9
-noteToPitchClass B = pitchClass 11
-
-rootToPitchClass :: Root -> PitchClass
-rootToPitchClass (Root note acc) =
-  shiftPitchClassBy (accidentalToModifier acc) (noteToPitchClass note) 
