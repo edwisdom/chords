@@ -6,11 +6,16 @@ module Interval
   , defaultIQuality
   , intervalToDistance
   , jumpIntervalFromNote
+  , (|+|)
+  , (|-|)
+  , invert
   ) where
 
 
 import CanonicalChord (Root(..), Accidental(..), nextNthNote)
 import PitchClass (rootToPitchClass, pitchClassToInt)
+import Data.Maybe (fromJust)
+
 
 
 data Interval 
@@ -92,16 +97,67 @@ lowerMajor (IAugmented x) = (IAugmented (x-1))
 
 defaultIQuality :: Int -> IQuality
 defaultIQuality i =
-  case (i-1) `mod` 7 + 1 of
+  case (intMod i) of
     intervalInt
       | intervalInt `elem` [1, 4, 5] -> IPerfect
       | intervalInt `elem` [2, 3, 6, 7] -> IMajor
       | otherwise -> error "Impl error, mod 7 issue"
  
 
+modShift :: Int -> Int -> (Int -> Int)
+modShift newZero modulus = (\i -> ((i - newZero) `mod` modulus) + newZero)
+
+intMod :: Int -> Int
+intMod = modShift 1 7
+
+intervalMod :: Interval -> Interval 
+intervalMod (Interval iQual i) = Interval iQual (intMod i)
+
+lowestAbsValue :: Int -> Int
+lowestAbsValue = modShift (-6) 12
+
+
+invert :: Interval -> Interval
+invert (Interval iQual i) = 
+  let 
+    newI = intMod $ 9 - (intMod i)
+    newQual = 
+      case iQual of 
+        IMajor -> IMinor
+        IMinor -> IMajor
+        IPerfect -> IPerfect
+        (IAugmented x) -> (IDiminished x)
+        (IDiminished x) -> (IAugmented x)
+  in 
+    Interval newQual newI
+
+
+infixl 6 |+| 
+(|+|) i1 i2 = intervalAdd i1 i2
+
+infixl 6 |-| 
+(|-|) i1 i2 = intervalSubtract i1 i2
+
+intervalAdd :: Interval -> Interval -> Interval
+intervalAdd int1@(Interval q1 i1) int2@(Interval q2 i2) =
+  let 
+    newI = i1 + i2 - 1
+    defQual = defaultIQuality newI
+    currDist = fromJust $ intervalToDistance (Interval defQual newI)
+    wantedDist = (fromJust (intervalToDistance int1)) 
+               + (fromJust (intervalToDistance int2))
+    diff = lowestAbsValue $ wantedDist - currDist
+  in 
+    (Interval defQual newI) <+> diff
+
+
+intervalSubtract :: Interval -> Interval -> Interval
+intervalSubtract int1 int2 = intervalMod $ intervalAdd int1 (invert int2)
+
+
 intervalToDistance :: Interval -> Maybe Int
-intervalToDistance (Interval q i) = 
-  subIntervalToDistance (Interval q ((i-1) `mod` 7 + 1))
+intervalToDistance int@(Interval q i) = 
+  subIntervalToDistance $ intervalMod int
   where
     subIntervalToDistance (Interval IPerfect 1) = Just 0
     subIntervalToDistance (Interval IMajor 2) = Just 2
@@ -147,7 +203,7 @@ jumpIntervalFromNote (Interval iQual iNum) (Root note acc) =
       case intervalToDistance (Interval iQual iNum) of
         Just (dist) -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
-    diff = (((wantedDist - currDist) + 6) `mod` 12) - 6
+    diff = lowestAbsValue $ wantedDist - currDist
     newAcc = 
       case (signum diff) of
         1 -> AccSharp diff 
