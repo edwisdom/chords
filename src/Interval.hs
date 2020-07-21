@@ -53,7 +53,7 @@ data IQuality
 
 infixl 6 <+>
 (<+>) (Interval iQual i) x = 
-  Interval (iterate modFunc iQual !! x) i
+  Interval (iterate modFunc iQual !! abs(x)) i
   where 
     modFunc =
       case (defaultIQuality i, signum x) of
