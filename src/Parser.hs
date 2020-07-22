@@ -46,28 +46,25 @@ parserAccidental =
                         return $ constructor $ length accs
 
 parserRoot :: Parser Root
-parserRoot =
-  do
-    noteChar <- oneOf "ABCDEFG"
-    let note = read [noteChar]
-    Root note <$> parserAccidental
+parserRoot = do noteChar <- oneOf "ABCDEFG"
+                let note = read [noteChar]
+                Root note <$> parserAccidental
 
 parserQuality :: Parser Quality
-parserQuality =
-       parser "^" QMajor
-  <||> parser "M" QMajor
-  <||> parser "-" QMinor
-  <||> parser "m" QMinor
-  <||> parser "dim" QDiminished
-  <||> parser "o" QDiminished
-  <||> parser "aug" QAugmented
-  <||> parser "+" QAugmented
+parserQuality = choice $ uncurry parseQualfromString <$> qualStrings
   where
-    parser :: String -> Quality -> Parser Quality
-    parser literal quality =
-      do
-        _ <- string literal
-        return quality
+    qualStrings = [ ("^",   QMajor)
+                  , ("M",   QMajor)
+                  , ("-",   QMinor)
+                  , ("m",   QMinor)
+                  , ("dim", QDiminished)
+                  , ("o",   QDiminished)
+                  , ("aug", QAugmented)
+                  , ("+",   QAugmented )
+                  ]
+
+    parseQualfromString :: String -> Quality -> Parser Quality
+    parseQualfromString literal quality = string literal >> return quality
 
 parserHighestNatural :: Parser HighestNatural
 parserHighestNatural =
