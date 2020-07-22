@@ -179,7 +179,7 @@ intervalToDistance int@(Interval q i) =
     subIntervalToDistance (Interval (IAugmented x) i) =
       let defQuality = defaultIQuality i
       in
-        (x+) <$> subIntervalToDistance (Interval defQuality i)
+        (x +) <$> subIntervalToDistance (Interval defQuality i)
 
 
     subIntervalToDistance (Interval (IDiminished x) i) =
