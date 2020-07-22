@@ -1,4 +1,4 @@
-module CanonicalChord 
+module CanonicalChord
   ( canonicalizeChord
   , Chord(..)
   , Root(..)
@@ -30,6 +30,6 @@ canonicalizeChord (Chord.Chord root mqual highNat ext sus) =
     Chord root ccqual highNat ext sus
 
 
-canonicalizeQuality :: (Maybe Quality) -> HighestNatural -> Quality
+canonicalizeQuality :: Maybe Quality -> HighestNatural -> Quality
 canonicalizeQuality Nothing (HighestNatural _ i) = if i < 7 then QMajor else QDominant
 canonicalizeQuality (Just q) _ = q
