@@ -5,6 +5,7 @@ module Parser
       ) where
 
 import Chord
+import Common.Utils
 
 import Text.Parsec (option, optionMaybe, (<|>), parse, many, eof)
 import Text.Parsec.String (Parser)
