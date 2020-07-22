@@ -7,12 +7,12 @@ import Chord
 
 
 
-data PitchClass = PitchClass Int
+newtype PitchClass = PitchClass Int
   deriving (Show, Eq, Ord)
 
 
 pitchClass :: Int -> PitchClass
-pitchClass i = PitchClass (i `mod` 12)
+pitchClass i = PitchClass $ i `mod` 12
 
 
 pitchClassToInt :: PitchClass -> Int
@@ -20,7 +20,7 @@ pitchClassToInt (PitchClass i) = i
 
 
 shiftPitchClassBy :: Int -> PitchClass -> PitchClass
-shiftPitchClassBy by (PitchClass i) = pitchClass (by + i)
+shiftPitchClassBy by (PitchClass i) = pitchClass $ by + i
 
 
 accidentalToModifier :: Accidental -> Int
@@ -41,4 +41,4 @@ noteToPitchClass B = pitchClass 11
 
 rootToPitchClass :: Root -> PitchClass
 rootToPitchClass (Root note acc) =
-  shiftPitchClassBy (accidentalToModifier acc) (noteToPitchClass note) 
+  shiftPitchClassBy (accidentalToModifier acc) (noteToPitchClass note)
