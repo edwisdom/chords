@@ -5,35 +5,47 @@ module Parser
       ) where
 
 import Chord
-import Common.Utils
+import Common.Utils (rightToMaybe)
 
-import Text.Parsec (option, optionMaybe, (<|>), parse, many, eof)
-import Text.Parsec.String (Parser)
-import Text.ParserCombinators.Parsec.Combinator (many1)
+import Text.Parsec
+    ( choice
+    , option
+    , optionMaybe
+    , (<|>)
+    , (<?>)
+    , parse
+    , many
+    , many1
+    , unexpected
+    , eof )
+import Text.Parsec.String (Parser) -- TODO: We're gonna want to do better than
+                                   --       this... Fortunately that won't
+                                   --       break anything, if we're careful.
 import Text.Parsec.Char (string, char, oneOf, digit)
 import Text.Parsec.Prim (try)
 
 import Data.Maybe (fromMaybe)
 
+-- TODO: Let's be a little more robust here
 parseChord :: String -> Maybe Chord
-parseChord s =
-  case parse parserChord "" s of
-    Left err  -> Nothing
-    Right xs  -> Just xs
+parseChord s = rightToMaybe $ parse parserChord "" s
 
-
+-- N.B. This should only be used when it's absolutely necessary
 (<||>) :: Parser a -> Parser a -> Parser a
 p <||> q = try p <|> q
 
 parserAccidental :: Parser Accidental
 parserAccidental =
-  option AccNatural $ parser '#' AccSharp <||> parser 'b' AccFlat
+  option AccNatural (parseAllOf '#' <|> parseAllOf 'b')
   where
-    parser :: Char -> (Int -> Accidental) -> Parser Accidental
-    parser symbol constructor =
-      do
-        cs <- many1 $ char symbol
-        return $ constructor (length cs)
+    parseAllOf :: Char -> Parser Accidental
+    parseAllOf acc
+      | acc `elem` "#b" = let constructor = case acc of
+                                              '#' -> AccSharp
+                                              'b' -> AccFlat
+                          in do accs <- many1 $ char acc
+                                return $ constructor $ length accs
+      | otherwise       = unexpected "character"
 
 parserRoot :: Parser Root
 parserRoot =
