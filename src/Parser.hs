@@ -51,7 +51,7 @@ parserRoot = do noteChar <- oneOf "ABCDEFG"
                 Root note <$> parserAccidental
 
 parserQuality :: Parser Quality
-parserQuality = choice $ uncurry parseQualfromString <$> qualStrings
+parserQuality = choice $ parseQualfromString <$> qualStrings
   where
     qualStrings = [ ("^",   QMajor)
                   , ("M",   QMajor)
@@ -63,15 +63,15 @@ parserQuality = choice $ uncurry parseQualfromString <$> qualStrings
                   , ("+",   QAugmented )
                   ]
 
-    parseQualfromString :: String -> Quality -> Parser Quality
-    parseQualfromString qualName quality = string qualName >> return quality
+    parseQualfromString :: (String, Quality) -> Parser Quality
+    parseQualfromString (qualName, quality) = string qualName >> return quality
 
 parserHighestNatural :: Parser HighestNatural
 parserHighestNatural =
   do
     constructor <- parserMajor
     digits <- many1 digit
-    return $ constructor (read digits)
+    return $ constructor $ read digits
   where
     parserMajor :: Parser (Int -> HighestNatural)
     parserMajor =
