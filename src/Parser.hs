@@ -68,7 +68,7 @@ parserHighestNatural =
     parserMajor :: Parser (Int -> HighestNatural)
     parserMajor =
       do
-        major <- optionMaybe (string "Maj" <||> string "M" <||> string "^")
+        major <- optionMaybe $ string "Maj" <||> string "M" <||> string "^"
         return $
           case major of
             Just _ -> HighestNatural Major
@@ -85,7 +85,7 @@ parserSus =
     parserSusPresent =
       do
         _ <- string "sus"
-        number <- optionMaybe (many1 digit)
+        number <- optionMaybe $ many1 digit
         return $ maybe 2 read number
 
 parserExtension :: Parser Extension

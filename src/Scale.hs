@@ -37,7 +37,7 @@ data Scale
 nthDegreeIntervals :: [Interval] -> Int -> [Interval]
 nthDegreeIntervals ints n = sort $ (|-| rootInterval) <$> ints
   where
-    rootInterval = ints !! (n-1)
+    rootInterval = ints !! (n - 1)
 
 
 listIntervals :: [IQuality] -> [Int] -> [Interval]
@@ -62,10 +62,10 @@ scaleToIntervals SLocrian =
   nthDegreeIntervals (scaleToIntervals SMajor) 7
 scaleToIntervals SAugmentedQuality =
   listIntervals
-  [IPerfect, IMajor, IMajor, (IAugmented 1), (IAugmented 1), IMajor, IMinor] [1..7]
+  [IPerfect, IMajor, IMajor, IAugmented 1, IAugmented 1, IMajor, IMinor] [1..7]
 scaleToIntervals SDiminishedQuality =
   listIntervals
-  [IPerfect, IMajor, IMinor, IPerfect, (IDiminished 1), IMinor, (IDiminished 1)] [1..7]
+  [IPerfect, IMajor, IMinor, IPerfect, IDiminished 1, IMinor, IDiminished 1] [1..7]
 scaleToIntervals SMelodicMinor =
   listIntervals
   [IPerfect, IMajor, IMinor, IPerfect, IPerfect, IMajor, IMajor] [1..7]

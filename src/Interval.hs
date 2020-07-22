@@ -196,11 +196,11 @@ intervalToDistance int@(Interval q i) =
 jumpIntervalFromNote :: Interval -> Root -> Root
 jumpIntervalFromNote (Interval iQual iNum) (Root note acc) =
   let
-    newNote = nextNthNote note (iNum - 1)
-    currDist = (pitchClassToInt (rootToPitchClass(Root newNote AccNatural))
-              - pitchClassToInt (rootToPitchClass(Root note acc)))
+    newNote = nextNthNote note $ iNum - 1
+    currDist = pitchClassToInt (rootToPitchClass(Root newNote AccNatural))
+             - pitchClassToInt (rootToPitchClass(Root note acc))
     wantedDist =
-      case intervalToDistance (Interval iQual iNum) of
+      case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
     diff = lowestAbsValue $ wantedDist - currDist

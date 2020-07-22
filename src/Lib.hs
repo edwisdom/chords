@@ -38,7 +38,7 @@ type HeliotonicScale = Map Int Interval
 
 
 qualityToIntervals :: Quality -> HeliotonicScale
-qualityToIntervals qual = fromList $ zip [1..7] (scaleToIntervals (qualityToScale qual))
+qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToScale qual
   where
     qualityToScale :: Quality -> Scale
     qualityToScale QMajor = SLydian
