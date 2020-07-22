@@ -39,13 +39,11 @@ parserAccidental =
   option AccNatural (parseAllOf '#' <|> parseAllOf 'b')
   where
     parseAllOf :: Char -> Parser Accidental
-    parseAllOf acc
-      | acc `elem` "#b" = let constructor = case acc of
-                                              '#' -> AccSharp
-                                              'b' -> AccFlat
-                          in do accs <- many1 $ char acc
-                                return $ constructor $ length accs
-      | otherwise       = unexpected "character"
+    parseAllOf acc = do let constructor = case acc of
+                                            '#' -> AccSharp
+                                            'b' -> AccFlat
+                        accs <- many1 $ char acc
+                        return $ constructor $ length accs
 
 parserRoot :: Parser Root
 parserRoot =
