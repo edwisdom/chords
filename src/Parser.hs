@@ -64,7 +64,7 @@ parserQuality = choice $ uncurry parseQualfromString <$> qualStrings
                   ]
 
     parseQualfromString :: String -> Quality -> Parser Quality
-    parseQualfromString literal quality = string literal >> return quality
+    parseQualfromString qualName quality = string qualName >> return quality
 
 parserHighestNatural :: Parser HighestNatural
 parserHighestNatural =
@@ -76,7 +76,7 @@ parserHighestNatural =
     parserMajor :: Parser (Int -> HighestNatural)
     parserMajor =
       do
-        major <- optionMaybe $ string "Maj" <||> string "M" <||> string "^"
+        major <- optionMaybe $ string "Maj" <||> string "M" <|> string "^"
         return $
           case major of
             Just _ -> HighestNatural Major
