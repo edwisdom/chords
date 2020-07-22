@@ -65,7 +65,6 @@ highestNaturalToIntervals (HighestNatural major i) scale =
   insertMajor major $ getIntervals subset scale
   where
     subset =
-
       if i `mod` 2 == 0 then
         [1, 3, 5, i]
       else
