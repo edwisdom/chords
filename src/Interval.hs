@@ -8,7 +8,7 @@ module Interval
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
-  , invert
+  , invertInt
   ) where
 
 
@@ -117,8 +117,8 @@ lowestAbsValue :: Int -> Int
 lowestAbsValue = modShift (-6) 12
 
 
-invert :: Interval -> Interval
-invert (Interval iQual i) = 
+invertInt :: Interval -> Interval
+invertInt (Interval iQual i) = 
   let 
     newI = intMod $ 9 - (intMod i)
     newQual = 
@@ -152,7 +152,7 @@ intervalAdd int1@(Interval q1 i1) int2@(Interval q2 i2) =
 
 
 intervalSubtract :: Interval -> Interval -> Interval
-intervalSubtract int1 int2 = intervalMod $ intervalAdd int1 (invert int2)
+intervalSubtract int1 int2 = intervalMod $ intervalAdd int1 (invertInt int2)
 
 
 intervalToDistance :: Interval -> Maybe Int

@@ -1,6 +1,7 @@
 module Lib
   ( chordToIntervals
   , chordToNotes
+  , transpose
   ) where
 
 
@@ -76,6 +77,8 @@ highestNaturalToIntervals (HighestNatural major i) scale =
     insertMajor notMajor hts = hts
 
 
+transpose :: Chord -> Interval -> Chord
+transpose (Chord root qual highNat ext sus) int = 
+  Chord (jumpIntervalFromNote int root) qual highNat ext sus
 
-  
-
+ 
