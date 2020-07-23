@@ -1,4 +1,4 @@
-module Base.Accidental
+module Base.Core.Accidental
   ( Accidental
   , nSharp
   , nFlat

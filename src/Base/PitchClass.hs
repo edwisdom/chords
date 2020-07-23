@@ -4,8 +4,8 @@ module Base.PitchClass
   , getPitchClass
   ) where
 
-import Base.Note
-import Base.Accidental
+import Base.Core.Note
+import Base.Core.Accidental
 import Base.Chord ( Root(..) )
 
 newtype PitchClass = PitchClass { getPitchClass :: Int }

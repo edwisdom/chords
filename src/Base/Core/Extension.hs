@@ -1,4 +1,4 @@
-module Base.Extension
+module Base.Core.Extension
   ( Extension
   , sharp
   , flat

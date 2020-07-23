@@ -1,9 +1,9 @@
 module Base.Chord where
 
-import Base.Accidental
-import Base.Extension
-import Base.Note
-import Base.Quality
+import Base.Core.Accidental
+import Base.Core.Extension
+import Base.Core.Note
+import Base.Core.Quality
 
 data RawChord
   = RawChord Root (Maybe Quality) HighestNatural [Extension] Sus

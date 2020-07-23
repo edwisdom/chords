@@ -1,4 +1,4 @@
-module Base.Note
+module Base.Core.Note
   ( Note(..)
   , nextNthNote
   , prevNthNote

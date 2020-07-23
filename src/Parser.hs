@@ -4,10 +4,10 @@ module Parser
   , parse
   ) where
 
-import Base.Accidental
+import Base.Core.Accidental
+import Base.Core.Extension
+import Base.Core.Quality
 import Base.Chord
-import Base.Extension
-import Base.Quality
 
 import Common.Utils (rightToMaybe)
 
