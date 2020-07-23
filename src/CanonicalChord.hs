@@ -9,9 +9,7 @@ module CanonicalChord
   , MajorOrNot(..)
   , Note(..)
   , Accidental(..)
-  , nextNote
   , nextNthNote
-  , prevNote
   , prevNthNote
   ) where
 

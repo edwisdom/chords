@@ -76,17 +76,8 @@ instance Show Accidental where
   show (AccFlat i) = concat $ replicate i "b"
   show AccNatural = ""
 
-
-nextNote :: Note -> Note
-nextNote G = A
-nextNote n = succ n
-
-prevNote :: Note -> Note
-prevNote A = G
-prevNote n = pred n
-
 nextNthNote :: Note -> Int -> Note
-nextNthNote note i = iterate nextNote note !! i
+nextNthNote note i = iterate succ note !! i
 
 prevNthNote :: Note -> Int -> Note
-prevNthNote note i = iterate prevNote note !! i
+prevNthNote note i = iterate pred note !! i
