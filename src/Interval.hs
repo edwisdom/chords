@@ -12,7 +12,7 @@ module Interval
   ) where
 
 
-import CanonicalChord (Root(..), Accidental(..), nextNthNote)
+import Chord (Root(..), Accidental(..), nextNthNote)
 import PitchClass (rootToPitchClass, pitchClassToInt)
 import Data.Maybe (fromJust)
 

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 28f599305b1e1274f2645d3b3fd27f85045566cabd30a0eb4331fa963d7ce58c
+-- hash: cd630ab9a7ba45091be74aed2a092ef68905df65bfd038ef2ebaaaeb004327c2
 
 name:           chords
 version:        0.1.0.0
@@ -27,7 +27,6 @@ source-repository head
 
 library
   exposed-modules:
-      CanonicalChord
       Chord
       Common.Utils
       Interval

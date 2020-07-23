@@ -2,7 +2,7 @@ module Main where
 
 import Lib
 import Parser
-import CanonicalChord
+import Chord
 import Control.Monad (unless)
 
 main :: IO ()
@@ -17,5 +17,5 @@ readEvalPrint chordStr =
     _ <- print chordStr
     let xs = Parser.parseChord chordStr
     _ <- print xs
-    _ <- print $ CanonicalChord.canonicalizeChord <$> xs
-    print $ show <$> Lib.chordToNotes <$> CanonicalChord.canonicalizeChord <$> xs
+    _ <- print $ canonicalizeChord <$> xs
+    print $ show <$> Lib.chordToNotes <$> canonicalizeChord <$> xs

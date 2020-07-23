@@ -81,3 +81,14 @@ nextNthNote note i = iterate succ note !! i
 
 prevNthNote :: Note -> Int -> Note
 prevNthNote note i = iterate pred note !! i
+
+data CChord = CChord Root Quality HighestNatural [Extension] Sus
+ deriving Show
+
+canonicalizeQuality :: Maybe Quality -> HighestNatural -> Quality
+canonicalizeQuality Nothing  (HighestNatural _ i) = if i < 7 then QMajor else QDominant
+canonicalizeQuality (Just q) _                    = q
+
+canonicalizeChord :: Chord -> CChord
+canonicalizeChord (Chord root mqual highNat exts sus) =
+  CChord root (canonicalizeQuality mqual highNat) highNat exts sus
