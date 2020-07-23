@@ -69,18 +69,18 @@ parserQuality = choice $ parseQualfromString <$> qualStrings
 parserHighestNatural :: Parser HighestNatural
 parserHighestNatural =
   do
-    constructor <- parserMajor
+    constructor <- parseMajToConstructor
     digits <- many1 digit
     return $ constructor $ read digits
   where
-    parserMajor :: Parser (Int -> HighestNatural)
-    parserMajor =
+    parseMajToConstructor :: Parser (Int -> HighestNatural)
+    parseMajToConstructor =
       do
         major <- optionMaybe $ string "Maj" <||> string "M" <|> string "^"
-        return $
+        return $ HighestNatural $
           case major of
-            Just _ -> HighestNatural Major
-            Nothing -> HighestNatural NonMajor
+            Just _ ->  Major
+            Nothing -> NonMajor
 
 parserSus :: Parser Sus
 parserSus =
