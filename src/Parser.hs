@@ -94,19 +94,16 @@ parserSus =
 
 parserExtension :: Parser Extension
 parserExtension =
-  do
-    sharpOrFlat <- parserSf
-    number <- many1 digit
-    return $ sharpOrFlat $ read number
+  do sharpOrFlat <- parserSf
+     number <- many1 digit
+     return $ sharpOrFlat $ read number
   where
     parserSf :: Parser (Int -> Extension)
     parserSf =
-      do
-        sf <- oneOf "b#"
-        return $ case sf of
-          'b' -> ExtFlat
-          '#' -> ExtSharp
-          _ -> error "Unhandled possiblity in parser"
+      do sf <- oneOf "b#"
+         return $ case sf of
+                    'b' -> ExtFlat
+                    '#' -> ExtSharp
 
 parserChord :: Parser Chord
 parserChord =
