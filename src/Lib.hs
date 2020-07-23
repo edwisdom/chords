@@ -7,6 +7,7 @@ import Base.Core.Quality
 import Base.Chord
 
 import Base.Chord.Extension
+import Base.Chord.Root
 import Base.Chord.Sus
 
 import Interval

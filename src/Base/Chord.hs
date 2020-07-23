@@ -5,6 +5,7 @@ import Base.Core.Note
 import Base.Core.Quality
 
 import Base.Chord.Extension
+import Base.Chord.Root
 import Base.Chord.Sus
 
 data RawChord
@@ -19,12 +20,6 @@ data MajorOrNot
   = Major
   | NonMajor
   deriving Show
-
-data Root
-  = Root Note Accidental
-
-instance Show Root where
-  show (Root note acc) = show note ++ show acc
 
 data Chord = Chord Root Quality HighestNatural [Extension] Sus
  deriving Show

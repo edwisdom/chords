@@ -9,6 +9,7 @@ import Base.Core.Quality
 import Base.Chord
 
 import Base.Chord.Extension
+import Base.Chord.Root
 import Base.Chord.Sus
 
 import Common.Utils (rightToMaybe)
@@ -56,7 +57,7 @@ parserRoot :: Parser Root
 parserRoot = do noteChar <- oneOf "ABCDEFG"
                 let
                   note = read [noteChar]
-                Root note <$> parserAccidental
+                rootFrom note <$> parserAccidental
 
 parserQuality :: Parser Quality
 parserQuality = choice $ parseQualfromString <$> qualStrings

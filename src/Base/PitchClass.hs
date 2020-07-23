@@ -6,7 +6,7 @@ module Base.PitchClass
 
 import Base.Core.Note
 import Base.Core.Accidental
-import Base.Chord ( Root(..) )
+import Base.Chord.Root
 
 newtype PitchClass = PitchClass { getPitchClass :: Int }
   deriving (Show, Eq, Ord)
@@ -27,5 +27,5 @@ noteToPitchClass A = pitchClass 9
 noteToPitchClass B = pitchClass 11
 
 rootToPitchClass :: Root -> PitchClass
-rootToPitchClass (Root note acc) =
-  shiftPitchClassBy (impliedShift acc) (noteToPitchClass note)
+rootToPitchClass r =
+  shiftPitchClassBy (impliedShift $ getAcc r) (noteToPitchClass $ getRoot r)
