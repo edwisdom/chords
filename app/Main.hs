@@ -13,9 +13,8 @@ main =
 
 readEvalPrint :: String -> IO ()
 readEvalPrint chordStr =
-  do
-    _ <- print chordStr
-    let xs = Parser.parseChord chordStr
-    _ <- print xs
-    _ <- print $ canonicalizeChord <$> xs
-    print $ show . Lib.chordToNotes . canonicalizeChord <$> xs
+  do print chordStr
+     let xs = Parser.parseChord chordStr
+     print xs
+     print $ canonicalizeChord <$> xs
+     print $ show . Lib.chordToNotes . canonicalizeChord <$> xs
