@@ -6,6 +6,7 @@ module Lib
 import Base.Core.Quality
 import Base.Chord
 
+import Base.Chord.Chord
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Root
@@ -27,15 +28,15 @@ import Data.Maybe (fromJust)
 
 
 chordToNotes :: Chord -> [Root]
-chordToNotes chord@(Chord root _ _ _ _) =
-  flip jumpIntervalFromNote root <$> S.toList (chordToIntervals chord)
+chordToNotes chord =
+  flip jumpIntervalFromNote (getChordRoot chord) <$> S.toList (chordToIntervals chord)
 
 
 chordToIntervals :: Chord -> Set Interval
-chordToIntervals (Chord root quality highNat exts sus) =
+chordToIntervals chord =
   let
-    baseScale = highestNaturalToIntervals highNat $ qualityToIntervals quality
-    intervals = susIntervals (extendIntervals baseScale exts) sus
+    baseScale = highestNaturalToIntervals (getHighestNatural chord) $ qualityToIntervals $ getQuality chord
+    intervals = susIntervals (extendIntervals baseScale $ getExtensions chord) $ getSus chord
   in
     foldr S.insert S.empty intervals
 
