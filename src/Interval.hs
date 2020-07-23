@@ -34,11 +34,11 @@ instance Show Interval where
     let
       qualString =
         case iQual of
-          IMajor -> "M"
-          IMinor -> "m"
-          IPerfect -> "P"
+          IMajor          -> "M"
+          IMinor          -> "m"
+          IPerfect        -> "P"
           (IDiminished x) -> show x ++ "dim"
-          (IAugmented x) -> show x ++ "aug"
+          (IAugmented x)  -> show x ++ "aug"
     in
       qualString ++ show i
 
@@ -58,11 +58,11 @@ infixl 6 <+>
   where
     modFunc =
       case (defaultIQuality i, signum x) of
-        (IPerfect, 1) -> raisePerfect
-        (IMajor, 1) -> raiseMajor
+        (IPerfect, 1)  -> raisePerfect
+        (IMajor, 1)    -> raiseMajor
         (IPerfect, -1) -> lowerPerfect
-        (IMajor, -1) -> lowerMajor
-        (_, 0) -> id
+        (IMajor, -1)   -> lowerMajor
+        (_, 0)         -> id
 
 
 infixl 6 <->
@@ -71,36 +71,36 @@ interval <-> x =  interval <+> (-x)
 
 raisePerfect :: IQuality -> IQuality
 raisePerfect IPerfect = IAugmented 1
-raisePerfect (IAugmented x) = IAugmented $ x + 1
+raisePerfect (IAugmented x)  = IAugmented $ x + 1
 raisePerfect (IDiminished 1) = IPerfect
 raisePerfect (IDiminished x) = IDiminished $ x - 1
 
 raiseMajor :: IQuality -> IQuality
 raiseMajor IMajor = IAugmented 1
-raiseMajor (IAugmented x) = IAugmented $ x + 1
-raiseMajor IMinor = IMajor
+raiseMajor (IAugmented x)  = IAugmented $ x + 1
+raiseMajor IMinor          = IMajor
 raiseMajor (IDiminished 1) = IMinor
 raiseMajor (IDiminished x) = IDiminished $ x - 1
 
 lowerPerfect :: IQuality -> IQuality
-lowerPerfect IPerfect = IDiminished 1
+lowerPerfect IPerfect        = IDiminished 1
 lowerPerfect (IDiminished x) = IDiminished $ x + 1
-lowerPerfect (IAugmented 1) = IPerfect
-lowerPerfect (IAugmented x) = IAugmented $ x-1
+lowerPerfect (IAugmented 1)  = IPerfect
+lowerPerfect (IAugmented x)  = IAugmented $ x-1
 
 lowerMajor :: IQuality -> IQuality
-lowerMajor IMajor = IMinor
-lowerMajor IMinor = IDiminished 1
+lowerMajor IMajor          = IMinor
+lowerMajor IMinor          = IDiminished 1
 lowerMajor (IDiminished x) = IDiminished $ x + 1
-lowerMajor (IAugmented 1) = IMajor
-lowerMajor (IAugmented x) = IAugmented $ x - 1
+lowerMajor (IAugmented 1)  = IMajor
+lowerMajor (IAugmented x)  = IAugmented $ x - 1
 
 
 defaultIQuality :: Int -> IQuality
 defaultIQuality i =
   case intMod i of
     intervalInt
-      | intervalInt `elem` [1, 4, 5] -> IPerfect
+      | intervalInt `elem` [1, 4, 5]    -> IPerfect
       | intervalInt `elem` [2, 3, 6, 7] -> IMajor
       | otherwise -> error "Impl error, mod 7 issue"
 
@@ -124,10 +124,10 @@ invert (Interval iQual i) =
     newI = intMod $ 9 - intMod i
     newQual =
       case iQual of
-        IMajor -> IMinor
-        IMinor -> IMajor
-        IPerfect -> IPerfect
-        (IAugmented x) -> IDiminished x
+        IMajor          -> IMinor
+        IMinor          -> IMajor
+        IPerfect        -> IPerfect
+        (IAugmented x)  -> IDiminished x
         (IDiminished x) -> IAugmented x
   in
     Interval newQual newI
@@ -142,12 +142,12 @@ infixl 6 |-|
 intervalAdd :: Interval -> Interval -> Interval
 intervalAdd int1@(Interval q1 i1) int2@(Interval q2 i2) =
   let
-    newI = i1 + i2 - 1
-    defQual = defaultIQuality newI
-    currDist = fromJust $ intervalToDistance (Interval defQual newI)
+    newI       = i1 + i2 - 1
+    defQual    = defaultIQuality newI
+    currDist   = fromJust $ intervalToDistance (Interval defQual newI)
     wantedDist = fromJust (intervalToDistance int1)
                + fromJust (intervalToDistance int2)
-    diff = lowestAbsValue $ wantedDist - currDist
+    diff       = lowestAbsValue $ wantedDist - currDist
   in
     Interval defQual newI <+> diff
 
@@ -161,35 +161,38 @@ intervalToDistance int@(Interval q i) =
   subIntervalToDistance $ intervalMod int
   where
     subIntervalToDistance (Interval IPerfect 1) = Just 0
-    subIntervalToDistance (Interval IMajor 2) = Just 2
-    subIntervalToDistance (Interval IMajor 3) = Just 4
+    subIntervalToDistance (Interval IMajor 2)   = Just 2
+    subIntervalToDistance (Interval IMajor 3)   = Just 4
     subIntervalToDistance (Interval IPerfect 4) = Just 5
     subIntervalToDistance (Interval IPerfect 5) = Just 7
-    subIntervalToDistance (Interval IMajor 6) = Just 9
-    subIntervalToDistance (Interval IMajor 7) = Just 11
+    subIntervalToDistance (Interval IMajor 6)   = Just 9
+    subIntervalToDistance (Interval IMajor 7)   = Just 11
 
     subIntervalToDistance (Interval IMinor i) =
-      let defQuality = defaultIQuality i
+      let
+        defQuality = defaultIQuality i
       in
         case defQuality of
-          IMajor -> subtract 1 <$> subIntervalToDistance (Interval IMajor i)
+          IMajor   -> subtract 1 <$> subIntervalToDistance (Interval IMajor i)
           IPerfect -> Nothing
-          _ -> error "Impl error, default quality must be M or P"
+          _        -> error "Impl error, default quality must be M or P"
 
 
     subIntervalToDistance (Interval (IAugmented x) i) =
-      let defQuality = defaultIQuality i
+      let
+        defQuality = defaultIQuality i
       in
         (x +) <$> subIntervalToDistance (Interval defQuality i)
 
 
     subIntervalToDistance (Interval (IDiminished x) i) =
-      let defQuality = defaultIQuality i
+      let
+        defQuality = defaultIQuality i
       in
         case defQuality of
-          IMajor -> subtract (x + 1) <$> subIntervalToDistance (Interval IMajor i)
+          IMajor   -> subtract (x + 1) <$> subIntervalToDistance (Interval IMajor i)
           IPerfect -> subtract x <$> subIntervalToDistance (Interval IPerfect i)
-          _ -> error "Impl error, default quality must be M or P"
+          _        -> error "Impl error, default quality must be M or P"
 
     subIntervalToDistance _ = Nothing
 
@@ -197,14 +200,14 @@ intervalToDistance int@(Interval q i) =
 jumpIntervalFromNote :: Interval -> Root -> Root
 jumpIntervalFromNote (Interval iQual iNum) (Root note acc) =
   let
-    newNote = nextNthNote note $ iNum - 1
-    currDist = getPitchClass (rootToPitchClass(Root newNote natural))
-             - getPitchClass (rootToPitchClass(Root note acc))
+    newNote    = nextNthNote note $ iNum - 1
+    currDist   = getPitchClass (rootToPitchClass(Root newNote natural))
+               - getPitchClass (rootToPitchClass(Root note acc))
     wantedDist =
       case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
-    diff = lowestAbsValue $ wantedDist - currDist
+    diff   = lowestAbsValue $ wantedDist - currDist
     newAcc =
       case signum diff of
         1  -> nSharp diff

@@ -51,7 +51,7 @@ qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToSc
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale NoSus = scale
+susIntervals scale NoSus   = scale
 susIntervals scale (Sus i) = insert i (Interval (defaultIQuality i) i) $ delete 3 scale
 
 
@@ -61,7 +61,7 @@ extendIntervals = foldr $ flip extendInterval
   extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
   extendInterval scale ext = insert deg (Interval (defaultIQuality deg) deg <+> shift) scale
     where
-      deg = degree ext
+      deg   = degree ext
       shift = extSign ext
 
 highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
@@ -75,11 +75,14 @@ highestNaturalToIntervals (HighestNatural major i) scale =
         [1,3..i]
     getIntervals :: [Int] -> HeliotonicScale -> HeliotonicScale
     getIntervals ints hts = fromList $ map ($ hts) (getInterval <$> ints)
+
     getInterval :: Int -> HeliotonicScale -> (Int, Interval)
     getInterval int hts =
-      let interval = hts !? ((int-1) `mod` 7 + 1)
+      let
+        interval = hts !? ((int-1) `mod` 7 + 1)
       in
         (int, fromJust $ interval)
+
     insertMajor :: MajorOrNot -> HeliotonicScale -> HeliotonicScale
     insertMajor Major hts = insert 7 (Interval IMajor 7) hts
     insertMajor notMajor hts = hts

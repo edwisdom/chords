@@ -18,7 +18,7 @@ flat = ExtFlat
 
 degree :: Extension -> Int
 degree (ExtSharp deg) = deg
-degree (ExtFlat deg) = deg
+degree (ExtFlat deg)  = deg
 
 extSign :: Extension -> Int
 extSign (ExtSharp _) = 1

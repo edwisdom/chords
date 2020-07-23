@@ -43,29 +43,32 @@ parserAccidental =
   option natural (parseAllOf '#' <|> parseAllOf 'b')
   where
     parseAllOf :: Char -> Parser Accidental
-    parseAllOf acc = do let constructor = case acc of
-                                            '#' -> nSharp
-                                            'b' -> nFlat
+    parseAllOf acc = do let
+                          constructor = case acc of
+                                          '#' -> nSharp
+                                          'b' -> nFlat
                         accs <- many1 $ char acc
                         return $ constructor $ length accs
 
 parserRoot :: Parser Root
 parserRoot = do noteChar <- oneOf "ABCDEFG"
-                let note = read [noteChar]
+                let
+                  note = read [noteChar]
                 Root note <$> parserAccidental
 
 parserQuality :: Parser Quality
 parserQuality = choice $ parseQualfromString <$> qualStrings
   where
-    qualStrings = [ ("^",   QMajor)
-                  , ("M",   QMajor)
-                  , ("-",   QMinor)
-                  , ("m",   QMinor)
-                  , ("dim", QDiminished)
-                  , ("o",   QDiminished)
-                  , ("aug", QAugmented)
-                  , ("+",   QAugmented )
-                  ]
+    qualStrings =
+      [ ("^",   QMajor)
+      , ("M",   QMajor)
+      , ("-",   QMinor)
+      , ("m",   QMinor)
+      , ("dim", QDiminished)
+      , ("o",   QDiminished)
+      , ("aug", QAugmented)
+      , ("+",   QAugmented )
+      ]
 
     parseQualfromString :: (String, Quality) -> Parser Quality
     parseQualfromString (qualName, quality) = string qualName >> return quality
