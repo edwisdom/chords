@@ -1,4 +1,4 @@
-module Base.Core.Extension
+module Base.Chord.Extension
   ( Extension
   , sharp
   , flat
