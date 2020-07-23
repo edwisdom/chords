@@ -1,8 +1,8 @@
 module Parser
-    ( parseChord
-    , parserChord
-    , parse
-      ) where
+  ( parseChord
+  , parserChord
+  , parse
+  ) where
 
 import Base.Chord
 import Common.Utils (rightToMaybe)

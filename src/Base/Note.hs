@@ -1,6 +1,7 @@
-module Base.Note ( Note(..)
-                 , nextNthNote
-                 , prevNthNote ) where
+module Base.Note
+  ( Note(..)
+  , nextNthNote
+  , prevNthNote ) where
 
 data Note
  = A
