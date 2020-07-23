@@ -20,13 +20,13 @@ import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)
 
 
-chordToNotes :: CChord -> [Root]
-chordToNotes chord@(CChord root _ _ _ _) =
+chordToNotes :: Chord -> [Root]
+chordToNotes chord@(Chord root _ _ _ _) =
   flip jumpIntervalFromNote root <$> S.toList (chordToIntervals chord)
 
 
-chordToIntervals :: CChord -> Set Interval
-chordToIntervals (CChord root quality highNat exts sus) =
+chordToIntervals :: Chord -> Set Interval
+chordToIntervals (Chord root quality highNat exts sus) =
   let
     baseScale = highestNaturalToIntervals highNat $ qualityToIntervals quality
     intervals = susIntervals (extendIntervals baseScale exts) sus

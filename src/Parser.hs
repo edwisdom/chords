@@ -27,7 +27,7 @@ import Text.Parsec.Prim (try)
 import Data.Maybe (fromMaybe)
 
 -- TODO: Let's be a little more robust here
-parseChord :: String -> Maybe Chord
+parseChord :: String -> Maybe RawChord
 parseChord s = rightToMaybe $ parse parserChord "" s
 
 -- N.B. This should only be used when it's absolutely necessary
@@ -105,7 +105,7 @@ parserExtension =
                     'b' -> ExtFlat
                     '#' -> ExtSharp
 
-parserChord :: Parser Chord
+parserChord :: Parser RawChord
 parserChord =
   do root <- parserRoot
      mqual <- optionMaybe parserQuality
@@ -113,4 +113,4 @@ parserChord =
      exts <- many parserExtension
      sus <- parserSus
      eof
-     return $ Chord root mqual highestQual exts sus
+     return $ RawChord root mqual highestQual exts sus
