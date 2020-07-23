@@ -12,6 +12,7 @@ import Base.Chord
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
+import Base.Chord.RawChord
 import Base.Chord.Root
 import Base.Chord.Sus
 
@@ -126,4 +127,4 @@ parserChord =
      exts <- many parserExtension
      sus <- parserSus
      eof
-     return $ RawChord root mqual highestQual exts sus
+     return $ rawChordFrom root mqual highestQual exts sus

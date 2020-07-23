@@ -19,7 +19,8 @@ data Chord = Chord { getChordRoot :: Root
                    , getQuality :: Quality
                    , getHighestNatural :: HighestNatural
                    , getExtensions :: [Extension]
-                   , getSus :: Sus } deriving Show
+                   , getSus :: Sus
+                   } deriving Show
 
 chordFrom :: Root -> Quality -> HighestNatural -> [Extension] -> Sus -> Chord
 chordFrom = Chord
