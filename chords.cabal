@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: cd630ab9a7ba45091be74aed2a092ef68905df65bfd038ef2ebaaaeb004327c2
+-- hash: c36de559a33a162e7de9a74ed0f2cb271e9e6d9230c272596ab1e5ec279e7573
 
 name:           chords
 version:        0.1.0.0
@@ -27,7 +27,8 @@ source-repository head
 
 library
   exposed-modules:
-      Chord
+      Base.Chord
+      Base.Note
       Common.Utils
       Interval
       Lib

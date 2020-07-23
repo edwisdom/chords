@@ -4,7 +4,7 @@ module Lib
   ) where
 
 
-import Chord
+import Base.Chord
 import Interval
     ( Interval(..),
       IQuality(..),

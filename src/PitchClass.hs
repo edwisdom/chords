@@ -3,7 +3,10 @@ module PitchClass
   , pitchClassToInt
   ) where
 
-import Chord
+import Base.Note
+import Base.Chord
+  ( Accidental(..)
+  , Root(..) )
 
 
 

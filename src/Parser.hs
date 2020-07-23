@@ -4,7 +4,7 @@ module Parser
     , parse
       ) where
 
-import Chord
+import Base.Chord
 import Common.Utils (rightToMaybe)
 
 import Text.Parsec

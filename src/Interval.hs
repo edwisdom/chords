@@ -11,8 +11,8 @@ module Interval
   , invert
   ) where
 
-
-import Chord (Root(..), Accidental(..), nextNthNote)
+import Base.Note  (nextNthNote)
+import Base.Chord (Root(..), Accidental(..))
 import PitchClass (rootToPitchClass, pitchClassToInt)
 import Data.Maybe (fromJust)
 
