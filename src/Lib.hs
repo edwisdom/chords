@@ -7,6 +7,7 @@ import Base.Core.Quality
 import Base.Chord
 
 import Base.Chord.Extension
+import Base.Chord.Sus
 
 import Interval
     ( Interval(..),
@@ -52,8 +53,7 @@ qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToSc
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale NoSus   = scale
-susIntervals scale (Sus i) = insert i (Interval (defaultIQuality i) i) $ delete 3 scale
+susIntervals scale s = maybe scale (\i -> insert i (Interval (defaultIQuality i) i) $ delete 3 scale) (getMaybeDeg s)
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale

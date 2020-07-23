@@ -3,7 +3,8 @@ module Base.Core.Accidental
   , nSharp
   , nFlat
   , natural
-  , impliedShift ) where
+  , impliedShift
+  ) where
 
 data Accidental
  = AccSharp Int

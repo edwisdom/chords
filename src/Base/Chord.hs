@@ -5,6 +5,7 @@ import Base.Core.Note
 import Base.Core.Quality
 
 import Base.Chord.Extension
+import Base.Chord.Sus
 
 data RawChord
   = RawChord Root (Maybe Quality) HighestNatural [Extension] Sus
@@ -17,11 +18,6 @@ data HighestNatural
 data MajorOrNot
   = Major
   | NonMajor
-  deriving Show
-
-data Sus
-  = Sus Int
-  | NoSus
   deriving Show
 
 data Root

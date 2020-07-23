@@ -9,6 +9,7 @@ import Base.Core.Quality
 import Base.Chord
 
 import Base.Chord.Extension
+import Base.Chord.Sus
 
 import Common.Utils (rightToMaybe)
 
@@ -92,7 +93,7 @@ parserHighestNatural =
 parserSus :: Parser Sus
 parserSus =
   do msus <- optionMaybe parserSusPresent
-     return $ maybe NoSus Sus msus
+     return $ maybe noSus sus msus
   where
     parserSusPresent :: Parser Int
     parserSusPresent =

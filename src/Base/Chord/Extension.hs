@@ -3,7 +3,8 @@ module Base.Chord.Extension
   , sharp
   , flat
   , degree
-  , extSign ) where
+  , extSign
+  ) where
 
 data Extension
   = ExtSharp Int

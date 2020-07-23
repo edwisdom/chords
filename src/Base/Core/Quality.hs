@@ -1,5 +1,6 @@
 module Base.Core.Quality
-  ( Quality(..) ) where
+  ( Quality(..) 
+  ) where
 
 data Quality
  = QMajor
