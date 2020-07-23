@@ -18,4 +18,4 @@ readEvalPrint chordStr =
     let xs = Parser.parseChord chordStr
     _ <- print xs
     _ <- print $ CanonicalChord.canonicalizeChord <$> xs
-    print $ show <$> Lib.chordToNotes <$> CanonicalChord.canonicalizeChord <$> xs
+    print $ show . Lib.chordToNotes . CanonicalChord.canonicalizeChord <$> xs

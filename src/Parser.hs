@@ -5,113 +5,112 @@ module Parser
       ) where
 
 import Chord
-import Common.Utils
+import Common.Utils (rightToMaybe)
 
-import Text.Parsec (option, optionMaybe, (<|>), parse, many, eof)
-import Text.Parsec.String (Parser)
-import Text.ParserCombinators.Parsec.Combinator (many1)
+import Text.Parsec
+    ( choice
+    , option
+    , optionMaybe
+    , (<|>)
+    , (<?>)
+    , parse
+    , many
+    , many1
+    , unexpected
+    , eof )
+import Text.Parsec.String (Parser) -- TODO: We're gonna want to do better than
+                                   --       this... Fortunately that won't
+                                   --       break anything, if we're careful.
 import Text.Parsec.Char (string, char, oneOf, digit)
 import Text.Parsec.Prim (try)
 
 import Data.Maybe (fromMaybe)
 
+-- TODO: Let's be a little more robust here
 parseChord :: String -> Maybe Chord
-parseChord s =
-  case parse parserChord "" s of
-    Left err  -> Nothing
-    Right xs  -> Just xs
+parseChord s = rightToMaybe $ parse parserChord "" s
 
-
+-- N.B. This should only be used when it's absolutely necessary
 (<||>) :: Parser a -> Parser a -> Parser a
 p <||> q = try p <|> q
 
 parserAccidental :: Parser Accidental
 parserAccidental =
-  option AccNatural $ parser '#' AccSharp <||> parser 'b' AccFlat
+  option AccNatural (parseAllOf '#' <|> parseAllOf 'b')
   where
-    parser :: Char -> (Int -> Accidental) -> Parser Accidental
-    parser symbol constructor =
-      do
-        cs <- many1 $ char symbol
-        return $ constructor (length cs)
+    parseAllOf :: Char -> Parser Accidental
+    parseAllOf acc = do let constructor = case acc of
+                                            '#' -> AccSharp
+                                            'b' -> AccFlat
+                        accs <- many1 $ char acc
+                        return $ constructor $ length accs
 
 parserRoot :: Parser Root
-parserRoot =
-  do
-    noteChar <- oneOf "ABCDEFG"
-    let note = read [noteChar]
-    Root note <$> parserAccidental
+parserRoot = do noteChar <- oneOf "ABCDEFG"
+                let note = read [noteChar]
+                Root note <$> parserAccidental
 
 parserQuality :: Parser Quality
-parserQuality =
-       parser "^" QMajor
-  <||> parser "M" QMajor
-  <||> parser "-" QMinor
-  <||> parser "m" QMinor
-  <||> parser "dim" QDiminished
-  <||> parser "o" QDiminished
-  <||> parser "aug" QAugmented
-  <||> parser "+" QAugmented
+parserQuality = choice $ parseQualfromString <$> qualStrings
   where
-    parser :: String -> Quality -> Parser Quality
-    parser literal quality =
-      do
-        _ <- string literal
-        return quality
+    qualStrings = [ ("^",   QMajor)
+                  , ("M",   QMajor)
+                  , ("-",   QMinor)
+                  , ("m",   QMinor)
+                  , ("dim", QDiminished)
+                  , ("o",   QDiminished)
+                  , ("aug", QAugmented)
+                  , ("+",   QAugmented )
+                  ]
+
+    parseQualfromString :: (String, Quality) -> Parser Quality
+    parseQualfromString (qualName, quality) = string qualName >> return quality
 
 parserHighestNatural :: Parser HighestNatural
 parserHighestNatural =
   do
-    constructor <- parserMajor
+    constructor <- parseMajToConstructor
     digits <- many1 digit
-    return $ constructor (read digits)
+    return $ constructor $ read digits
   where
-    parserMajor :: Parser (Int -> HighestNatural)
-    parserMajor =
-      do
-        major <- optionMaybe $ string "Maj" <||> string "M" <||> string "^"
-        return $
-          case major of
-            Just _ -> HighestNatural Major
-            Nothing -> HighestNatural NonMajor
+    parseMajToConstructor :: Parser (Int -> HighestNatural)
+    parseMajToConstructor =
+      do major <- optionMaybe $ string "Maj" <||> string "M" <|> string "^"
+         return $ HighestNatural $
+           case major of
+             Just _  -> Major
+             Nothing -> NonMajor
 
 parserSus :: Parser Sus
 parserSus =
-  do
-    msus <- optionMaybe parserSusPresent
-    let sus = maybe NoSus Sus msus
-    return sus
+  do msus <- optionMaybe parserSusPresent
+     return $ maybe NoSus Sus msus
   where
     parserSusPresent :: Parser Int
     parserSusPresent =
-      do
-        _ <- string "sus"
-        number <- optionMaybe $ many1 digit
-        return $ maybe 2 read number
+      do string "sus"
+         number <- optionMaybe $ many1 digit
+         return $ maybe 2 read number
 
 parserExtension :: Parser Extension
 parserExtension =
-  do
-    sharpOrFlat <- parserSf
-    number <- many1 digit
-    return $ sharpOrFlat $ read number
+  do sharpOrFlat <- parserSf
+     number <- many1 digit
+     return $ sharpOrFlat $ read number
   where
     parserSf :: Parser (Int -> Extension)
     parserSf =
-      do
-        sf <- oneOf "b#"
-        return $ case sf of
-          'b' -> ExtFlat
-          '#' -> ExtSharp
-          _ -> error "Unhandled possiblity in parser"
+      do sf <- oneOf "b#"
+         return $ case sf of
+                    'b' -> ExtFlat
+                    '#' -> ExtSharp
 
 parserChord :: Parser Chord
 parserChord =
-  do
-    root <- parserRoot
-    mqual <- optionMaybe parserQuality
-    highestQual <- option (HighestNatural Major 5) parserHighestNatural
-    exts <- many parserExtension
-    sus <- parserSus
-    _ <- eof
-    return $ Chord root mqual highestQual exts sus
+  do root <- parserRoot
+     mqual <- optionMaybe parserQuality
+     highestQual <- option (HighestNatural Major 5) parserHighestNatural
+     exts <- many parserExtension
+     sus <- parserSus
+     eof
+     return $ Chord root mqual highestQual exts sus
