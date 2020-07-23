@@ -2,6 +2,7 @@ module Base.Chord where
 
 import Base.Note
 import Base.Accidental
+import Base.Extension
 
 data RawChord
   = RawChord Root (Maybe Quality) HighestNatural [Extension] Sus
@@ -20,11 +21,6 @@ data Sus
   = Sus Int
   | NoSus
   deriving Show
-
-data Extension
- = ExtSharp Int
- | ExtFlat Int
- deriving Show
 
 data Quality
  = QMajor

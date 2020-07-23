@@ -6,6 +6,7 @@ module Parser
 
 import Base.Chord
 import Base.Accidental
+import Base.Extension
 import Common.Utils (rightToMaybe)
 
 import Text.Parsec
@@ -103,8 +104,8 @@ parserExtension =
     parserSf =
       do sf <- oneOf "b#"
          return $ case sf of
-                    'b' -> ExtFlat
-                    '#' -> ExtSharp
+                    'b' -> flat
+                    '#' -> sharp
 
 parserChord :: Parser RawChord
 parserChord =

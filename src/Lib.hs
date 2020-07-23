@@ -3,7 +3,7 @@ module Lib
   , chordToNotes
   ) where
 
-
+import Base.Extension
 import Base.Chord
 import Interval
     ( Interval(..),
@@ -57,8 +57,10 @@ extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
   extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-  extendInterval scale (ExtSharp i) = insert i (Interval (defaultIQuality i) i <+> 1) scale
-  extendInterval scale (ExtFlat i) = insert i (Interval (defaultIQuality i) i <-> 1) scale
+  extendInterval scale ext = insert deg (Interval (defaultIQuality deg) deg <+> shift) scale
+    where
+      deg = degree ext
+      shift = extSign ext
 
 highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
 highestNaturalToIntervals (HighestNatural major i) scale =
