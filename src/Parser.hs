@@ -107,11 +107,10 @@ parserExtension =
 
 parserChord :: Parser Chord
 parserChord =
-  do
-    root <- parserRoot
-    mqual <- optionMaybe parserQuality
-    highestQual <- option (HighestNatural Major 5) parserHighestNatural
-    exts <- many parserExtension
-    sus <- parserSus
-    _ <- eof
-    return $ Chord root mqual highestQual exts sus
+  do root <- parserRoot
+     mqual <- optionMaybe parserQuality
+     highestQual <- option (HighestNatural Major 5) parserHighestNatural
+     exts <- many parserExtension
+     sus <- parserSus
+     eof
+     return $ Chord root mqual highestQual exts sus
