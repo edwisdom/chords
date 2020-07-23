@@ -14,7 +14,7 @@ module Interval
 import Base.Note (nextNthNote)
 import Base.Accidental
 import Base.Chord (Root(..))
-import PitchClass (rootToPitchClass, getPitchClass )
+import Base.PitchClass (rootToPitchClass, getPitchClass )
 import Data.Maybe (fromJust)
 
 

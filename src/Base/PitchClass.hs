@@ -1,4 +1,4 @@
-module PitchClass
+module Base.PitchClass
   ( pitchClass
   , rootToPitchClass
   , getPitchClass
