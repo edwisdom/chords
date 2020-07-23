@@ -1,15 +1,15 @@
 module Interval
-    ( Interval(..)
-    , (<+>)
-    , (<->)
-    , IQuality(..)
-    , defaultIQuality
-    , intervalToDistance
-    , jumpIntervalFromNote
-    , (|+|)
-    , (|-|)
-    , invert
-    ) where
+  ( Interval(..)
+  , (<+>)
+  , (<->)
+  , IQuality(..)
+  , defaultIQuality
+  , intervalToDistance
+  , jumpIntervalFromNote
+  , (|+|)
+  , (|-|)
+  , invert
+  ) where
 
 import Base.Note  (nextNthNote)
 import Base.Chord (Root(..), Accidental(..))

@@ -1,4 +1,6 @@
-module Common.Utils where
+module Common.Utils
+  ( rightToMaybe
+  ) where
 
 rightToMaybe :: Either a b -> Maybe b
 rightToMaybe (Left _)  = Nothing
