@@ -1,4 +1,6 @@
-module Base.Chord where
+module Base.Chord
+  ( canonicalizeChord
+  ) where
 
 import Base.Core.Quality
 
