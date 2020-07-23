@@ -86,13 +86,12 @@ parserSus :: Parser Sus
 parserSus =
   do
     msus <- optionMaybe parserSusPresent
-    let sus = maybe NoSus Sus msus
-    return sus
+    return $ maybe NoSus Sus msus
   where
     parserSusPresent :: Parser Int
     parserSusPresent =
       do
-        _ <- string "sus"
+        string "sus"
         number <- optionMaybe $ many1 digit
         return $ maybe 2 read number
 
