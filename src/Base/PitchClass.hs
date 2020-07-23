@@ -6,8 +6,7 @@ module Base.PitchClass
 
 import Base.Note
 import Base.Accidental
-import Base.Chord
-  ( Root(..) )
+import Base.Chord ( Root(..) )
 
 newtype PitchClass = PitchClass { getPitchClass :: Int }
   deriving (Show, Eq, Ord)

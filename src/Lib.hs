@@ -3,8 +3,9 @@ module Lib
   , chordToNotes
   ) where
 
-import Base.Extension
 import Base.Chord
+import Base.Extension
+import Base.Quality
 import Interval
     ( Interval(..),
       IQuality(..),
