@@ -4,9 +4,9 @@ module PitchClass
   ) where
 
 import Base.Note
+import Base.Accidental
 import Base.Chord
-  ( Accidental(..)
-  , Root(..) )
+  ( Root(..) )
 
 
 

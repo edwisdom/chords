@@ -5,6 +5,7 @@ module Parser
   ) where
 
 import Base.Chord
+import Base.Accidental
 import Common.Utils (rightToMaybe)
 
 import Text.Parsec

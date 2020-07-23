@@ -1,6 +1,7 @@
 module Base.Chord where
 
 import Base.Note
+import Base.Accidental
 
 data RawChord
   = RawChord Root (Maybe Quality) HighestNatural [Extension] Sus
@@ -38,16 +39,6 @@ data Root
 
 instance Show Root where
   show (Root note acc) = show note ++ show acc
-
-data Accidental
- = AccSharp Int
- | AccFlat Int
- | AccNatural
-
-instance Show Accidental where
-  show (AccSharp i) = concat $ replicate i "#"
-  show (AccFlat i) = concat $ replicate i "b"
-  show AccNatural = ""
 
 data Chord = Chord Root Quality HighestNatural [Extension] Sus
  deriving Show
