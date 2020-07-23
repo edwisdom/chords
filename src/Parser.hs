@@ -75,25 +75,22 @@ parserHighestNatural =
   where
     parseMajToConstructor :: Parser (Int -> HighestNatural)
     parseMajToConstructor =
-      do
-        major <- optionMaybe $ string "Maj" <||> string "M" <|> string "^"
-        return $ HighestNatural $
-          case major of
-            Just _ ->  Major
-            Nothing -> NonMajor
+      do major <- optionMaybe $ string "Maj" <||> string "M" <|> string "^"
+         return $ HighestNatural $
+           case major of
+             Just _  -> Major
+             Nothing -> NonMajor
 
 parserSus :: Parser Sus
 parserSus =
-  do
-    msus <- optionMaybe parserSusPresent
-    return $ maybe NoSus Sus msus
+  do msus <- optionMaybe parserSusPresent
+     return $ maybe NoSus Sus msus
   where
     parserSusPresent :: Parser Int
     parserSusPresent =
-      do
-        string "sus"
-        number <- optionMaybe $ many1 digit
-        return $ maybe 2 read number
+      do string "sus"
+         number <- optionMaybe $ many1 digit
+         return $ maybe 2 read number
 
 parserExtension :: Parser Extension
 parserExtension =
