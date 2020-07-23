@@ -14,7 +14,7 @@ module Interval
 import Base.Note (nextNthNote)
 import Base.Accidental
 import Base.Chord (Root(..))
-import PitchClass (rootToPitchClass, pitchClassToInt)
+import PitchClass (rootToPitchClass, getPitchClass )
 import Data.Maybe (fromJust)
 
 
@@ -198,8 +198,8 @@ jumpIntervalFromNote :: Interval -> Root -> Root
 jumpIntervalFromNote (Interval iQual iNum) (Root note acc) =
   let
     newNote = nextNthNote note $ iNum - 1
-    currDist = pitchClassToInt (rootToPitchClass(Root newNote natural))
-             - pitchClassToInt (rootToPitchClass(Root note acc))
+    currDist = getPitchClass (rootToPitchClass(Root newNote natural))
+             - getPitchClass (rootToPitchClass(Root note acc))
     wantedDist =
       case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
