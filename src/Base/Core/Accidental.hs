@@ -3,7 +3,7 @@ module Base.Core.Accidental
   , nSharp
   , nFlat
   , natural
-  , countAcc ) where
+  , impliedShift ) where
 
 data Accidental
  = AccSharp Int
@@ -12,8 +12,8 @@ data Accidental
 
 instance Show Accidental where
   show (AccSharp i) = concat $ replicate i "#"
-  show (AccFlat i) = concat $ replicate i "b"
-  show AccNatural = ""
+  show (AccFlat i)  = concat $ replicate i "b"
+  show AccNatural   = ""
 
 nSharp :: Int -> Accidental
 nSharp = AccSharp
@@ -24,7 +24,7 @@ nFlat = AccFlat
 natural :: Accidental
 natural = AccNatural
 
-countAcc :: Accidental -> Int
-countAcc (AccSharp i) = i
-countAcc (AccFlat i) = -i
-countAcc AccNatural = 0
+impliedShift :: Accidental -> Int
+impliedShift (AccSharp i) = i
+impliedShift (AccFlat i)  = -i
+impliedShift AccNatural   = 0

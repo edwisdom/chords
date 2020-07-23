@@ -28,4 +28,4 @@ noteToPitchClass B = pitchClass 11
 
 rootToPitchClass :: Root -> PitchClass
 rootToPitchClass (Root note acc) =
-  shiftPitchClassBy (countAcc acc) (noteToPitchClass note)
+  shiftPitchClassBy (impliedShift acc) (noteToPitchClass note)
