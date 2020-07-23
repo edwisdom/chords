@@ -4,11 +4,14 @@ module Parser
   , parse
   ) where
 
+import Data.Maybe (isJust)
+
 import Base.Core.Accidental
 import Base.Core.Quality
 import Base.Chord
 
 import Base.Chord.Extension
+import Base.Chord.HighestNatural
 import Base.Chord.Root
 import Base.Chord.Sus
 
@@ -86,10 +89,10 @@ parserHighestNatural =
     parseMajToConstructor :: Parser (Int -> HighestNatural)
     parseMajToConstructor =
       do major <- optionMaybe $ string "Maj" <||> string "M" <|> string "^"
-         return $ HighestNatural $
-           case major of
-             Just _  -> Major
-             Nothing -> NonMajor
+         return $ if isJust major then
+                    majorNatural
+                  else
+                    nonMajorNatural
 
 parserSus :: Parser Sus
 parserSus =
@@ -119,7 +122,7 @@ parserChord :: Parser RawChord
 parserChord =
   do root <- parserRoot
      mqual <- optionMaybe parserQuality
-     highestQual <- option (HighestNatural Major 5) parserHighestNatural
+     highestQual <- option (majorNatural 5) parserHighestNatural
      exts <- many parserExtension
      sus <- parserSus
      eof

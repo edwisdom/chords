@@ -7,6 +7,7 @@ import Base.Core.Quality
 import Base.Chord
 
 import Base.Chord.Extension
+import Base.Chord.HighestNatural
 import Base.Chord.Root
 import Base.Chord.Sus
 
@@ -67,14 +68,24 @@ extendIntervals = foldr $ flip extendInterval
       shift = extSign ext
 
 highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
-highestNaturalToIntervals (HighestNatural major i) scale =
-  insertMajor major $ getIntervals subset scale
+highestNaturalToIntervals hn scale =
+  let
+    scaleInts = getIntervals subset scale
+  in
+    if isMajor hn then
+      insertMajorSeven scaleInts
+    else
+      scaleInts
   where
     subset =
-      if i `mod` 2 == 0 then
-        [1, 3, 5, i]
-      else
-        [1,3..i]
+      let
+        deg = getDegree hn
+      in
+        if (getDegree hn) `mod` 2 == 0 then
+          [1, 3, 5, deg]
+        else
+          [1, 3 .. deg]
+
     getIntervals :: [Int] -> HeliotonicScale -> HeliotonicScale
     getIntervals ints hts = fromList $ map ($ hts) (getInterval <$> ints)
 
@@ -85,6 +96,5 @@ highestNaturalToIntervals (HighestNatural major i) scale =
       in
         (int, fromJust $ interval)
 
-    insertMajor :: MajorOrNot -> HeliotonicScale -> HeliotonicScale
-    insertMajor Major hts = insert 7 (Interval IMajor 7) hts
-    insertMajor notMajor hts = hts
+    insertMajorSeven :: HeliotonicScale -> HeliotonicScale
+    insertMajorSeven hts = insert 7 (Interval IMajor 7) hts
