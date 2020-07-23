@@ -7,9 +7,8 @@ import Control.Monad (unless)
 
 main :: IO ()
 main =
-  do
-    chordStr <- getLine
-    unless (chordStr == "q") $ readEvalPrint chordStr >> main
+  do chordStr <- getLine
+     unless (chordStr == "q") $ readEvalPrint chordStr >> main
 
 readEvalPrint :: String -> IO ()
 readEvalPrint chordStr =
