@@ -25,13 +25,6 @@ pitchClassToInt (PitchClass i) = i
 shiftPitchClassBy :: Int -> PitchClass -> PitchClass
 shiftPitchClassBy by (PitchClass i) = pitchClass $ by + i
 
-
-accidentalToModifier :: Accidental -> Int
-accidentalToModifier (AccSharp i) = i
-accidentalToModifier (AccFlat i) = -i
-accidentalToModifier AccNatural = 0
-
-
 noteToPitchClass :: Note -> PitchClass
 noteToPitchClass C = pitchClass 0
 noteToPitchClass D = pitchClass 2
@@ -44,4 +37,4 @@ noteToPitchClass B = pitchClass 11
 
 rootToPitchClass :: Root -> PitchClass
 rootToPitchClass (Root note acc) =
-  shiftPitchClassBy (accidentalToModifier acc) (noteToPitchClass note)
+  shiftPitchClassBy (countAcc acc) (noteToPitchClass note)

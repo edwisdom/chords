@@ -198,7 +198,7 @@ jumpIntervalFromNote :: Interval -> Root -> Root
 jumpIntervalFromNote (Interval iQual iNum) (Root note acc) =
   let
     newNote = nextNthNote note $ iNum - 1
-    currDist = pitchClassToInt (rootToPitchClass(Root newNote AccNatural))
+    currDist = pitchClassToInt (rootToPitchClass(Root newNote natural))
              - pitchClassToInt (rootToPitchClass(Root note acc))
     wantedDist =
       case intervalToDistance $ Interval iQual iNum of
@@ -207,7 +207,7 @@ jumpIntervalFromNote (Interval iQual iNum) (Root note acc) =
     diff = lowestAbsValue $ wantedDist - currDist
     newAcc =
       case signum diff of
-        1 -> AccSharp diff
-        -1 ->  AccFlat (-diff)
-        0 -> AccNatural
+        1  -> nSharp diff
+        -1 -> nFlat (-diff)
+        0  -> natural
   in Root newNote newAcc

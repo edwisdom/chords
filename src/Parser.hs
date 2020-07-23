@@ -37,12 +37,12 @@ p <||> q = try p <|> q
 
 parserAccidental :: Parser Accidental
 parserAccidental =
-  option AccNatural (parseAllOf '#' <|> parseAllOf 'b')
+  option natural (parseAllOf '#' <|> parseAllOf 'b')
   where
     parseAllOf :: Char -> Parser Accidental
     parseAllOf acc = do let constructor = case acc of
-                                            '#' -> AccSharp
-                                            'b' -> AccFlat
+                                            '#' -> nSharp
+                                            'b' -> nFlat
                         accs <- many1 $ char acc
                         return $ constructor $ length accs
 
