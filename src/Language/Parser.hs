@@ -37,7 +37,7 @@ import Text.Parsec.Char (string, char, oneOf, digit)
 import Text.Parsec.Prim (try)
 
 -- TODO: Let's be a little more robust here
-parseChord :: String -> Maybe RawChord
+parseChord :: String -> Maybe Chord
 parseChord s = rightToMaybe $ parse parserChord "" s
 
 -- N.B. This should only be used when it's absolutely necessary
@@ -118,7 +118,7 @@ parserExtension =
                     'b' -> flat
                     '#' -> sharp
 
-parserChord :: Parser RawChord
+parserChord :: Parser Chord
 parserChord =
   do root <- parserRoot
      mqual <- optionMaybe parserQuality
