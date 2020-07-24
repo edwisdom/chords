@@ -3,7 +3,7 @@ module Lib
   , chordToNotes
   ) where
 
-import Base.Core.Quality
+import Base.Core.Quality.Quality
 import Base.Chord
 
 import Base.Chord.Chord

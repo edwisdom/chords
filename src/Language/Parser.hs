@@ -7,7 +7,7 @@ module Language.Parser
 import Data.Maybe ( isJust, fromMaybe )
 
 import Base.Core.Accidental
-import Base.Core.Quality
+import Base.Core.Quality.Quality
 import Base.Chord
 
 import Base.Chord.Extension
