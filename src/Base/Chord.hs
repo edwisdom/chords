@@ -4,7 +4,7 @@ module Base.Chord
 
 import Base.Quality
 
-import Base.Core.Quality.Quality
+import Base.Core.Quality.CQuality
 
 import Base.Chord.Chord
 import Base.Chord.HighestNatural

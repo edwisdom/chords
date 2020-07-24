@@ -1,4 +1,4 @@
-module Base.Core.Quality.Quality
+module Base.Core.Quality.CQuality
   ( Quality(..)
   ) where
 

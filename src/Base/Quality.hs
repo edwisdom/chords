@@ -2,7 +2,7 @@ module Base.Quality
   ( canonicalizeQuality
   ) where
 
-import Base.Core.Quality.Quality
+import Base.Core.Quality.CQuality
 
 import Base.Chord.HighestNatural
 

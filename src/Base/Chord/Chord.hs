@@ -8,7 +8,7 @@ module Base.Chord.Chord
   , chordFrom
   ) where
 
-import Base.Core.Quality.Quality
+import Base.Core.Quality.CQuality
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
