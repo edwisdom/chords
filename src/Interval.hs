@@ -53,7 +53,8 @@ data IQuality
 
 
 infixl 6 <+>
-(<+>) (Interval iQual i) x =
+(<+>) :: Interval -> Int -> Interval
+(Interval iQual i) <+> x =
   Interval (iterate modFunc iQual !! abs x) i
   where
     modFunc =
@@ -66,6 +67,7 @@ infixl 6 <+>
 
 
 infixl 6 <->
+(<->) :: Interval -> Int -> Interval
 interval <-> x =  interval <+> (-x)
 
 

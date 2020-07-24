@@ -4,7 +4,7 @@ module Language.Parser
   , parse
   ) where
 
-import Data.Maybe (isJust)
+import Data.Maybe ( isJust, fromMaybe )
 
 import Base.Core.Accidental
 import Base.Core.Quality
@@ -35,8 +35,6 @@ import Text.Parsec.String (Parser) -- TODO: We're gonna want to do better than
                                    --       break anything, if we're careful.
 import Text.Parsec.Char (string, char, oneOf, digit)
 import Text.Parsec.Prim (try)
-
-import Data.Maybe (fromMaybe)
 
 -- TODO: Let's be a little more robust here
 parseChord :: String -> Maybe RawChord
