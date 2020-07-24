@@ -3,7 +3,9 @@ module Lib
   , chordToNotes
   ) where
 
-import Base.Core.Quality.Quality
+import qualified Base.Core.Quality.Quality as CQ
+import qualified Base.Core.Quality.IQuality as IQ
+
 import Base.Chord
 
 import Base.Chord.Chord
@@ -14,7 +16,6 @@ import Base.Chord.Sus
 
 import Interval
     ( Interval(..)
-    , IQuality(..)
     , (<+>)
     , (<->)
     , defaultIQuality
@@ -45,15 +46,15 @@ chordToIntervals chord =
 type HeliotonicScale = Map Int Interval
 
 
-qualityToIntervals :: Quality -> HeliotonicScale
+qualityToIntervals :: CQ.Quality -> HeliotonicScale
 qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToScale qual
   where
-    qualityToScale :: Quality -> Scale
-    qualityToScale QMajor = SLydian
-    qualityToScale QMinor = SDorian
-    qualityToScale QDominant = SMixolydian
-    qualityToScale QAugmented = SAugmentedQuality
-    qualityToScale QDiminished = SDiminishedQuality
+    qualityToScale :: CQ.Quality -> Scale
+    qualityToScale CQ.Major = SLydian
+    qualityToScale CQ.Minor = SDorian
+    qualityToScale CQ.Dominant = SMixolydian
+    qualityToScale CQ.Augmented = SAugmentedQuality
+    qualityToScale CQ.Diminished = SDiminishedQuality
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
@@ -99,4 +100,4 @@ highestNaturalToIntervals hn scale =
         (int, fromJust interval)
 
     insertMajorSeven :: HeliotonicScale -> HeliotonicScale
-    insertMajorSeven hts = insert 7 (Interval IMajor 7) hts
+    insertMajorSeven hts = insert 7 (Interval IQ.Major 7) hts
