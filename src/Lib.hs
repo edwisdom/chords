@@ -49,11 +49,11 @@ qualityToIntervals :: Quality -> HeliotonicScale
 qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToScale qual
   where
     qualityToScale :: Quality -> Scale
-    qualityToScale Major = SLydian
-    qualityToScale Minor = SDorian
-    qualityToScale Dominant = SMixolydian
-    qualityToScale (Augmented _) = SAugmentedQuality
-    qualityToScale (Diminished _) = SDiminishedQuality
+    qualityToScale QMajor = SLydian
+    qualityToScale QMinor = SDorian
+    qualityToScale QDominant = SMixolydian
+    qualityToScale QAugmented = SAugmentedQuality
+    qualityToScale QDiminished = SDiminishedQuality
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale

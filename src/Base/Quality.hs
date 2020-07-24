@@ -7,5 +7,5 @@ import Base.Core.Quality
 import Base.Chord.HighestNatural
 
 canonicalizeQuality :: Maybe Quality -> HighestNatural -> Quality
-canonicalizeQuality Nothing  hn = if getDegree hn < 7 then Major else Dominant
+canonicalizeQuality Nothing  hn = if getDegree hn < 7 then QMajor else QDominant
 canonicalizeQuality (Just q) _  = q
