@@ -1,4 +1,4 @@
-module Parser
+module Language.Parser
   ( parseChord
   , parserChord
   , parse

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b99ef628ab7c49ab986f048374995b63b24268bd597bddb5ad0bb5864528db5b
+-- hash: b660d48d6a93c19cff08cf610d3b057ef65390aa0e86cd88958e397f6fc5600d
 
 name:           chords
 version:        0.1.0.0
@@ -40,8 +40,8 @@ library
       Base.PitchClass
       Common.Utils
       Interval
+      Language.Parser
       Lib
-      Parser
       Scale
   other-modules:
       Paths_chords
