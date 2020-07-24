@@ -3,8 +3,15 @@ module Lib
   , chordToNotes
   ) where
 
+import Base.Core.Quality
+import Base.Chord
 
-import CanonicalChord
+import Base.Chord.Chord
+import Base.Chord.Extension
+import Base.Chord.HighestNatural
+import Base.Chord.Root
+import Base.Chord.Sus
+
 import Interval
     ( Interval(..),
       IQuality(..),
@@ -21,15 +28,15 @@ import Data.Maybe (fromJust)
 
 
 chordToNotes :: Chord -> [Root]
-chordToNotes chord@(Chord root _ _ _ _) =
-  flip jumpIntervalFromNote root <$> S.toList (chordToIntervals chord)
+chordToNotes chord =
+  flip jumpIntervalFromNote (getChordRoot chord) <$> S.toList (chordToIntervals chord)
 
 
 chordToIntervals :: Chord -> Set Interval
-chordToIntervals (Chord root quality highNat exts sus) =
+chordToIntervals chord =
   let
-    baseScale = highestNaturalToIntervals highNat $ qualityToIntervals quality
-    intervals = susIntervals (extendIntervals baseScale exts) sus
+    baseScale = highestNaturalToIntervals (getHighestNatural chord) $ qualityToIntervals $ getQuality chord
+    intervals = susIntervals (extendIntervals baseScale $ getExtensions chord) $ getSus chord
   in
     foldr S.insert S.empty intervals
 
@@ -49,33 +56,46 @@ qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToSc
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale NoSus = scale
-susIntervals scale (Sus i) = insert i (Interval (defaultIQuality i) i) $ delete 3 scale
+susIntervals scale s = maybe scale (\i -> insert i (Interval (defaultIQuality i) i) $ delete 3 scale) (getMaybeDeg s)
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
   extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-  extendInterval scale (ExtSharp i) = insert i (Interval (defaultIQuality i) i <+> 1) scale
-  extendInterval scale (ExtFlat i) = insert i (Interval (defaultIQuality i) i <-> 1) scale
+  extendInterval scale ext = insert deg (Interval (defaultIQuality deg) deg <+> shift) scale
+    where
+      deg   = degree ext
+      shift = extSign ext
 
 highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
-highestNaturalToIntervals (HighestNatural major i) scale =
-  insertMajor major $ getIntervals subset scale
+highestNaturalToIntervals hn scale =
+  let
+    scaleInts = getIntervals subset scale
+  in
+    if isMajor hn then
+      insertMajorSeven scaleInts
+    else
+      scaleInts
   where
     subset =
-      if i `mod` 2 == 0 then
-        [1, 3, 5, i]
-      else
-        [1,3..i]
+      let
+        deg = getDegree hn
+      in
+        if (getDegree hn) `mod` 2 == 0 then
+          [1, 3, 5, deg]
+        else
+          [1, 3 .. deg]
+
     getIntervals :: [Int] -> HeliotonicScale -> HeliotonicScale
     getIntervals ints hts = fromList $ map ($ hts) (getInterval <$> ints)
+
     getInterval :: Int -> HeliotonicScale -> (Int, Interval)
     getInterval int hts =
-      let interval = hts !? ((int-1) `mod` 7 + 1)
+      let
+        interval = hts !? ((int-1) `mod` 7 + 1)
       in
         (int, fromJust $ interval)
-    insertMajor :: MajorOrNot -> HeliotonicScale -> HeliotonicScale
-    insertMajor Major hts = insert 7 (Interval IMajor 7) hts
-    insertMajor notMajor hts = hts
+
+    insertMajorSeven :: HeliotonicScale -> HeliotonicScale
+    insertMajorSeven hts = insert 7 (Interval IMajor 7) hts
