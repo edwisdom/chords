@@ -1,11 +1,11 @@
 module Base.Core.Quality
-  ( Quality(..) 
+  ( Quality(..)
   ) where
 
 data Quality
- = QMajor
- | QMinor
- | QDominant
- | QDiminished
- | QAugmented
+ = Major
+ | Minor
+ | Dominant
+ | Diminished Int
+ | Augmented Int
  deriving Show

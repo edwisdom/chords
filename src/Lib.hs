@@ -49,11 +49,11 @@ qualityToIntervals :: Quality -> HeliotonicScale
 qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToScale qual
   where
     qualityToScale :: Quality -> Scale
-    qualityToScale QMajor = SLydian
-    qualityToScale QMinor = SDorian
-    qualityToScale QDominant = SMixolydian
-    qualityToScale QAugmented = SAugmentedQuality
-    qualityToScale QDiminished = SDiminishedQuality
+    qualityToScale Major = SLydian
+    qualityToScale Minor = SDorian
+    qualityToScale Dominant = SMixolydian
+    qualityToScale (Augmented _) = SAugmentedQuality
+    qualityToScale (Diminished _) = SDiminishedQuality
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
@@ -83,7 +83,7 @@ highestNaturalToIntervals hn scale =
       let
         deg = getDegree hn
       in
-        if (getDegree hn) `mod` 2 == 0 then
+        if even $ getDegree hn then
           [1, 3, 5, deg]
         else
           [1, 3 .. deg]
@@ -96,7 +96,7 @@ highestNaturalToIntervals hn scale =
       let
         interval = hts !? ((int-1) `mod` 7 + 1)
       in
-        (int, fromJust $ interval)
+        (int, fromJust interval)
 
     insertMajorSeven :: HeliotonicScale -> HeliotonicScale
     insertMajorSeven hts = insert 7 (Interval IMajor 7) hts

@@ -66,14 +66,14 @@ parserQuality :: Parser Quality
 parserQuality = choice $ parseQualfromString <$> qualStrings
   where
     qualStrings =
-      [ ("^",   QMajor)
-      , ("M",   QMajor)
-      , ("-",   QMinor)
-      , ("m",   QMinor)
-      , ("dim", QDiminished)
-      , ("o",   QDiminished)
-      , ("aug", QAugmented)
-      , ("+",   QAugmented )
+      [ ("^",   Major)
+      , ("M",   Major)
+      , ("-",   Minor)
+      , ("m",   Minor)
+      , ("dim", Diminished 1)
+      , ("o",   Diminished 1)
+      , ("aug", Augmented 1)
+      , ("+",   Augmented 1)
       ]
 
     parseQualfromString :: (String, Quality) -> Parser Quality
