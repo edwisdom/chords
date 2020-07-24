@@ -13,13 +13,14 @@ import Base.Chord.Root
 import Base.Chord.Sus
 
 import Interval
-    ( Interval(..),
-      IQuality(..),
-      (<+>),
-      (<->),
-      defaultIQuality,
-      jumpIntervalFromNote,
-      intervalToDistance )
+    ( Interval(..)
+    , IQuality(..)
+    , (<+>)
+    , (<->)
+    , defaultIQuality
+    , jumpIntervalFromNote
+    , intervalToDistance
+    )
 import Scale (Scale(..), scaleToIntervals)
 import Data.Set(Set(..))
 import qualified Data.Set as S

@@ -28,7 +28,8 @@ import Text.Parsec
     , many
     , many1
     , unexpected
-    , eof )
+    , eof
+    )
 import Text.Parsec.String (Parser) -- TODO: We're gonna want to do better than
                                    --       this... Fortunately that won't
                                    --       break anything, if we're careful.
