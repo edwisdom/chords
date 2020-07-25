@@ -2,7 +2,7 @@ module Base.Interval
   ( Interval
   , getQuality
   , getSize
-  , buildInterval
+  , intervalFrom
   , intervalToDistance
   , (<+>)
   , (<->)
@@ -52,8 +52,8 @@ normalizeIntervalSize :: Int -> Int
 normalizeIntervalSize = modByFrom 7 1
 
 -- This smart constructor normalizes the interval size to be between 1 and 7
-buildInterval :: Quality -> Int -> Interval
-buildInterval q s = Interval { getQuality = q, getSize = normalizeIntervalSize s }
+intervalFrom :: Quality -> Int -> Interval
+intervalFrom q s = Interval { getQuality = q, getSize = normalizeIntervalSize s }
 
 normalizeInterval :: Interval -> Interval
 normalizeInterval (Interval iQual i) = Interval iQual $ normalizeIntervalSize i

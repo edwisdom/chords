@@ -15,8 +15,8 @@ import Base.Chord.Root
 import Base.Chord.Sus
 
 import Base.Interval as I
-    (Interval(..)
-    , buildInterval
+    (Interval
+    , intervalFrom
     , (<+>)
     , (<->)
     , jumpIntervalFromNote
@@ -58,14 +58,14 @@ qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToSc
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale s = maybe scale (\i -> insert i (buildInterval (baseQuality i) i) $ delete 3 scale) (getMaybeDeg s)
+susIntervals scale s = maybe scale (\i -> insert i (intervalFrom (baseQuality i) i) $ delete 3 scale) (getMaybeDeg s)
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
   extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-  extendInterval scale ext = insert deg (buildInterval (baseQuality deg) deg <+> shift) scale
+  extendInterval scale ext = insert deg (intervalFrom (baseQuality deg) deg <+> shift) scale
     where
       deg   = degree ext
       shift = extSign ext
@@ -100,4 +100,4 @@ highestNaturalToIntervals hn scale =
         (int, fromJust interval)
 
     insertMajorSeven :: HeliotonicScale -> HeliotonicScale
-    insertMajorSeven hts = insert 7 (buildInterval IQ.Major 7) hts
+    insertMajorSeven hts = insert 7 (intervalFrom IQ.Major 7) hts
