@@ -9,7 +9,6 @@ module Base.Interval
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
-  , intMod
   ) where
 
 import Base.Core.Accidental
@@ -49,18 +48,19 @@ instance Show Interval where
     in
       qualString ++ show i
 
+normalizeIntervalSize :: Int -> Int
+normalizeIntervalSize = modByFrom 7 1
+
+-- This smart constructor normalizes the interval size to be between 1 and 7
 buildInterval :: Quality -> Int -> Interval
-buildInterval q s = Interval { getQuality = q, getSize = ((s - 1) `mod` 7) + 1}
+buildInterval q s = Interval { getQuality = q, getSize = normalizeIntervalSize s }
 
-intMod :: Int -> Int
-intMod = modByFrom 7 1
-
-intervalMod :: Interval -> Interval
-intervalMod (Interval iQual i) = Interval iQual $ intMod i
+normalizeInterval :: Interval -> Interval
+normalizeInterval (Interval iQual i) = Interval iQual $ normalizeIntervalSize i
 
 intervalToDistance :: Interval -> Maybe Int
 intervalToDistance int@(Interval q i) =
-  subIntervalToDistance $ intervalMod int
+  subIntervalToDistance $ normalizeInterval int
   where
     subIntervalToDistance (Interval Perfect 1) = Just 0
     subIntervalToDistance (Interval Major 2)   = Just 2
@@ -77,7 +77,6 @@ intervalToDistance int@(Interval q i) =
         case defQuality of
           Major   -> subtract 1 <$> subIntervalToDistance (Interval Major i)
           Perfect -> Nothing
-          _        -> error "Impl error, default quality must be M or P"
 
 
     subIntervalToDistance (Interval (Augmented x) i) =
@@ -94,7 +93,6 @@ intervalToDistance int@(Interval q i) =
         case defQuality of
           Major   -> subtract (x + 1) <$> subIntervalToDistance (Interval Major i)
           Perfect -> subtract x <$> subIntervalToDistance (Interval Perfect i)
-          _        -> error "Impl error, default quality must be M or P"
 
     subIntervalToDistance _ = Nothing
 
@@ -105,7 +103,7 @@ lowestAbsValue = modByFrom 12 (-6)
 invert :: Interval -> Interval
 invert (Interval iQual i) =
   let
-    newI = intMod $ 9 - intMod i
+    newI = normalizeIntervalSize $ 9 - normalizeIntervalSize i
     newQual =
       case iQual of
         Major          -> Minor
@@ -135,13 +133,8 @@ infixl 6 <->
 interval <-> x =  interval <+> (-x)
 
 infixl 6 |+|
-(|+|) = intervalAdd
-
-infixl 6 |-|
-(|-|) = intervalSubtract
-
-intervalAdd :: Interval -> Interval -> Interval
-intervalAdd int1@(Interval q1 i1) int2@(Interval q2 i2) =
+(|+|) :: Interval -> Interval -> Interval
+int1@(Interval q1 i1) |+| int2@(Interval q2 i2) =
   let
     newI       = i1 + i2 - 1
     defQual    = baseQuality newI
@@ -152,9 +145,9 @@ intervalAdd int1@(Interval q1 i1) int2@(Interval q2 i2) =
   in
     Interval defQual newI <+> diff
 
-
-intervalSubtract :: Interval -> Interval -> Interval
-intervalSubtract int1 int2 = intervalMod $ intervalAdd int1 $ invert int2
+infixl 6 |-|
+(|-|) :: Interval -> Interval -> Interval
+int1 |-| int2 = normalizeInterval $ int1 |+| invert int2
 
 jumpIntervalFromNote :: Interval -> Root -> Root
 jumpIntervalFromNote (Interval iQual iNum) r =
