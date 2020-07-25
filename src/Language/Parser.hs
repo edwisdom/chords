@@ -1,13 +1,13 @@
-module Parser
+module Language.Parser
   ( parseChord
   , parserChord
   , parse
   ) where
 
-import Data.Maybe (isJust)
+import Data.Maybe ( isJust, fromMaybe )
 
 import Base.Core.Accidental
-import Base.Core.Quality
+import Base.Core.Quality.CQuality
 import Base.Chord
 
 import Base.Chord.Extension
@@ -28,17 +28,16 @@ import Text.Parsec
     , many
     , many1
     , unexpected
-    , eof )
+    , eof
+    )
 import Text.Parsec.String (Parser) -- TODO: We're gonna want to do better than
                                    --       this... Fortunately that won't
                                    --       break anything, if we're careful.
 import Text.Parsec.Char (string, char, oneOf, digit)
 import Text.Parsec.Prim (try)
 
-import Data.Maybe (fromMaybe)
-
 -- TODO: Let's be a little more robust here
-parseChord :: String -> Maybe RawChord
+parseChord :: String -> Maybe Chord
 parseChord s = rightToMaybe $ parse parserChord "" s
 
 -- N.B. This should only be used when it's absolutely necessary
@@ -52,8 +51,8 @@ parserAccidental =
     parseAllOf :: Char -> Parser Accidental
     parseAllOf acc = do let
                           constructor = case acc of
-                                          '#' -> nSharp
-                                          'b' -> nFlat
+                                          '#' -> nSharps
+                                          'b' -> nFlats
                         accs <- many1 $ char acc
                         return $ constructor $ length accs
 
@@ -67,14 +66,14 @@ parserQuality :: Parser Quality
 parserQuality = choice $ parseQualfromString <$> qualStrings
   where
     qualStrings =
-      [ ("^",   QMajor)
-      , ("M",   QMajor)
-      , ("-",   QMinor)
-      , ("m",   QMinor)
-      , ("dim", QDiminished)
-      , ("o",   QDiminished)
-      , ("aug", QAugmented)
-      , ("+",   QAugmented )
+      [ ("^",   Major)
+      , ("M",   Major)
+      , ("-",   Minor)
+      , ("m",   Minor)
+      , ("dim", Diminished)
+      , ("o",   Diminished)
+      , ("aug", Augmented)
+      , ("+",   Augmented)
       ]
 
     parseQualfromString :: (String, Quality) -> Parser Quality
@@ -119,7 +118,7 @@ parserExtension =
                     'b' -> flat
                     '#' -> sharp
 
-parserChord :: Parser RawChord
+parserChord :: Parser Chord
 parserChord =
   do root <- parserRoot
      mqual <- optionMaybe parserQuality
@@ -127,4 +126,4 @@ parserChord =
      exts <- many parserExtension
      sus <- parserSus
      eof
-     return $ rawChordFrom root mqual highestQual exts sus
+     return $ chordFrom root mqual highestQual exts sus

@@ -2,18 +2,16 @@ module Base.Chord
   ( canonicalizeChord
   ) where
 
-import Base.Core.Quality
+import Base.CQuality
 
-import Base.Chord.Chord
+import Base.Core.Quality.CQuality
+
+import Base.Chord.Chord as C
 import Base.Chord.HighestNatural
-import Base.Chord.RawChord
+import Base.Chord.RawChord as RC
 
-canonicalizeQuality :: Maybe Quality -> HighestNatural -> Quality
-canonicalizeQuality Nothing  hn = if (getDegree hn) < 7 then QMajor else QDominant
-canonicalizeQuality (Just q) _                    = q
-
-canonicalizeChord :: RawChord -> Chord
+canonicalizeChord :: RC.Chord -> C.Chord
 canonicalizeChord rc =
-  chordFrom (getRawChordRoot rc) (canonicalizeQuality (getMaybeQuality rc) hn) hn (getRawExtensions rc) (getRawSus rc)
+  C.chordFrom (RC.getChordRoot rc) (canonicalizeQuality (RC.getMQuality rc) hn) hn (RC.getExtensions rc) (RC.getSus rc)
   where
-    hn = getRawHighestNatural rc
+    hn = RC.getHighestNatural rc

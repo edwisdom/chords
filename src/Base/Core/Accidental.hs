@@ -1,7 +1,7 @@
 module Base.Core.Accidental
   ( Accidental
-  , nSharp
-  , nFlat
+  , nSharps
+  , nFlats
   , natural
   , impliedShift
   ) where
@@ -16,11 +16,11 @@ instance Show Accidental where
   show (AccFlat i)  = concat $ replicate i "b"
   show AccNatural   = ""
 
-nSharp :: Int -> Accidental
-nSharp = AccSharp
+nSharps :: Int -> Accidental
+nSharps = AccSharp
 
-nFlat :: Int -> Accidental
-nFlat = AccFlat
+nFlats :: Int -> Accidental
+nFlats = AccFlat
 
 natural :: Accidental
 natural = AccNatural

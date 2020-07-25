@@ -3,23 +3,25 @@ module Lib
   , chordToNotes
   ) where
 
-import Base.Core.Quality
+import Base.Core.Quality.CQuality as CQ
+import Base.Core.Quality.IQuality as IQ
+
 import Base.Chord
 
-import Base.Chord.Chord
+import Base.Chord.Chord as C
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Root
 import Base.Chord.Sus
 
-import Interval
-    ( Interval(..),
-      IQuality(..),
-      (<+>),
-      (<->),
-      defaultIQuality,
-      jumpIntervalFromNote,
-      intervalToDistance )
+import Base.Interval as I
+    (Interval
+    , intervalFrom
+    , (<+>)
+    , (<->)
+    , jumpIntervalFromNote
+    , intervalToDistance
+    )
 import Scale (Scale(..), scaleToIntervals)
 import Data.Set(Set(..))
 import qualified Data.Set as S
@@ -35,7 +37,7 @@ chordToNotes chord =
 chordToIntervals :: Chord -> Set Interval
 chordToIntervals chord =
   let
-    baseScale = highestNaturalToIntervals (getHighestNatural chord) $ qualityToIntervals $ getQuality chord
+    baseScale = highestNaturalToIntervals (getHighestNatural chord) $ qualityToIntervals $ C.getQuality chord
     intervals = susIntervals (extendIntervals baseScale $ getExtensions chord) $ getSus chord
   in
     foldr S.insert S.empty intervals
@@ -44,29 +46,29 @@ chordToIntervals chord =
 type HeliotonicScale = Map Int Interval
 
 
-qualityToIntervals :: Quality -> HeliotonicScale
+qualityToIntervals :: CQ.Quality -> HeliotonicScale
 qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToScale qual
   where
-    qualityToScale :: Quality -> Scale
-    qualityToScale QMajor = SLydian
-    qualityToScale QMinor = SDorian
-    qualityToScale QDominant = SMixolydian
-    qualityToScale QAugmented = SAugmentedQuality
-    qualityToScale QDiminished = SDiminishedQuality
+    qualityToScale :: CQ.Quality -> Scale
+    qualityToScale CQ.Major = SLydian
+    qualityToScale CQ.Minor = SDorian
+    qualityToScale CQ.Dominant = SMixolydian
+    qualityToScale CQ.Augmented = SAugmentedQuality
+    qualityToScale CQ.Diminished = SDiminishedQuality
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale s = maybe scale (\i -> insert i (Interval (defaultIQuality i) i) $ delete 3 scale) (getMaybeDeg s)
+susIntervals scale s = maybe scale (\i -> insert i (intervalFrom (baseQuality i) i) $ delete 3 scale) (getMaybeDeg s)
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
   extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-  extendInterval scale ext = insert deg (Interval (defaultIQuality deg) deg <+> shift) scale
+  extendInterval scale ext = insert deg (intervalFrom (baseQuality deg) deg <+> shift) scale
     where
       deg   = degree ext
-      shift = extSign ext
+      shift = sign ext
 
 highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
 highestNaturalToIntervals hn scale =
@@ -82,7 +84,7 @@ highestNaturalToIntervals hn scale =
       let
         deg = getDegree hn
       in
-        if (getDegree hn) `mod` 2 == 0 then
+        if even $ getDegree hn then
           [1, 3, 5, deg]
         else
           [1, 3 .. deg]
@@ -95,7 +97,7 @@ highestNaturalToIntervals hn scale =
       let
         interval = hts !? ((int-1) `mod` 7 + 1)
       in
-        (int, fromJust $ interval)
+        (int, fromJust interval)
 
     insertMajorSeven :: HeliotonicScale -> HeliotonicScale
-    insertMajorSeven hts = insert 7 (Interval IMajor 7) hts
+    insertMajorSeven hts = insert 7 (intervalFrom IQ.Major 7) hts
