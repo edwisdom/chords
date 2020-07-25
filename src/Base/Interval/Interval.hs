@@ -10,7 +10,6 @@ module Base.Interval.Interval
   , (|+|)
   , (|-|)
   , modShift
-  , defaultIQuality
   ) where
 
 import Base.Core.Accidental
@@ -77,7 +76,7 @@ intervalToDistance int@(Interval q i) =
 
     subIntervalToDistance (Interval Minor i) =
       let
-        defQuality = defaultIQuality i
+        defQuality = baseQuality i
       in
         case defQuality of
           Major   -> subtract 1 <$> subIntervalToDistance (Interval Major i)
@@ -87,14 +86,14 @@ intervalToDistance int@(Interval q i) =
 
     subIntervalToDistance (Interval (Augmented x) i) =
       let
-        defQuality = defaultIQuality i
+        defQuality = baseQuality i
       in
         (x +) <$> subIntervalToDistance (Interval defQuality i)
 
 
     subIntervalToDistance (Interval (Diminished x) i) =
       let
-        defQuality = defaultIQuality i
+        defQuality = baseQuality i
       in
         case defQuality of
           Major   -> subtract (x + 1) <$> subIntervalToDistance (Interval Major i)
@@ -102,14 +101,6 @@ intervalToDistance int@(Interval q i) =
           _        -> error "Impl error, default quality must be M or P"
 
     subIntervalToDistance _ = Nothing
-
-defaultIQuality :: Int -> Quality
-defaultIQuality i =
-  case intMod i of
-    intervalInt
-      | intervalInt `elem` [1, 4, 5]    -> Perfect
-      | intervalInt `elem` [2, 3, 6, 7] -> Major
-      | otherwise -> error "Impl error, mod 7 issue"
 
 lowestAbsValue :: Int -> Int
 lowestAbsValue = modShift (-6) 12
@@ -135,7 +126,7 @@ infixl 6 <+>
   Interval (iterate modFunc iQual !! abs x) i
   where
     modFunc =
-      case (defaultIQuality i, signum x) of
+      case (baseQuality i, signum x) of
         (Perfect, 1)  -> raisePerfect
         (Major, 1)    -> raiseMajor
         (Perfect, -1) -> lowerPerfect
@@ -157,7 +148,7 @@ intervalAdd :: Interval -> Interval -> Interval
 intervalAdd int1@(Interval q1 i1) int2@(Interval q2 i2) =
   let
     newI       = i1 + i2 - 1
-    defQual    = defaultIQuality newI
+    defQual    = baseQuality newI
     currDist   = fromJust $ intervalToDistance (Interval defQual newI)
     wantedDist = fromJust (intervalToDistance int1)
                + fromJust (intervalToDistance int2)

@@ -3,8 +3,8 @@ module Lib
   , chordToNotes
   ) where
 
-import qualified Base.Core.Quality.CQuality as CQ
-import qualified Base.Core.Quality.IQuality as IQ
+import Base.Core.Quality.CQuality as CQ
+import Base.Core.Quality.IQuality as IQ
 
 import Base.Chord
 
@@ -19,7 +19,6 @@ import Base.Interval.Interval as I
     , buildInterval
     , (<+>)
     , (<->)
-    , defaultIQuality
     , jumpIntervalFromNote
     , intervalToDistance
     )
@@ -59,14 +58,14 @@ qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToSc
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale s = maybe scale (\i -> insert i (buildInterval (defaultIQuality i) i) $ delete 3 scale) (getMaybeDeg s)
+susIntervals scale s = maybe scale (\i -> insert i (buildInterval (baseQuality i) i) $ delete 3 scale) (getMaybeDeg s)
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
   extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-  extendInterval scale ext = insert deg (buildInterval (defaultIQuality deg) deg <+> shift) scale
+  extendInterval scale ext = insert deg (buildInterval (baseQuality deg) deg <+> shift) scale
     where
       deg   = degree ext
       shift = extSign ext
