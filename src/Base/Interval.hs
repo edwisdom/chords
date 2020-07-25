@@ -59,42 +59,35 @@ normalizeInterval :: Interval -> Interval
 normalizeInterval (Interval iQual i) = Interval iQual $ normalizeIntervalSize i
 
 intervalToDistance :: Interval -> Maybe Int
-intervalToDistance int@(Interval q i) =
-  subIntervalToDistance $ normalizeInterval int
-  where
-    subIntervalToDistance (Interval Perfect 1) = Just 0
-    subIntervalToDistance (Interval Major 2)   = Just 2
-    subIntervalToDistance (Interval Major 3)   = Just 4
-    subIntervalToDistance (Interval Perfect 4) = Just 5
-    subIntervalToDistance (Interval Perfect 5) = Just 7
-    subIntervalToDistance (Interval Major 6)   = Just 9
-    subIntervalToDistance (Interval Major 7)   = Just 11
+intervalToDistance interval =
+  case normalizeInterval interval of
+    -- Base interval distances
+    Interval Perfect 1 -> Just 0
+    Interval Major   2 -> Just 2
+    Interval Major   3 -> Just 4
+    Interval Perfect 4 -> Just 5
+    Interval Perfect 5 -> Just 7
+    Interval Major   6 -> Just 9
+    Interval Major   7 -> Just 11
 
-    subIntervalToDistance (Interval Minor i) =
-      let
-        defQuality = baseQuality i
-      in
-        case defQuality of
-          Major   -> subtract 1 <$> subIntervalToDistance (Interval Major i)
-          Perfect -> Nothing
+    -- Minor shifts
+    Interval Minor   i ->
+      case baseQuality i of
+        Major   -> subtract 1 <$> intervalToDistance (Interval Major i)
+        Perfect -> Nothing
 
+    -- Augmented shifts
+    Interval (Augmented x) i  ->
+      (x +) <$> intervalToDistance (Interval (baseQuality i) i)
 
-    subIntervalToDistance (Interval (Augmented x) i) =
-      let
-        defQuality = baseQuality i
-      in
-        (x +) <$> subIntervalToDistance (Interval defQuality i)
+    -- Diminished shifts
+    Interval (Diminished x) i ->
+      case baseQuality i of
+        Major   -> subtract (x + 1) <$> intervalToDistance (Interval Major i)
+        Perfect -> subtract x <$> intervalToDistance (Interval Perfect i)
 
-
-    subIntervalToDistance (Interval (Diminished x) i) =
-      let
-        defQuality = baseQuality i
-      in
-        case defQuality of
-          Major   -> subtract (x + 1) <$> subIntervalToDistance (Interval Major i)
-          Perfect -> subtract x <$> subIntervalToDistance (Interval Perfect i)
-
-    subIntervalToDistance _ = Nothing
+    -- Anything else must be an invalid interval
+    _ -> Nothing
 
 lowestAbsValue :: Int -> Int
 lowestAbsValue = modByFrom 12 (-6)
