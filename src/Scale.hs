@@ -5,7 +5,7 @@ module Scale
 
 import Base.Core.Quality.IQuality
 
-import Base.Interval.Interval (Interval(..), buildInterval, (|+|), (|-|))
+import Base.Interval (Interval, buildInterval, (|+|), (|-|))
 import Data.List (sort)
 
 

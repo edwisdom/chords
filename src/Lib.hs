@@ -14,7 +14,7 @@ import Base.Chord.HighestNatural
 import Base.Chord.Root
 import Base.Chord.Sus
 
-import Base.Interval.Interval as I
+import Base.Interval as I
     (Interval(..)
     , buildInterval
     , (<+>)

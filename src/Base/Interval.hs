@@ -1,4 +1,4 @@
-module Base.Interval.Interval
+module Base.Interval
   ( Interval
   , getQuality
   , getSize
