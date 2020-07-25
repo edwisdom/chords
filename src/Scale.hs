@@ -5,7 +5,7 @@ module Scale
 
 import Base.Core.Quality.IQuality
 
-import Interval (Interval(..), (|+|), (|-|))
+import Base.Interval.Interval (Interval(..), buildInterval, (|+|), (|-|))
 import Data.List (sort)
 
 
@@ -42,7 +42,7 @@ nthDegreeIntervals ints n = sort $ (|-| rootInterval) <$> ints
 
 
 listIntervals :: [Quality] -> [Int] -> [Interval]
-listIntervals qualities ints = uncurry Interval <$> zip qualities ints
+listIntervals qualities ints = uncurry buildInterval <$> zip qualities ints
 
 
 scaleToIntervals :: Scale -> [Interval]

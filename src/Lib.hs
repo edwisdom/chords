@@ -8,14 +8,15 @@ import qualified Base.Core.Quality.IQuality as IQ
 
 import Base.Chord
 
-import Base.Chord.Chord
+import Base.Chord.Chord as C
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Root
 import Base.Chord.Sus
 
-import Interval
-    ( Interval(..)
+import Base.Interval.Interval as I
+    (Interval(..)
+    , buildInterval
     , (<+>)
     , (<->)
     , defaultIQuality
@@ -37,7 +38,7 @@ chordToNotes chord =
 chordToIntervals :: Chord -> Set Interval
 chordToIntervals chord =
   let
-    baseScale = highestNaturalToIntervals (getHighestNatural chord) $ qualityToIntervals $ getQuality chord
+    baseScale = highestNaturalToIntervals (getHighestNatural chord) $ qualityToIntervals $ C.getQuality chord
     intervals = susIntervals (extendIntervals baseScale $ getExtensions chord) $ getSus chord
   in
     foldr S.insert S.empty intervals
@@ -58,14 +59,14 @@ qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToSc
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale s = maybe scale (\i -> insert i (Interval (defaultIQuality i) i) $ delete 3 scale) (getMaybeDeg s)
+susIntervals scale s = maybe scale (\i -> insert i (buildInterval (defaultIQuality i) i) $ delete 3 scale) (getMaybeDeg s)
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
   extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-  extendInterval scale ext = insert deg (Interval (defaultIQuality deg) deg <+> shift) scale
+  extendInterval scale ext = insert deg (buildInterval (defaultIQuality deg) deg <+> shift) scale
     where
       deg   = degree ext
       shift = extSign ext
@@ -100,4 +101,4 @@ highestNaturalToIntervals hn scale =
         (int, fromJust interval)
 
     insertMajorSeven :: HeliotonicScale -> HeliotonicScale
-    insertMajorSeven hts = insert 7 (Interval IQ.Major 7) hts
+    insertMajorSeven hts = insert 7 (buildInterval IQ.Major 7) hts

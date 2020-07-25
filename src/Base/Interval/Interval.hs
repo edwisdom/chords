@@ -1,32 +1,33 @@
-module Interval
-  ( Interval(..)
+module Base.Interval.Interval
+  ( Interval
+  , getQuality
+  , getSize
+  , buildInterval
+  , intervalToDistance
   , (<+>)
   , (<->)
-  , defaultIQuality
-  , intervalToDistance
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
-  , invert
+  , modShift
+  , defaultIQuality
   ) where
 
 import Base.Core.Accidental
-import Base.Core.Note (nextNthNote)
+import Base.Core.Note
 import Base.Core.Quality.IQuality
 
 import Base.Chord.Root
 
 import Base.IQuality
 
-import Base.PitchClass (rootToPitchClass, getPitchClass )
+import Base.PitchClass
 
 import Data.Maybe (fromJust)
 
-
-
-data Interval
- = Interval Quality Int
-
+data Interval = Interval { getQuality :: Quality
+                         , getSize :: Int
+                         }
 
 instance Eq Interval where
   int1 == int2 = intervalToDistance int1 == intervalToDistance int2
@@ -47,85 +48,20 @@ instance Show Interval where
     in
       qualString ++ show i
 
-
-infixl 6 <+>
-(<+>) :: Interval -> Int -> Interval
-(Interval iQual i) <+> x =
-  Interval (iterate modFunc iQual !! abs x) i
-  where
-    modFunc =
-      case (defaultIQuality i, signum x) of
-        (Perfect, 1)  -> raisePerfect
-        (Major, 1)    -> raiseMajor
-        (Perfect, -1) -> lowerPerfect
-        (Major, -1)   -> lowerMajor
-        (_, 0)         -> id
-
-
-infixl 6 <->
-(<->) :: Interval -> Int -> Interval
-interval <-> x =  interval <+> (-x)
-
-
-defaultIQuality :: Int -> Quality
-defaultIQuality i =
-  case intMod i of
-    intervalInt
-      | intervalInt `elem` [1, 4, 5]    -> Perfect
-      | intervalInt `elem` [2, 3, 6, 7] -> Major
-      | otherwise -> error "Impl error, mod 7 issue"
-
+buildInterval :: Quality -> Int -> Interval
+buildInterval q s = Interval { getQuality = q, getSize = ((s - 1) `mod` 7) + 1}
 
 modShift :: Int -> Int -> (Int -> Int)
 modShift newZero modulus i = ((i - newZero) `mod` modulus) + newZero
+
+modShift' :: Int -> Int -> Int -> Int
+modShift' y m x = (x `mod` m) + y + 1
 
 intMod :: Int -> Int
 intMod = modShift 1 7
 
 intervalMod :: Interval -> Interval
 intervalMod (Interval iQual i) = Interval iQual $ intMod i
-
-lowestAbsValue :: Int -> Int
-lowestAbsValue = modShift (-6) 12
-
-
-invert :: Interval -> Interval
-invert (Interval iQual i) =
-  let
-    newI = intMod $ 9 - intMod i
-    newQual =
-      case iQual of
-        Major          -> Minor
-        Minor          -> Major
-        Perfect        -> Perfect
-        (Augmented x)  -> Diminished x
-        (Diminished x) -> Augmented x
-  in
-    Interval newQual newI
-
-
-infixl 6 |+|
-(|+|) = intervalAdd
-
-infixl 6 |-|
-(|-|) = intervalSubtract
-
-intervalAdd :: Interval -> Interval -> Interval
-intervalAdd int1@(Interval q1 i1) int2@(Interval q2 i2) =
-  let
-    newI       = i1 + i2 - 1
-    defQual    = defaultIQuality newI
-    currDist   = fromJust $ intervalToDistance (Interval defQual newI)
-    wantedDist = fromJust (intervalToDistance int1)
-               + fromJust (intervalToDistance int2)
-    diff       = lowestAbsValue $ wantedDist - currDist
-  in
-    Interval defQual newI <+> diff
-
-
-intervalSubtract :: Interval -> Interval -> Interval
-intervalSubtract int1 int2 = intervalMod $ intervalAdd int1 $ invert int2
-
 
 intervalToDistance :: Interval -> Maybe Int
 intervalToDistance int@(Interval q i) =
@@ -167,6 +103,71 @@ intervalToDistance int@(Interval q i) =
 
     subIntervalToDistance _ = Nothing
 
+defaultIQuality :: Int -> Quality
+defaultIQuality i =
+  case intMod i of
+    intervalInt
+      | intervalInt `elem` [1, 4, 5]    -> Perfect
+      | intervalInt `elem` [2, 3, 6, 7] -> Major
+      | otherwise -> error "Impl error, mod 7 issue"
+
+lowestAbsValue :: Int -> Int
+lowestAbsValue = modShift (-6) 12
+
+
+invert :: Interval -> Interval
+invert (Interval iQual i) =
+  let
+    newI = intMod $ 9 - intMod i
+    newQual =
+      case iQual of
+        Major          -> Minor
+        Minor          -> Major
+        Perfect        -> Perfect
+        (Augmented x)  -> Diminished x
+        (Diminished x) -> Augmented x
+  in
+    Interval newQual newI
+
+infixl 6 <+>
+(<+>) :: Interval -> Int -> Interval
+(Interval iQual i) <+> x =
+  Interval (iterate modFunc iQual !! abs x) i
+  where
+    modFunc =
+      case (defaultIQuality i, signum x) of
+        (Perfect, 1)  -> raisePerfect
+        (Major, 1)    -> raiseMajor
+        (Perfect, -1) -> lowerPerfect
+        (Major, -1)   -> lowerMajor
+        (_, 0)         -> id
+
+
+infixl 6 <->
+(<->) :: Interval -> Int -> Interval
+interval <-> x =  interval <+> (-x)
+
+infixl 6 |+|
+(|+|) = intervalAdd
+
+infixl 6 |-|
+(|-|) = intervalSubtract
+
+intervalAdd :: Interval -> Interval -> Interval
+intervalAdd int1@(Interval q1 i1) int2@(Interval q2 i2) =
+  let
+    newI       = i1 + i2 - 1
+    defQual    = defaultIQuality newI
+    currDist   = fromJust $ intervalToDistance (Interval defQual newI)
+    wantedDist = fromJust (intervalToDistance int1)
+               + fromJust (intervalToDistance int2)
+    diff       = lowestAbsValue $ wantedDist - currDist
+  in
+    Interval defQual newI <+> diff
+
+
+intervalSubtract :: Interval -> Interval -> Interval
+intervalSubtract int1 int2 = intervalMod $ intervalAdd int1 $ invert int2
 
 jumpIntervalFromNote :: Interval -> Root -> Root
 jumpIntervalFromNote (Interval iQual iNum) r =
