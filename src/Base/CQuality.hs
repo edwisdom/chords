@@ -1,4 +1,4 @@
-module Base.Quality
+module Base.CQuality
   ( canonicalizeQuality
   ) where
 

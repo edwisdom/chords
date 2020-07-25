@@ -2,7 +2,7 @@ module Base.Chord
   ( canonicalizeChord
   ) where
 
-import Base.Quality
+import Base.CQuality
 
 import Base.Core.Quality.CQuality
 
