@@ -51,8 +51,8 @@ parserAccidental =
     parseAllOf :: Char -> Parser Accidental
     parseAllOf acc = do let
                           constructor = case acc of
-                                          '#' -> nSharp
-                                          'b' -> nFlat
+                                          '#' -> nSharps
+                                          'b' -> nFlats
                         accs <- many1 $ char acc
                         return $ constructor $ length accs
 
@@ -126,4 +126,4 @@ parserChord =
      exts <- many parserExtension
      sus <- parserSus
      eof
-     return $ rawChordFrom root mqual highestQual exts sus
+     return $ chordFrom root mqual highestQual exts sus

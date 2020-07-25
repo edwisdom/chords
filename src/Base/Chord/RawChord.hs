@@ -5,7 +5,7 @@ module Base.Chord.RawChord
   , getHighestNatural
   , getExtensions
   , getSus
-  , rawChordFrom
+  , chordFrom
   ) where
 
 import Base.Core.Quality.CQuality
@@ -22,5 +22,5 @@ data Chord = Chord { getChordRoot :: Root
                    , getSus :: Sus
                    } deriving Show
 
-rawChordFrom :: Root -> Maybe Quality -> HighestNatural -> [Extension] -> Sus -> Chord
-rawChordFrom = Chord
+chordFrom :: Root -> Maybe Quality -> HighestNatural -> [Extension] -> Sus -> Chord
+chordFrom = Chord

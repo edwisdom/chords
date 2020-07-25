@@ -154,7 +154,7 @@ jumpIntervalFromNote (Interval iQual iNum) r =
     diff   = lowestAbsValue $ wantedDist - currDist
     newAcc =
       case signum diff of
-        1  -> nSharp diff
-        -1 -> nFlat (-diff)
+        1  -> nSharps diff
+        -1 -> nFlats (-diff)
         0  -> natural
   in rootFrom newNote newAcc

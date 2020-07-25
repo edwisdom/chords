@@ -68,7 +68,7 @@ extendIntervals = foldr $ flip extendInterval
   extendInterval scale ext = insert deg (intervalFrom (baseQuality deg) deg <+> shift) scale
     where
       deg   = degree ext
-      shift = extSign ext
+      shift = sign ext
 
 highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
 highestNaturalToIntervals hn scale =

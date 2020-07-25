@@ -3,7 +3,7 @@ module Base.Chord.Extension
   , sharp
   , flat
   , degree
-  , extSign
+  , sign
   ) where
 
 data Extension
@@ -21,6 +21,6 @@ degree :: Extension -> Int
 degree (ExtSharp deg) = deg
 degree (ExtFlat deg)  = deg
 
-extSign :: Extension -> Int
-extSign (ExtSharp _) = 1
-extSign (ExtFlat _)  = -1
+sign :: Extension -> Int
+sign (ExtSharp _) = 1
+sign (ExtFlat _)  = -1
