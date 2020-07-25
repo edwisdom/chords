@@ -9,6 +9,7 @@ module Base.Interval.Interval
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
+  , intMod
   ) where
 
 import Base.Core.Accidental
@@ -20,6 +21,8 @@ import Base.Chord.Root
 import Base.IQuality
 
 import Base.PitchClass
+
+import Common.Utils (modByFrom)
 
 import Data.Maybe (fromJust)
 
@@ -49,11 +52,8 @@ instance Show Interval where
 buildInterval :: Quality -> Int -> Interval
 buildInterval q s = Interval { getQuality = q, getSize = ((s - 1) `mod` 7) + 1}
 
-modByFrom :: Int -> Int -> (Int -> Int)
-modByFrom x m y = ((x - y) `mod` m) + y
-
 intMod :: Int -> Int
-intMod = modByFrom 1 7
+intMod = modByFrom 7 1
 
 intervalMod :: Interval -> Interval
 intervalMod (Interval iQual i) = Interval iQual $ intMod i
@@ -99,7 +99,7 @@ intervalToDistance int@(Interval q i) =
     subIntervalToDistance _ = Nothing
 
 lowestAbsValue :: Int -> Int
-lowestAbsValue = modByFrom (-6) 12
+lowestAbsValue = modByFrom 12 (-6)
 
 
 invert :: Interval -> Interval

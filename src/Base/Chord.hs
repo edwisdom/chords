@@ -6,9 +6,9 @@ import Base.CQuality
 
 import Base.Core.Quality.CQuality
 
-import qualified Base.Chord.Chord as C
+import Base.Chord.Chord as C
 import Base.Chord.HighestNatural
-import qualified Base.Chord.RawChord as RC
+import Base.Chord.RawChord as RC
 
 canonicalizeChord :: RC.Chord -> C.Chord
 canonicalizeChord rc =

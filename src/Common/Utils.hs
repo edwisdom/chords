@@ -4,7 +4,7 @@ module Common.Utils
   ) where
 
 modByFrom :: Int -> Int -> Int -> Int
-modByFrom x m y = ((x - y) `mod` m) + y
+modByFrom m y x = ((x - y) `mod` m) + y
 
 rightToMaybe :: Either a b -> Maybe b
 rightToMaybe (Left _)  = Nothing
