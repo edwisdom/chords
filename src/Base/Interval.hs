@@ -146,7 +146,7 @@ jumpIntervalFromNote :: Interval -> Root -> Root
 jumpIntervalFromNote (Interval iQual iNum) r =
   let
     newNote    = nextNthNote (getRoot r) $ iNum - 1
-    currDist   = getPitchClass (rootToPitchClass $ rootFrom newNote natural)
+    currDist   = getPitchClass (rootToPitchClass (rootFrom newNote natural)) - getPitchClass (rootToPitchClass r)
     wantedDist =
       case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
