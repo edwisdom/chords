@@ -1,6 +1,7 @@
 module Lib
   ( chordToIntervals
   , chordToNotes
+  , transpose
   ) where
 
 import Base.Core.Quality.CQuality as CQ
@@ -101,3 +102,4 @@ highestNaturalToIntervals hn scale =
 
     insertMajorSeven :: HeliotonicScale -> HeliotonicScale
     insertMajorSeven hts = insert 7 (intervalFrom IQ.Major 7) hts
+        (int, fromJust interval)
