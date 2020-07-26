@@ -43,8 +43,8 @@ instance Show Interval where
           Major          -> "M"
           Minor          -> "m"
           Perfect        -> "P"
-          (Diminished x) -> show x ++ "dim"
-          (Augmented x)  -> show x ++ "aug"
+          Diminished x -> show x ++ "dim"
+          Augmented x  -> show x ++ "aug"
     in
       qualString ++ show i
 
