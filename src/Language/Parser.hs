@@ -122,7 +122,7 @@ parserChord :: Parser Chord
 parserChord =
   do root <- parserRoot
      mqual <- optionMaybe parserQuality
-     highestQual <- option (majorNatural 5) parserHighestNatural
+     highestQual <- option (nonMajorNatural 5) parserHighestNatural
      exts <- many parserExtension
      sus <- parserSus
      eof

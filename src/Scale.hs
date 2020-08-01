@@ -1,99 +1,109 @@
 module Scale
   ( Scale(..)
-  , scaleToIntervals
+  , BaseMode(..)
+  , baseModeIntervals
   ) where
 
 import Base.Core.Quality.IQuality
-
+import Base.Chord.Root
+import Base.Chord.Extension
 import Base.Interval (Interval, intervalFrom, (|+|), (|-|))
+import Base.Core.Accidental
 import Data.List (sort)
+import Data.Set(Set(..), fromList, toAscList)
 
 
-data Scale
-  = SLydian
-  | SDorian
-  | SMixolydian
-  | SAugmentedQuality
-  | SDiminishedQuality
-  | SMajor
-  | SMinor
-  | SPhrygian
-  | SLocrian
-  | SMelodicMinor
-  | SDorianb2
-  | SLydianAug
-  | SLydianDom
-  | SMixolydianb6
-  | SLocrianSharp2
-  | SAltered
-  | SHarmonicMinor
-  | SLocrianNat6
-  | SIonianSharp5
-  | SDorianSharp4
-  | SPhrygianDom
-  | SLydianSharp2
-  | SSuperLocrianbb7
+data Scale = Root Mode
 
 
-nthDegreeIntervals :: [Interval] -> Int -> [Interval]
-nthDegreeIntervals ints n = sort $ (|-| rootInterval) <$> ints
+data Mode = BaseMode [ScaleExt]
+
+
+data ScaleExt = Accidental Int
+
+
+data BaseMode 
+  = Lydian
+  | Dorian
+  | Mixolydian
+  | AugmentedQuality
+  | DiminishedQuality
+  | Ionian
+  | Aeolian
+  | Phrygian
+  | Locrian
+  | MelodicMinor
+  | LydianAug
+  | LydianDom
+  | Altered
+  | HarmonicMinor
+  | PhrygianDom
+  | DoubleHarmonicMinor
+  | HarmonicMajor
+  | DoubleHarmonicMajor
+  deriving Show
+
+nthDegreeIntervals :: Set Interval -> Int -> Set Interval
+nthDegreeIntervals ints n = fromList $ (|-| rootInterval) <$> toAscList ints
   where
-    rootInterval = ints !! (n - 1)
+    rootInterval = toAscList ints !! (n - 1)
 
 
-listIntervals :: [Quality] -> [Int] -> [Interval]
-listIntervals qualities ints = uncurry intervalFrom <$> zip qualities ints
+zipToIntervalSet :: [Quality] -> [Int] -> Set Interval
+zipToIntervalSet qualities ints = fromList $ uncurry intervalFrom <$> zip qualities ints
 
 
-scaleToIntervals :: Scale -> [Interval]
-scaleToIntervals SMajor =
-  listIntervals
+baseModeIntervals :: BaseMode -> Set Interval
+baseModeIntervals Ionian =
+  zipToIntervalSet
   [Perfect, Major, Major, Perfect, Perfect, Major, Major] [1..7]
-scaleToIntervals SDorian =
-  nthDegreeIntervals (scaleToIntervals SMajor) 2
-scaleToIntervals SPhrygian =
-  nthDegreeIntervals (scaleToIntervals SMajor) 3
-scaleToIntervals SLydian =
-  nthDegreeIntervals (scaleToIntervals SMajor) 4
-scaleToIntervals SMixolydian =
-  nthDegreeIntervals (scaleToIntervals SMajor) 5
-scaleToIntervals SMinor =
-  nthDegreeIntervals (scaleToIntervals SMajor) 6
-scaleToIntervals SLocrian =
-  nthDegreeIntervals (scaleToIntervals SMajor) 7
-scaleToIntervals SAugmentedQuality =
-  listIntervals
+baseModeIntervals Dorian =
+  nthDegreeIntervals (baseModeIntervals Ionian) 2
+baseModeIntervals Phrygian =
+  nthDegreeIntervals (baseModeIntervals Ionian) 3
+baseModeIntervals Lydian =
+  nthDegreeIntervals (baseModeIntervals Ionian) 4
+baseModeIntervals Mixolydian =
+  nthDegreeIntervals (baseModeIntervals Ionian) 5
+baseModeIntervals Aeolian =
+  nthDegreeIntervals (baseModeIntervals Ionian) 6
+baseModeIntervals Locrian =
+  nthDegreeIntervals (baseModeIntervals Ionian) 7
+baseModeIntervals AugmentedQuality =
+  zipToIntervalSet
   [Perfect, Major, Major, Augmented 1, Augmented 1, Major, Minor] [1..7]
-scaleToIntervals SDiminishedQuality =
-  listIntervals
+baseModeIntervals DiminishedQuality =
+  zipToIntervalSet
   [Perfect, Major, Minor, Perfect, Diminished 1, Minor, Diminished 1] [1..7]
-scaleToIntervals SMelodicMinor =
-  listIntervals
+baseModeIntervals MelodicMinor =
+  zipToIntervalSet
   [Perfect, Major, Minor, Perfect, Perfect, Major, Major] [1..7]
-scaleToIntervals SDorianb2 =
-  nthDegreeIntervals (scaleToIntervals SMelodicMinor) 2
-scaleToIntervals SLydianAug =
-  nthDegreeIntervals (scaleToIntervals SMelodicMinor) 3
-scaleToIntervals SLydianDom =
-  nthDegreeIntervals (scaleToIntervals SMelodicMinor) 4
-scaleToIntervals SMixolydianb6 =
-  nthDegreeIntervals (scaleToIntervals SMelodicMinor) 5
-scaleToIntervals SLocrianSharp2 =
-  nthDegreeIntervals (scaleToIntervals SMelodicMinor) 6
-scaleToIntervals SAltered =
-  nthDegreeIntervals (scaleToIntervals SMelodicMinor) 7
-scaleToIntervals SHarmonicMinor =
-  listIntervals
+baseModeIntervals LydianAug =
+  nthDegreeIntervals (baseModeIntervals MelodicMinor) 3
+baseModeIntervals LydianDom =
+  nthDegreeIntervals (baseModeIntervals MelodicMinor) 4
+baseModeIntervals Altered =
+  nthDegreeIntervals (baseModeIntervals MelodicMinor) 7
+baseModeIntervals HarmonicMinor =
+  zipToIntervalSet
   [Perfect, Major, Minor, Perfect, Perfect, Minor, Major] [1..7]
-scaleToIntervals SLocrianNat6 =
-  nthDegreeIntervals (scaleToIntervals SHarmonicMinor) 2
-scaleToIntervals SIonianSharp5 =
-  nthDegreeIntervals (scaleToIntervals SHarmonicMinor) 3
-scaleToIntervals SDorianSharp4 =
-  nthDegreeIntervals (scaleToIntervals SHarmonicMinor) 4
-scaleToIntervals SPhrygianDom =
-  nthDegreeIntervals (scaleToIntervals SHarmonicMinor) 5
-scaleToIntervals SLydianSharp2 =
-  nthDegreeIntervals (scaleToIntervals SHarmonicMinor) 6
-scaleToIntervals SSuperLocrianbb7 =
-  nthDegreeIntervals (scaleToIntervals SHarmonicMinor) 7
+baseModeIntervals PhrygianDom =
+  nthDegreeIntervals (baseModeIntervals HarmonicMinor) 5
+baseModeIntervals DoubleHarmonicMinor =
+  zipToIntervalSet
+  [Perfect, Major, Minor, Augmented 1, Perfect, Minor, Major] [1..7]
+baseModeIntervals HarmonicMajor =
+  zipToIntervalSet
+  [Perfect, Major, Major, Perfect, Perfect, Minor, Major] [1..7]
+baseModeIntervals DoubleHarmonicMajor =
+  zipToIntervalSet
+  [Perfect, Minor, Major, Perfect, Perfect, Minor, Major] [1..7]
+
+
+-- modeToIntervals :: Mode -> Set Interval
+-- modeToIntervals baseMode exts = 
+--   where 
+--     baseIntervals = baseModeIntervals baseMode
+--     extIntervals :: [Extension] -> Set Interval -> Set Interval 
+--     <+>
+     
