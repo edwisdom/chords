@@ -82,9 +82,12 @@ intervalToDistance interval =
 
     -- Diminished shifts
     Interval (Diminished x) i ->
-      case baseQuality i of
-        Major   -> subtract (x + 1) <$> intervalToDistance (Interval Major i)
-        Perfect -> subtract x <$> intervalToDistance (Interval Perfect i)
+      subtract offset <$> intervalToDistance (Interval bq i)
+      where
+        bq = baseQuality i
+        offset = case bq of
+                   Major   -> x + 1
+                   Perfect -> x
 
     -- Anything else must be an invalid interval
     _ -> Nothing
@@ -109,7 +112,7 @@ invert (Interval iQual i) =
 
 infixl 6 <+>
 (<+>) :: Interval -> Int -> Interval
-(Interval iQual i) <+> x =
+Interval iQual i <+> x =
   Interval (iterate modFunc iQual !! abs x) i
   where
     modFunc =
