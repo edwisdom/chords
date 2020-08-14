@@ -1,25 +1,35 @@
 module Scale
   ( Scale(..)
   , BaseMode(..)
+  , Mode(..)
+  , ScaleExt(..)
   , baseModeIntervals
+  , modeToIntervals
+  , scaleToNotes
+  , modalDistance
   ) where
+
 
 import Base.Core.Quality.IQuality
 import Base.Chord.Root
-import Base.Chord.Extension
-import Base.Interval (Interval, intervalFrom, (|+|), (|-|))
-import Base.Core.Accidental
+import Base.Interval
+import Base.Core.Accidental(Accidental(..), impliedShift)
 import Data.List (sort)
-import Data.Set(Set(..), fromList, toAscList)
+import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic)
+import qualified Data.Set as S(filter, map)
+import Data.Maybe(fromJust)
 
 
-data Scale = Root Mode
+
+data Scale = Scale Root Mode
 
 
-data Mode = BaseMode [ScaleExt]
+data Mode = Mode BaseMode [ScaleExt]
 
 
-data ScaleExt = Accidental Int
+data ScaleExt = ScaleExt { acc :: Accidental
+                         , deg :: Int
+                         }
 
 
 data BaseMode 
@@ -42,6 +52,7 @@ data BaseMode
   | HarmonicMajor
   | DoubleHarmonicMajor
   deriving Show
+
 
 nthDegreeIntervals :: Set Interval -> Int -> Set Interval
 nthDegreeIntervals ints n = fromList $ (|-| rootInterval) <$> toAscList ints
@@ -100,10 +111,34 @@ baseModeIntervals DoubleHarmonicMajor =
   [Perfect, Minor, Major, Perfect, Perfect, Minor, Major] [1..7]
 
 
--- modeToIntervals :: Mode -> Set Interval
--- modeToIntervals baseMode exts = 
---   where 
---     baseIntervals = baseModeIntervals baseMode
---     extIntervals :: [Extension] -> Set Interval -> Set Interval 
---     <+>
-     
+modeToIntervals :: Mode -> Set Interval
+modeToIntervals (Mode baseMode exts) = foldr extIntervals (baseModeIntervals baseMode) exts
+  where 
+    extIntervals :: ScaleExt -> Set Interval -> Set Interval
+    extIntervals ext intSet = insert (oldInt <+> (impliedShift $ acc ext)) (delete oldInt intSet)
+      where
+        -- TODO: If there isn't only one interval of a certain degree, the mode is
+        -- ambiguously constructed and we should give a warning.
+        oldInt = elemAt 0 (S.filter (\a -> getSize a == deg ext) intSet)    
+
+
+scaleToNotes :: Scale -> Set Root
+scaleToNotes (Scale root mode) = mapMonotonic (flip jumpIntervalFromNote root) (modeToIntervals mode)
+
+
+modalDistance :: Set Interval -> Set Interval -> Int
+modalDistance mode1 mode2 = sum $ intDistance <$> zip (toAscList mode1) (toAscList mode2)
+  where 
+    intDistance :: (Interval, Interval) -> Int
+    intDistance (i1, i2) = abs $ fromJust $ intervalToDistance (i1 |-| i2) 
+
+
+-- intervalsToMode :: Set Interval -> [Mode]
+-- intervalsToMode intSet = 
+--   let 
+--     sameDegreeModes = filter (\a -> S.map getSize baseModeIntervals a 
+--                                  == S.map getSize baseModeIntervals intSet) 
+--                       [Lydian ..]
+--     dists = modalDistance intSet <$> sameDegreeModes
+
+
