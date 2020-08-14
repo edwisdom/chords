@@ -7,17 +7,21 @@ module Scale
   , modeToIntervals
   , scaleToNotes
   , modalDistance
+  , modesToExts
+  , intervalsToMode
+  , zipToIntervalSet
   ) where
 
 
 import Base.Core.Quality.IQuality
 import Base.Chord.Root
 import Base.Interval
-import Base.Core.Accidental(Accidental(..), impliedShift)
-import Data.List (sort)
+import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)
+import Data.List (sort, sortBy, intercalate)
 import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic)
 import qualified Data.Set as S(filter, map)
 import Data.Maybe(fromJust)
+import Data.Function
 
 
 
@@ -26,10 +30,15 @@ data Scale = Scale Root Mode
 
 data Mode = Mode BaseMode [ScaleExt]
 
+instance Show Mode where
+  show (Mode base exts) = show base ++ " " ++ (intercalate ", " (show <$> exts))
 
 data ScaleExt = ScaleExt { acc :: Accidental
                          , deg :: Int
                          }
+
+instance Show ScaleExt where
+  show ext = show (acc ext) ++ show (deg ext)
 
 
 data BaseMode 
@@ -51,7 +60,7 @@ data BaseMode
   | DoubleHarmonicMinor
   | HarmonicMajor
   | DoubleHarmonicMajor
-  deriving Show
+  deriving (Show, Enum)
 
 
 nthDegreeIntervals :: Set Interval -> Int -> Set Interval
@@ -133,12 +142,37 @@ modalDistance mode1 mode2 = sum $ intDistance <$> zip (toAscList mode1) (toAscLi
     intDistance (i1, i2) = abs $ fromJust $ intervalToDistance (i1 |-| i2) 
 
 
--- intervalsToMode :: Set Interval -> [Mode]
--- intervalsToMode intSet = 
---   let 
---     sameDegreeModes = filter (\a -> S.map getSize baseModeIntervals a 
---                                  == S.map getSize baseModeIntervals intSet) 
---                       [Lydian ..]
---     dists = modalDistance intSet <$> sameDegreeModes
+modesToExts :: Set Interval -> Set Interval -> [ScaleExt]
+modesToExts mode1 mode2 = 
+  let 
+    zippedInts = zip (toAscList mode1) (toAscList mode2)  
+    intervalDiffToAcc :: Interval -> Interval -> Accidental
+    intervalDiffToAcc i1 i2 = shiftToAcc $ fromJust $ intervalToDistance $ i2 |-| i1
+    accToExtList :: Accidental -> Int -> [ScaleExt] -> [ScaleExt]
+    accToExtList accidental degree = 
+      if accidental == natural then
+        id
+      else  
+        (++ [ScaleExt { acc = accidental
+                      , deg = degree 
+                      }])
+  in  
+    foldr (\(i1,i2) exts -> accToExtList (intervalDiffToAcc i2 i1) (getSize i1) exts) 
+          []
+          zippedInts 
+
+
+intervalsToMode :: Set Interval -> [Mode]
+intervalsToMode intSet = 
+  let 
+    sameDegreeModes = filter (\a -> S.map getSize (baseModeIntervals a) 
+                                 == S.map getSize intSet) 
+                      [Lydian ..]
+    distanceFromIntSet :: Set Interval -> BaseMode -> Int
+    distanceFromIntSet iSet mode = modalDistance iSet $ baseModeIntervals mode
+    sortedModes = sortBy (compare `on` distanceFromIntSet intSet) sameDegreeModes
+    exts = modesToExts intSet <$> (baseModeIntervals <$> sortedModes)
+  in
+    take 3 $ (\(x,y) -> Mode x y) <$> zip sortedModes exts
 
 
