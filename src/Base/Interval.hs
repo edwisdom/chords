@@ -9,6 +9,7 @@ module Base.Interval
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
+  , invert
   ) where
 
 import Base.Core.Accidental

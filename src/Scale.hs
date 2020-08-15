@@ -10,15 +10,19 @@ module Scale
   , modesToExts
   , intervalsToMode
   , zipToIntervalSet
+  , isSubsetMode
+  , getSubsetModeByDegree
+  , invert
   ) where
 
 
 import Base.Core.Quality.IQuality
 import Base.Chord.Root
-import Base.Interval
+import Base.Interval hiding (invert)
+import qualified Base.Interval as I (invert)
 import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)
-import Data.List (sort, sortBy, intercalate)
-import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic)
+import Data.List (sort, sortBy, intercalate, takeWhile)
+import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic, isSubsetOf)
 import qualified Data.Set as S(filter, map)
 import Data.Maybe(fromJust)
 import Data.Function
@@ -173,6 +177,17 @@ intervalsToMode intSet =
     sortedModes = sortBy (compare `on` distanceFromIntSet intSet) sameDegreeModes
     exts = modesToExts intSet <$> (baseModeIntervals <$> sortedModes)
   in
-    take 3 $ (\(x,y) -> Mode x y) <$> zip sortedModes exts
+    takeWhile (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ (\(x,y) -> Mode x y) <$> zip sortedModes exts
 
 
+isSubsetMode :: Set Interval -> Set Interval -> Bool
+isSubsetMode mode1 mode2 = isSubsetOf mode1 mode2 
+
+getSubsetModeByDegree :: Set Interval -> Set Int -> Set Interval
+getSubsetModeByDegree mode degs = S.filter (\i -> any (== getSize i) degs) mode
+
+invert :: Set Interval -> Set Interval
+invert mode = S.map I.invert mode
+
+numAlteredDegsInMode :: Mode -> Int 
+numAlteredDegsInMode (Mode base exts) = length exts
