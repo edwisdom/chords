@@ -31,11 +31,17 @@ import Data.Function
 
 data Scale = Scale Root Mode
 
+instance Show Scale where
+  show (Scale root mode) = show root ++ show mode
 
 data Mode = Mode BaseMode [ScaleExt]
 
 instance Show Mode where
-  show (Mode base exts) = show base ++ " " ++ (intercalate ", " (show <$> exts))
+  show (Mode base exts) = show base
+                       --Add a space if there are extensions...
+                       ++ (replicate (signum (length (exts))) ' ')
+                       --Add extensions separated by a comma...
+                       ++ (intercalate ", " (show <$> exts))        
 
 data ScaleExt = ScaleExt { acc :: Accidental
                          , deg :: Int
