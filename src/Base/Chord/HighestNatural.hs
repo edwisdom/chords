@@ -9,7 +9,13 @@ module Base.Chord.HighestNatural
 data HighestNatural =
   HighestNatural { isMajor :: Bool
                  , getDegree :: Int
-                 } deriving Show
+                 }
+
+instance Show HighestNatural where
+  show highNat = 
+    case isMajor highNat of
+      True -> "M" ++ show (getDegree highNat)
+      False -> show (getDegree highNat)
 
 majorNatural :: Int -> HighestNatural
 majorNatural deg = HighestNatural { isMajor = True, getDegree = deg }

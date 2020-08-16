@@ -6,7 +6,13 @@ module Base.Chord.Sus
   ) where
 
 newtype Sus = Sus { getMaybeDeg :: Maybe Int }
-  deriving Show
+
+instance Show Sus where
+  show sus = 
+    case getMaybeDeg sus of 
+      (Just x) -> "sus" ++ show x
+      Nothing -> "sus"
+
 
 sus :: Int -> Sus
 sus deg = Sus $ Just deg
