@@ -20,7 +20,15 @@ data Chord = Chord { getChordRoot :: Root
                    , getHighestNatural :: HighestNatural
                    , getExtensions :: [Extension]
                    , getSus :: Sus
-                   } deriving Show
+                   }
+
+instance Show Chord where
+  show chord = show     (getChordRoot      chord)
+            ++ show     (getQuality        chord)
+            ++ show     (getHighestNatural chord)
+            ++ concat (map show (getExtensions  chord))
+            ++ show     (getSus            chord)
+
 
 chordFrom :: Root -> Quality -> HighestNatural -> [Extension] -> Sus -> Chord
 chordFrom = Chord

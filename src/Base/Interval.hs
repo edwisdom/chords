@@ -37,17 +37,7 @@ instance Ord Interval where
   int1 `compare` int2 = intervalToDistance int1 `compare` intervalToDistance int2
 
 instance Show Interval where
-  show (Interval iQual i) =
-    let
-      qualString =
-        case iQual of
-          Major          -> "M"
-          Minor          -> "m"
-          Perfect        -> "P"
-          Diminished x -> show x ++ "dim"
-          Augmented x  -> show x ++ "aug"
-    in
-      qualString ++ show i
+  show (Interval iQual i) = show iQual ++ show i
 
 normalizeIntervalSize :: Int -> Int
 normalizeIntervalSize = modByFrom 7 1

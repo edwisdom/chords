@@ -11,7 +11,13 @@ data Quality
  | Minor
  | Diminished Int
  | Augmented Int
- deriving Show
+ 
+instance Show Quality where
+  show Major = "M"
+  show Perfect = "P"
+  show Minor = "m"
+  show (Diminished i) = show i ++ "dim"
+  show (Augmented i) = show i ++ "aug"
 
 baseQuality :: Int -> Quality
 baseQuality n

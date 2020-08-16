@@ -9,7 +9,10 @@ module Base.Chord.Extension
 data Extension
   = ExtSharp Int
   | ExtFlat Int
-  deriving Show
+
+instance Show Extension where
+  show (ExtSharp x) = "#" ++ show x
+  show (ExtFlat x) = "b" ++ show x
 
 sharp :: Int -> Extension
 sharp = ExtSharp
