@@ -159,13 +159,9 @@ modesToExts mode1 mode2 =
     intervalDiffToAcc :: Interval -> Interval -> Accidental
     intervalDiffToAcc i1 i2 = shiftToAcc $ fromJust $ intervalToDistance $ i2 |-| i1
     accToExtList :: Accidental -> Int -> [ScaleExt] -> [ScaleExt]
-    accToExtList accidental degree = 
-      if accidental == natural then
-        id
-      else  
-        (++ [ScaleExt { acc = accidental
-                      , deg = degree 
-                      }])
+    accToExtList accidental degree
+      | accidental == natural = id
+      | otherwise             = (ScaleExt { acc = accidental, deg = degree } :)
   in  
     foldr (\(i1,i2) exts -> accToExtList (intervalDiffToAcc i2 i1) (getSize i1) exts) 
           []
