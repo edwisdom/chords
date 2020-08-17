@@ -177,7 +177,7 @@ intervalsToMode intSet =
     distanceFromIntSet :: Set Interval -> BaseMode -> Int
     distanceFromIntSet iSet mode = modalDistance iSet $ baseModeIntervals mode
     sortedModes = sortBy (compare `on` distanceFromIntSet intSet) sameDegreeModes
-    exts = modesToExts intSet <$> (baseModeIntervals <$> sortedModes)
+    exts = modesToExts intSet . baseModeIntervals <$> sortedModes
   in
     takeWhile (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ (\(x,y) -> Mode x y) <$> zip sortedModes exts
 
