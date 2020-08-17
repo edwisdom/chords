@@ -34,7 +34,6 @@ impliedShift AccNatural   = 0
 
 shiftToAcc :: Int -> Accidental
 shiftToAcc i = 
-  case signum i of
-        1  -> nSharps i
-        -1 -> nFlats (-i)
-        0  -> natural
+  | i > 0     = AccSharp i
+  | i < 0     = AccFlat (-i)
+  | otherwise = AccNatural
