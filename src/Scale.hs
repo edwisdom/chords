@@ -171,9 +171,9 @@ modesToExts mode1 mode2 =
 intervalsToMode :: Set Interval -> [Mode]
 intervalsToMode intSet = 
   let 
-    sameDegreeModes = filter (\a -> S.map getSize (baseModeIntervals a) 
-                                 == S.map getSize intSet) 
-                      [Lydian ..]
+    sameDegreeModes =
+        filter (\bm -> ((==) `on` S.map getSize) (baseModeIntervals bm) intSet)
+               [Lydian ..]
     distanceFromIntSet :: Set Interval -> BaseMode -> Int
     distanceFromIntSet iSet mode = modalDistance iSet $ baseModeIntervals mode
     sortedModes = sortBy (compare `on` distanceFromIntSet intSet) sameDegreeModes
