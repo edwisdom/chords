@@ -74,7 +74,7 @@ data BaseMode
 
 
 nthDegreeIntervals :: Set Interval -> Int -> Set Interval
-nthDegreeIntervals ints n = fromList $ (|-| rootInterval) <$> toAscList ints
+nthDegreeIntervals ints n = S.map (|-| rootInterval) ints
   where
     rootInterval = toAscList ints !! (n - 1)
 
