@@ -9,6 +9,7 @@ module Base.Interval
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
+  , invert
   ) where
 
 import Base.Core.Accidental
@@ -151,10 +152,5 @@ jumpIntervalFromNote (Interval iQual iNum) r =
       case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
-    diff   = lowestAbsValue $ wantedDist - currDist
-    newAcc =
-      case signum diff of
-        1  -> nSharps diff
-        -1 -> nFlats (-diff)
-        0  -> natural
+    newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist  
   in rootFrom newNote newAcc
