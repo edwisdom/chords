@@ -41,7 +41,7 @@ instance Show Mode where
                        --Add a space if there are extensions...
                        ++ if null exts then "" else " "
                        --Add extensions separated by a comma...
-                       ++ (intercalate ", " (show <$> exts))        
+                       ++ intercalate ", " (show <$> exts)
 
 data ScaleExt = ScaleExt { acc :: Accidental
                          , deg :: Int
