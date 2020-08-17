@@ -146,7 +146,7 @@ scaleToNotes (Scale root mode) = mapMonotonic (`jumpIntervalFromNote` root) (mod
 
 
 modalDistance :: Set Interval -> Set Interval -> Int
-modalDistance mode1 mode2 = sum $ intDistance <$> zip (toAscList mode1) (toAscList mode2)
+modalDistance mode1 mode2 = sum $ intDistance <$> (zip `on` toAscList) mode1 mode2
   where 
     intDistance :: (Interval, Interval) -> Int
     intDistance (i1, i2) = abs $ fromJust $ intervalToDistance (i1 |-| i2) 
