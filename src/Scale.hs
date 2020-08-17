@@ -142,7 +142,7 @@ modeToIntervals (Mode baseMode exts) = foldr extIntervals (baseModeIntervals bas
 
 
 scaleToNotes :: Scale -> Set Root
-scaleToNotes (Scale root mode) = mapMonotonic (flip jumpIntervalFromNote root) (modeToIntervals mode)
+scaleToNotes (Scale root mode) = mapMonotonic (`jumpIntervalFromNote` root) (modeToIntervals mode)
 
 
 modalDistance :: Set Interval -> Set Interval -> Int
