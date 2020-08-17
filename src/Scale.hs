@@ -39,7 +39,7 @@ data Mode = Mode BaseMode [ScaleExt]
 instance Show Mode where
   show (Mode base exts) = show base
                        --Add a space if there are extensions...
-                       ++ (replicate (signum (length (exts))) ' ')
+                       ++ if null exts then "" else " "
                        --Add extensions separated by a comma...
                        ++ (intercalate ", " (show <$> exts))        
 
