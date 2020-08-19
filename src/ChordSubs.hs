@@ -1,6 +1,7 @@
 module ChordSubs
   ( remove5
   , extend1
+  , negativeNote
   ) where 
 
 
@@ -15,10 +16,13 @@ import Base.Chord.Sus
 import Base.Core.Quality.CQuality as CQ
 import Base.Core.Quality.IQuality as IQ
 
-import Base.Interval
+import Base.Interval hiding (getQuality)
+import qualified Base.Interval as I(getQuality)
 
 import Lib(chordToIntervals, chordToNotes)
 import Data.Set(Set(..), toList, delete)
+import Data.Maybe(fromJust)
+import Base.PitchClass(rootToPitchClass, pitchClass)
 
 
 
@@ -41,3 +45,15 @@ extend1 (chord, _) =  (newChord, chordToNotes newChord)
         majorNatural (getDegree highNat + 2)
       else 
         nonMajorNatural (getDegree highNat + 2)
+
+negativeNote :: Root -> Root -> Root
+negativeNote key note = 
+  let 
+    origInt = intervalBetweenNotes key note
+    newNum = normalizeIntervalSize $ 6 - getSize origInt
+    newDist = (7 - (fromJust $ intervalToDistance origInt)) `mod` 12
+    baseInt = intervalFrom (baseQuality newNum) newNum
+    newInt = baseInt <+> (newDist - (fromJust (intervalToDistance baseInt)))
+  in 
+    jumpIntervalFromNote newInt key
+

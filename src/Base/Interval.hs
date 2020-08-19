@@ -10,6 +10,9 @@ module Base.Interval
   , (|+|)
   , (|-|)
   , invert
+  , intervalBetweenNotes
+  , modByFrom
+  , normalizeIntervalSize
   ) where
 
 import Base.Core.Accidental
@@ -144,3 +147,13 @@ jumpIntervalFromNote (Interval iQual iNum) r =
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
     newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist  
   in rootFrom newNote newAcc
+
+intervalBetweenNotes :: Root -> Root -> Interval
+intervalBetweenNotes start end = 
+  let
+    noteDist = (modByFrom 7 0) (fromEnum (getRoot end) - fromEnum (getRoot start)) + 1
+    currInterval = intervalFrom (baseQuality noteDist) noteDist
+    newNote = jumpIntervalFromNote currInterval start
+    wantedDist = getPitchClass (rootToPitchClass end) - getPitchClass (rootToPitchClass newNote)
+  in
+    currInterval <+> (modByFrom 12 (-6)) wantedDist
