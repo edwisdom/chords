@@ -11,6 +11,7 @@ import Base.Core.Note
 data Root = Root { getRoot :: Note
                  , getAcc :: Accidental
                  }
+  deriving (Eq)
 
 rootFrom :: Note -> Accidental -> Root
 rootFrom note acc = Root { getRoot = note, getAcc = acc }

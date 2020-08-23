@@ -12,10 +12,11 @@ data HighestNatural =
                  }
 
 instance Show HighestNatural where
-  show highNat = 
-    case isMajor highNat of
-      True -> "M" ++ show (getDegree highNat)
-      False -> show (getDegree highNat)
+  show highNat =
+    case (isMajor highNat, getDegree highNat) of
+      (True, _) -> "M" ++ show (getDegree highNat)
+      (False, 5) -> ""
+      (False, _) -> show (getDegree highNat)
 
 majorNatural :: Int -> HighestNatural
 majorNatural deg = HighestNatural { isMajor = True, getDegree = deg }

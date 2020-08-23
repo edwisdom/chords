@@ -12,7 +12,7 @@ data Note
  | E
  | F
  | G
- deriving (Show, Read)
+ deriving (Show, Read, Eq)
 
 instance Enum Note where
   toEnum 0 = A

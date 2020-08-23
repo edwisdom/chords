@@ -15,6 +15,8 @@ import Base.Chord.HighestNatural
 import Base.Chord.Root
 import Base.Chord.Sus
 
+
+
 data Chord = Chord { getChordRoot :: Root
                    , getQuality :: Quality
                    , getHighestNatural :: HighestNatural
@@ -24,7 +26,7 @@ data Chord = Chord { getChordRoot :: Root
 
 instance Show Chord where
   show chord = show     (getChordRoot      chord)
-            ++ show     (getQuality        chord)
+            ++ show     (getQuality     chord)
             ++ show     (getHighestNatural chord)
             ++ concat (map show (getExtensions  chord))
             ++ show     (getSus            chord)

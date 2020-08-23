@@ -1,14 +1,16 @@
 module Lib
   ( chordToIntervals
   , chordToNotes
+  , qualityToIntervals
+  , HeliotonicScale
   ) where
 
 import Base.Core.Quality.CQuality as CQ
 import Base.Core.Quality.IQuality as IQ
 
 import Base.Chord
-
 import Base.Chord.Chord as C
+
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Root
@@ -50,7 +52,7 @@ qualityToIntervals :: CQ.Quality -> HeliotonicScale
 qualityToIntervals qual = fromList $ zip [1..7] $ S.toList $ baseModeIntervals $ qualityToScale qual
   where
     qualityToScale :: CQ.Quality -> BaseMode
-    qualityToScale CQ.Major = Lydian
+    qualityToScale CQ.Major = Ionian
     qualityToScale CQ.Minor = Dorian
     qualityToScale CQ.Dominant = Mixolydian
     qualityToScale CQ.Augmented = AugmentedQuality
@@ -58,7 +60,9 @@ qualityToIntervals qual = fromList $ zip [1..7] $ S.toList $ baseModeIntervals $
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale s = maybe scale (\i -> insert i (intervalFrom (baseQuality i) i) $ delete 3 scale) (getMaybeDeg s)
+susIntervals scale s
+  | isSus s = maybe (delete 3 scale) (\i -> insert i (intervalFrom (baseQuality i) i) $ delete 3 scale) (getMaybeDeg s)
+  | otherwise = scale
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale

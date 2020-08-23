@@ -3,9 +3,9 @@ module Base.Core.Quality.CQuality
   ) where
 
 
-instance Show Quality where 
-  show qual = 
-    case qual of 
+instance Show Quality where
+  show qual =
+    case qual of
       Major -> "M"
       Minor -> "m"
       Dominant -> ""
@@ -19,3 +19,4 @@ data Quality
   | Dominant
   | Diminished
   | Augmented
+  deriving(Eq)

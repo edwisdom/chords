@@ -97,13 +97,13 @@ parserHighestNatural =
 parserSus :: Parser Sus
 parserSus =
   do msus <- optionMaybe parserSusPresent
-     return $ maybe noSus sus msus
+     return (maybe noSus id (maybe susNoNum sus <$> msus))
   where
-    parserSusPresent :: Parser Int
+    parserSusPresent :: Parser (Maybe Int)
     parserSusPresent =
       do string "sus"
          number <- optionMaybe $ many1 digit
-         return $ maybe 2 read number
+         return $ read <$> number
 
 parserExtension :: Parser Extension
 parserExtension =
@@ -113,10 +113,10 @@ parserExtension =
   where
     parserSf :: Parser (Int -> Extension)
     parserSf =
-      do sf <- oneOf "b#"
-         return $ case sf of
-                    'b' -> flat
-                    '#' -> sharp
+      do sf <- string "b" <||> string "#" <|> string "add"
+         return $ if sf == "b" then flat
+                  else if sf == "#" then sharp
+                  else add
 
 parserChord :: Parser Chord
 parserChord =
