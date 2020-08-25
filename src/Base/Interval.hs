@@ -17,10 +17,10 @@ module Base.Interval
   ) where
 
 import Base.Core.Accidental
-import Base.Core.Note
+import Base.Core.Letter
 import Base.Core.Quality.IQuality
 
-import Base.Chord.Root
+import Base.Chord.Note
 
 import Base.IQuality
 
@@ -118,7 +118,7 @@ infixl 6 <+>
 
 infixl 6 <->
 (<->) :: Interval -> Int -> Interval
-interval <-> x =  interval <+> (-x)
+interval <-> x = interval <+> (-x)
 
 infixl 6 |+|
 (|+|) :: Interval -> Interval -> Interval
@@ -137,25 +137,25 @@ infixl 6 |-|
 (|-|) :: Interval -> Interval -> Interval
 int1 |-| int2 = normalizeInterval $ int1 |+| invert int2
 
-jumpIntervalFromNote :: Interval -> Root -> Root
+jumpIntervalFromNote :: Interval -> Note -> Note
 jumpIntervalFromNote (Interval iQual iNum) r =
   let
-    newNote    = nextNthNote (getRoot r) $ iNum - 1
-    currDist   = getPitchClass (rootToPitchClass (rootFrom newNote natural)) - getPitchClass (rootToPitchClass r)
+    newNote    = nextNthLetter (getLetter r) $ iNum - 1
+    currDist   = getPitchClass (noteToPitchClass (noteFrom newNote natural)) - getPitchClass (noteToPitchClass r)
     wantedDist =
       case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
     newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist
-  in rootFrom newNote newAcc
+  in noteFrom newNote newAcc
 
-intervalBetweenNotes :: Root -> Root -> Interval
+intervalBetweenNotes :: Note -> Note -> Interval
 intervalBetweenNotes start end =
   let
-    noteDist = (modByFrom 7 0) (fromEnum (getRoot end) - fromEnum (getRoot start)) + 1
-    currInterval = intervalFrom (baseQuality noteDist) noteDist
+    letterDist = (modByFrom 7 0) (fromEnum (getLetter end) - fromEnum (getLetter start)) + 1
+    currInterval = intervalFrom (baseQuality letterDist) letterDist
     newNote = jumpIntervalFromNote currInterval start
-    wantedDist = getPitchClass (rootToPitchClass end) - getPitchClass (rootToPitchClass newNote)
+    wantedDist = getPitchClass (noteToPitchClass end) - getPitchClass (noteToPitchClass newNote)
   in
     currInterval <+> (modByFrom 12 (-6)) wantedDist
 

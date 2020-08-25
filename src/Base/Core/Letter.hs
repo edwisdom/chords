@@ -1,10 +1,10 @@
-module Base.Core.Note
-  ( Note(..)
-  , nextNthNote
-  , prevNthNote
+module Base.Core.Letter
+  ( Letter(..)
+  , nextNthLetter
+  , prevNthLetter
   ) where
 
-data Note
+data Letter
  = A
  | B
  | C
@@ -14,7 +14,7 @@ data Note
  | G
  deriving (Show, Read, Eq)
 
-instance Enum Note where
+instance Enum Letter where
   toEnum 0 = A
   toEnum 1 = B
   toEnum 2 = C
@@ -32,8 +32,8 @@ instance Enum Note where
   fromEnum F = 5
   fromEnum G = 6
 
-nextNthNote :: Note -> Int -> Note
-nextNthNote note i = iterate succ note !! i
+nextNthLetter :: Letter -> Int -> Letter
+nextNthLetter letter i = iterate succ letter !! i
 
-prevNthNote :: Note -> Int -> Note
-prevNthNote note i = iterate pred note !! i
+prevNthLetter :: Letter -> Int -> Letter
+prevNthLetter letter i = iterate pred letter !! i

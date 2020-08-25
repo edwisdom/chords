@@ -12,12 +12,12 @@ import Base.Core.Quality.CQuality
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Root
+import Base.Chord.Note
 import Base.Chord.Sus
 
 
 
-data Chord = Chord { getChordRoot :: Root
+data Chord = Chord { getChordRoot :: Note
                    , getQuality :: Quality
                    , getHighestNatural :: HighestNatural
                    , getExtensions :: [Extension]
@@ -32,5 +32,5 @@ instance Show Chord where
             ++ show     (getSus            chord)
 
 
-chordFrom :: Root -> Quality -> HighestNatural -> [Extension] -> Sus -> Chord
+chordFrom :: Note -> Quality -> HighestNatural -> [Extension] -> Sus -> Chord
 chordFrom = Chord

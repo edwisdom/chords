@@ -17,7 +17,7 @@ module Scale
 
 
 import Base.Core.Quality.IQuality
-import Base.Chord.Root
+import Base.Chord.Note
 import Base.Interval hiding (invert)
 import qualified Base.Interval as I (invert)
 import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)
@@ -29,10 +29,10 @@ import Data.Function
 
 
 
-data Scale = Scale Root Mode
+data Scale = Scale Note Mode
 
 instance Show Scale where
-  show (Scale root mode) = show root ++ show mode
+  show (Scale note mode) = show note ++ show mode
 
 data Mode = Mode BaseMode [ScaleExt]
 
@@ -51,7 +51,7 @@ instance Show ScaleExt where
   show ext = show (acc ext) ++ show (deg ext)
 
 
-data BaseMode 
+data BaseMode
   = Lydian
   | Dorian
   | Mixolydian
@@ -74,9 +74,9 @@ data BaseMode
 
 
 nthDegreeIntervals :: Set Interval -> Int -> Set Interval
-nthDegreeIntervals ints n = S.map (|-| rootInterval) ints
+nthDegreeIntervals ints n = S.map (|-| noteInterval) ints
   where
-    rootInterval = toAscList ints !! (n - 1)
+   noteInterval = toAscList ints !! (n - 1)
 
 
 zipToIntervalSet :: [Quality] -> [Int] -> Set Interval
@@ -132,45 +132,45 @@ baseModeIntervals DoubleHarmonicMajor =
 
 modeToIntervals :: Mode -> Set Interval
 modeToIntervals (Mode baseMode exts) = foldr extIntervals (baseModeIntervals baseMode) exts
-  where 
+  where
     extIntervals :: ScaleExt -> Set Interval -> Set Interval
     extIntervals ext intSet = insert (oldInt <+> (impliedShift $ acc ext)) (delete oldInt intSet)
       where
         -- TODO: If there isn't only one interval of a certain degree, the mode is
         -- ambiguously constructed and we should give a warning.
-        oldInt = elemAt 0 (S.filter (\a -> getSize a == deg ext) intSet)    
+        oldInt = elemAt 0 (S.filter (\a -> getSize a == deg ext) intSet)
 
 
-scaleToNotes :: Scale -> Set Root
-scaleToNotes (Scale root mode) = mapMonotonic (`jumpIntervalFromNote` root) (modeToIntervals mode)
+scaleToNotes :: Scale -> Set Note
+scaleToNotes (Scale note mode) = mapMonotonic (`jumpIntervalFromNote` note) (modeToIntervals mode)
 
 
 modalDistance :: Set Interval -> Set Interval -> Int
 modalDistance mode1 mode2 = sum $ intDistance <$> (zip `on` toAscList) mode1 mode2
-  where 
+  where
     intDistance :: (Interval, Interval) -> Int
-    intDistance (i1, i2) = abs $ fromJust $ intervalToDistance (i1 |-| i2) 
+    intDistance (i1, i2) = abs $ fromJust $ intervalToDistance (i1 |-| i2)
 
 
 modesToExts :: Set Interval -> Set Interval -> [ScaleExt]
-modesToExts mode1 mode2 = 
-  let 
-    zippedInts = zip (toAscList mode1) (toAscList mode2)  
+modesToExts mode1 mode2 =
+  let
+    zippedInts = zip (toAscList mode1) (toAscList mode2)
     intervalDiffToAcc :: Interval -> Interval -> Accidental
     intervalDiffToAcc i1 i2 = shiftToAcc $ fromJust $ intervalToDistance $ i2 |-| i1
     accToExtList :: Accidental -> Int -> [ScaleExt] -> [ScaleExt]
     accToExtList accidental degree
       | accidental == natural = id
       | otherwise             = (ScaleExt { acc = accidental, deg = degree } :)
-  in  
-    foldr (\(i1,i2) exts -> accToExtList (intervalDiffToAcc i2 i1) (getSize i1) exts) 
+  in
+    foldr (\(i1,i2) exts -> accToExtList (intervalDiffToAcc i2 i1) (getSize i1) exts)
           []
-          zippedInts 
+          zippedInts
 
 
 intervalsToMode :: Set Interval -> [Mode]
-intervalsToMode intSet = 
-  let 
+intervalsToMode intSet =
+  let
     sameDegreeModes =
         filter (\bm -> ((==) `on` S.map getSize) (baseModeIntervals bm) intSet)
                [Lydian ..]
@@ -183,7 +183,7 @@ intervalsToMode intSet =
 
 
 isSubsetMode :: Set Interval -> Set Interval -> Bool
-isSubsetMode mode1 mode2 = isSubsetOf mode1 mode2 
+isSubsetMode mode1 mode2 = isSubsetOf mode1 mode2
 
 getSubsetModeByDegree :: Set Interval -> Set Int -> Set Interval
 getSubsetModeByDegree mode degs = S.filter (\i -> any (== getSize i) degs) mode
@@ -191,5 +191,5 @@ getSubsetModeByDegree mode degs = S.filter (\i -> any (== getSize i) degs) mode
 invert :: Set Interval -> Set Interval
 invert mode = S.map I.invert mode
 
-numAlteredDegsInMode :: Mode -> Int 
+numAlteredDegsInMode :: Mode -> Int
 numAlteredDegsInMode (Mode base exts) = length exts

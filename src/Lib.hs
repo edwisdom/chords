@@ -13,7 +13,7 @@ import Base.Chord.Chord as C
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Root
+import Base.Chord.Note
 import Base.Chord.Sus
 
 import Base.Interval as I
@@ -31,7 +31,7 @@ import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)
 
 
-chordToNotes :: Chord -> [Root]
+chordToNotes :: Chord -> [Note]
 chordToNotes chord =
   flip jumpIntervalFromNote (getChordRoot chord) <$> S.toList (chordToIntervals chord)
 

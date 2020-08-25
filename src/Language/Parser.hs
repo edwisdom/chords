@@ -13,7 +13,7 @@ import Base.Chord
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.RawChord
-import Base.Chord.Root
+import Base.Chord.Note
 import Base.Chord.Sus
 
 import Common.Utils (rightToMaybe)
@@ -56,11 +56,11 @@ parserAccidental =
                         accs <- many1 $ char acc
                         return $ constructor $ length accs
 
-parserRoot :: Parser Root
-parserRoot = do noteChar <- oneOf "ABCDEFG"
+parserNote :: Parser Note
+parserNote = do letterChar <- oneOf "ABCDEFG"
                 let
-                  note = read [noteChar]
-                rootFrom note <$> parserAccidental
+                  letter = read [letterChar]
+                noteFrom letter <$> parserAccidental
 
 parserQuality :: Parser Quality
 parserQuality = choice $ parseQualfromString <$> qualStrings
@@ -120,10 +120,10 @@ parserExtension =
 
 parserChord :: Parser Chord
 parserChord =
-  do root <- parserRoot
+  do note <- parserNote
      mqual <- optionMaybe parserQuality
      highestQual <- option (nonMajorNatural 5) parserHighestNatural
      exts <- many parserExtension
      sus <- parserSus
      eof
-     return $ chordFrom root mqual highestQual exts sus
+     return $ chordFrom note mqual highestQual exts sus

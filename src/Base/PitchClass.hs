@@ -1,12 +1,16 @@
 module Base.PitchClass
   ( pitchClass
-  , rootToPitchClass
+  , PitchClass
+  , letterToPitchClass
+  , shiftPitchClassBy
   , getPitchClass
+  , (@-@)
+  , (@+@)
   ) where
 
-import Base.Core.Note
+import Base.Core.Letter
 import Base.Core.Accidental
-import Base.Chord.Root
+
 
 newtype PitchClass = PitchClass { getPitchClass :: Int }
   deriving (Show, Eq, Ord)
@@ -17,15 +21,23 @@ pitchClass i = PitchClass $ i `mod` 12
 shiftPitchClassBy :: Int -> PitchClass -> PitchClass
 shiftPitchClassBy by (PitchClass i) = pitchClass $ by + i
 
-noteToPitchClass :: Note -> PitchClass
-noteToPitchClass C = pitchClass 0
-noteToPitchClass D = pitchClass 2
-noteToPitchClass E = pitchClass 4
-noteToPitchClass F = pitchClass 5
-noteToPitchClass G = pitchClass 7
-noteToPitchClass A = pitchClass 9
-noteToPitchClass B = pitchClass 11
+infixl 6 @-@
+(@-@) :: PitchClass -> PitchClass -> Int
+(PitchClass p1) @-@ (PitchClass p2) = (p1 - p2) `mod` 12
 
-rootToPitchClass :: Root -> PitchClass
-rootToPitchClass r =
-  shiftPitchClassBy (impliedShift $ getAcc r) (noteToPitchClass $ getRoot r)
+infixl 6 @+@
+(@+@) :: PitchClass -> Int -> PitchClass
+(PitchClass p) @+@ i = pitchClass (p + i)
+
+
+letterToPitchClass :: Letter -> PitchClass
+letterToPitchClass C = pitchClass 0
+letterToPitchClass D = pitchClass 2
+letterToPitchClass E = pitchClass 4
+letterToPitchClass F = pitchClass 5
+letterToPitchClass G = pitchClass 7
+letterToPitchClass A = pitchClass 9
+letterToPitchClass B = pitchClass 11
+
+
+
