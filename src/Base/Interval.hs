@@ -52,9 +52,24 @@ instance Show Interval where
 normalizeIntervalSize :: Int -> Int
 normalizeIntervalSize = modByFrom 7 1
 
--- This smart constructor normalizes the interval size to be between 1 and 7
-intervalFrom :: Quality -> Int -> Interval
-intervalFrom q s = Interval { getQuality = q, getSize = normalizeIntervalSize s }
+-- TODO: This should probably return an Either String Interval (or an error
+-- type in place of String) instead of Maybe Interval, in order to facilitate
+-- more sophisticated error handling / reporting.
+intervalFrom :: Quality -> Int -> Maybe Interval
+intervalFrom q s = if normalizedSize `elem` goodSizes then
+                     Just Interval { getQuality = q, getSize = normalizedSize }
+                   else
+                     Nothing
+  where
+    normalizedSize :: Int
+    normalizedSize = normalizeIntervalSize s
+
+    goodSizes :: [Int]
+    goodSizes = case q of
+                  Perfect -> [1, 4, 5]
+                  Major   -> [2, 3, 6, 7]
+                  Minor   -> [2, 3, 6, 7]
+                  _       -> [1 .. 7]
 
 normalizeInterval :: Interval -> Interval
 normalizeInterval (Interval iQual i) = Interval iQual $ normalizeIntervalSize i
