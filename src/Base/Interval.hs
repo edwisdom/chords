@@ -170,5 +170,5 @@ jumpIntervalFromNote (Interval iQual iNum) r =
       case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
-    newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist  
+    newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist
   in rootFrom newNote newAcc
