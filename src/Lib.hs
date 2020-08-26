@@ -25,15 +25,14 @@ import Base.Interval as I
     , intervalToDistance
     )
 import Scale (Scale(..), BaseMode(..), baseModeIntervals)
-import Data.Set(Set(..))
+import Data.Set(Set(..), mapMonotonic)
 import qualified Data.Set as S
 import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)
 
 
 chordToNotes :: Chord -> [Note]
-chordToNotes chord =
-  flip jumpIntervalFromNote (getChordRoot chord) <$> S.toList (chordToIntervals chord)
+chordToNotes chord = S.toList $ mapMonotonic (`jumpIntervalFromNote` (getChordRoot chord)) (chordToIntervals chord)
 
 
 chordToIntervals :: Chord -> Set Interval

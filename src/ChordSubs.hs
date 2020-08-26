@@ -4,6 +4,18 @@ module ChordSubs
   , negativeNote
   , notesToChord
   , negative
+  , dimFamilySub
+  , diatonicChord
+  , isDiatonicTo
+  , tonic
+  , supertonic
+  , mediant
+  , subdominant
+  , dominant
+  , submediant
+  , subtonic
+  , diatonicFuncSub
+  , parallelSub
   ) where
 
 
@@ -21,22 +33,23 @@ import Base.Core.Quality.IQuality as IQ
 import Base.Interval hiding (getQuality)
 import qualified Base.Interval as I(getQuality)
 
-import Data.List(sortBy, delete, zip4, zip5)
+import Data.List(sortBy, delete, zip4, zip5, find, elemIndex)
 import Data.Function(on)
 import Lib(chordToIntervals, chordToNotes, qualityToIntervals)
-import Data.Set(Set(..), toList)
+import Data.Set(Set(..), toList, member, isSubsetOf, fromList)
 import qualified Data.Set as S (delete)
-import Data.Maybe(fromJust, catMaybes)
+import Data.Maybe(fromJust, catMaybes, isJust)
 import Base.PitchClass(pitchClass)
 import qualified Data.Map.Strict as M (lookup, elems)
 import Common.Utils
+import Scale
 
 
 type ExpChord = (Chord, [Note])
 
 
 remove5 :: ExpChord -> ExpChord
-remove5 (chord, _) = (chord, (toNotes (getChordRoot chord) (S.delete (intervalFrom Perfect 5) (chordToIntervals chord))))
+remove5 (chord, _) = (chord, toNotes (getChordRoot chord) (S.delete (intervalFrom Perfect 5) (chordToIntervals chord)))
   where
     toNotes :: Note -> Set Interval -> [Note]
     toNotes root intSet = flip jumpIntervalFromNote root <$> toList intSet
@@ -60,9 +73,9 @@ negativeNote key note =
   let
     origInt = intervalBetweenNotes key note
     newNum = normalizeIntervalSize $ 6 - getSize origInt
-    newDist = (7 - (fromJust $ intervalToDistance origInt)) `mod` 12
+    newDist = 7 - fromJust (intervalToDistance origInt) `mod` 12
     baseInt = intervalFrom (baseQuality newNum) newNum
-    newInt = baseInt <+> (newDist - (fromJust (intervalToDistance baseInt)))
+    newInt = baseInt <+> (newDist - fromJust (intervalToDistance baseInt))
   in
     jumpIntervalFromNote newInt key
 
@@ -75,6 +88,7 @@ notesToChord notes =
       | hasInterval IQ.Major 3 && hasInterval IQ.Minor 7 = CQ.Dominant
       | hasInterval IQ.Major 3 && hasInterval (IQ.Augmented 1) 5 = CQ.Augmented
       | hasInterval IQ.Major 3 = CQ.Major
+      | hasInterval IQ.Minor 3 && hasInterval IQ.Minor 7 = CQ.Minor
       | hasInterval IQ.Minor 3 && hasInterval (IQ.Diminished 1) 5 = CQ.Diminished
       | hasInterval IQ.Minor 3 = CQ.Minor
       | hasInterval IQ.Minor 7 = CQ.Dominant
@@ -82,7 +96,7 @@ notesToChord notes =
       where
         notesContainIntervalFromNote :: [Note] -> Note -> Interval -> Bool
         notesContainIntervalFromNote notes key interval =
-          (jumpIntervalFromNote interval key) `elem` notes
+          jumpIntervalFromNote interval key `elem` notes
         hasInterval iQual iSize = notesContainIntervalFromNote notes root (intervalFrom iQual iSize)
     qualities = findQuality <$> roots
     findHighNat :: Note -> CQ.Quality -> HighestNatural
@@ -94,9 +108,9 @@ notesToChord notes =
       | not (has 7) && not (has 9) && not (has 11) &&       has 13 = majorOrNot 6
       |                                                  otherwise = majorOrNot 5
       where
-        qInts = catMaybes $ ($ (qualityToIntervals quality)) <$> (M.lookup <$> [7, 2, 4, 6])
+        qInts = catMaybes $ ($ qualityToIntervals quality) <$> (M.lookup <$> [7, 2, 4, 6])
         cInts = intervalBetweenNotes root <$> roots
-        majorOrNot = if (quality /= CQ.Major) && (intervalFrom IQ.Major 7) `elem` cInts
+        majorOrNot = if (quality /= CQ.Major) && intervalFrom IQ.Major 7 `elem` cInts
                      then majorNatural
                      else nonMajorNatural
         has :: Int -> Bool
@@ -114,8 +128,8 @@ notesToChord notes =
       where
         cInts = intervalBetweenNotes root <$> roots
         containsThird = 3 `elem` (getSize <$> cInts)
-        has2 = (intervalFrom IQ.Major 2) `elem` cInts
-        has4 = (intervalFrom IQ.Perfect 4) `elem` cInts
+        has2 = intervalFrom IQ.Major 2 `elem` cInts
+        has4 = intervalFrom IQ.Perfect 4 `elem` cInts
     chordSuses = uncurry findSus <$> zip roots highNats
     findExts :: Note -> CQ.Quality -> HighestNatural -> Sus -> [Extension]
     findExts root quality highNat chordSus =
@@ -123,15 +137,18 @@ notesToChord notes =
         qInts = M.elems $ qualityToIntervals quality
         cInts = intervalBetweenNotes root <$> roots
         numHighNat = getDegree highNat
-        removableDegs = [1,3..numHighNat] ++ (if numHighNat == 6 then [6] else [])
-        noNatInts = filter (\x -> not $ (x `elem` qInts) && (getSize x) `elem` removableDegs) cInts
-        noSusInts = if chordSus == sus 2 then delete (intervalFrom IQ.Major 2) noNatInts
-                    else if chordSus == sus 4 then delete (intervalFrom IQ.Perfect 4) noNatInts
-                    else if (chordSus == susNoNum && numHighNat < 9)
-                         then delete (intervalFrom IQ.Major 2) $ delete (intervalFrom IQ.Perfect 4) noNatInts
-                    else noNatInts
+        removableDegs = map normalizeIntervalSize [1, 3 .. numHighNat] ++ ([6 | numHighNat == 6])
+        noNatInts = filter (\x -> not $ (x `elem` qInts) && getSize x `elem` removableDegs) cInts
+        noSusInts
+          | chordSus == sus 2 = delete (intervalFrom IQ.Major 2) noNatInts
+          | chordSus == sus 4 = delete (intervalFrom IQ.Perfect 4) noNatInts
+          | (chordSus == susNoNum && numHighNat < 9) = delete (intervalFrom IQ.Major 2)
+                                                     $ delete (intervalFrom IQ.Perfect 4) noNatInts
+          | otherwise = noNatInts
         intToExt :: Interval -> Extension
-        intToExt int = distToExt (fromJust $ intervalToDistance $ int |-| (getIntWithSize (getSize int) qInts)) (getSize int + 7)
+        intToExt int
+          | getSize int == 5 = distToExt (fromJust $ intervalToDistance $ int |-| getIntWithSize (getSize int) qInts) (getSize int)
+          | otherwise = distToExt (fromJust $ intervalToDistance $ int |-| getIntWithSize (getSize int) qInts) (getSize int + 7)
       in
         intToExt <$> noSusInts
     exts = uncurry4 findExts <$> zip4 roots qualities highNats chordSuses
@@ -146,10 +163,90 @@ negative :: Note -> ExpChord -> ExpChord
 negative key (chord, notes) = (newChord, newNotes)
   where
     newNotes = negativeNote key <$> notes
-    newChord = (notesToChord newNotes) !! 0
+    newChord = head (notesToChord newNotes)
 
--- dimFamilySub :: ExpChord -> [ExpChord]
--- dimFamilySub (chord, notes)
---   |  getQuality chord == CQ.Dominant ||
---     (getQuality chord == CQ.Minor && (intervalFrom IQ.Major 6) `member` (chordToIntervals chord))
---     =
+
+transposeExpChord :: ExpChord -> IQ.Quality -> Int -> ExpChord
+transposeExpChord (chord, notes) iQual i =
+  let
+    newChord = transposeToRoot chord $ respell $ jumpIntervalFromNote (intervalFrom iQual i) (getChordRoot chord)
+  in
+    (newChord, chordToNotes newChord)
+
+dimFamilySub :: ExpChord -> [ExpChord]
+dimFamilySub eChord@(chord, notes)
+  |  getQuality chord == CQ.Dominant ||
+    (getQuality chord == CQ.Minor && (intervalFrom IQ.Major 6 `member` chordToIntervals chord))
+    = [transposeExpChord eChord IQ.Minor 3, transposeExpChord eChord (IQ.Diminished 1) 5, transposeExpChord eChord IQ.Major 6]
+  | otherwise = []
+
+
+tritoneSub :: ExpChord -> ExpChord
+tritoneSub eChord = transposeExpChord eChord (IQ.Augmented 1) 4
+
+
+diatonicChord :: Scale -> Int -> Int -> Int -> ExpChord
+diatonicChord scale@(Scale note mode) numNotes degree jumpSize =
+  let
+    notes = scaleToNotes scale
+    indices = map (\x -> x `mod` length notes) [degree-1, (degree-1) + jumpSize.. (degree-1) + (jumpSize * (numNotes-1))]
+    chordTones = getIndices indices notes
+  in
+    (fromJust (find (\ c -> getChordRoot c == notes !! (degree - 1)) (notesToChord chordTones)), chordTones)
+
+tonic :: Note -> Int -> ExpChord
+tonic key numNotes =
+  diatonicChord (Scale key (Mode Ionian [])) numNotes 1 2
+
+supertonic :: Note -> Int -> ExpChord
+supertonic key numNotes =
+  diatonicChord (Scale key (Mode Ionian [])) numNotes 2 2
+
+mediant :: Note -> Int -> ExpChord
+mediant key numNotes =
+  diatonicChord (Scale key (Mode Ionian [])) numNotes 3 2
+
+subdominant :: Note -> Int -> ExpChord
+subdominant key numNotes =
+  diatonicChord (Scale key (Mode Ionian [])) numNotes 4 2
+
+dominant :: Note -> Int -> ExpChord
+dominant key numNotes =
+  diatonicChord (Scale key (Mode Ionian [])) numNotes 5 2
+
+submediant :: Note -> Int -> ExpChord
+submediant key numNotes =
+  diatonicChord (Scale key (Mode Ionian [])) numNotes 6 2
+
+subtonic :: Note -> Int -> ExpChord
+subtonic key numNotes =
+  diatonicChord (Scale key (Mode Ionian [])) numNotes 7 2
+
+
+isDiatonicTo :: Chord -> Scale -> Bool
+isDiatonicTo chord scale = all (`elem` scaleToNotes scale) (chordToNotes chord)
+
+diatonicFuncSub :: Note -> ExpChord -> [ExpChord]
+diatonicFuncSub key (chord, notes)
+  | validSub && degree == 1 = [mediant key numNotes, submediant key numNotes]
+  | validSub && degree == 2 = [subdominant key numNotes]
+  | validSub && degree == 3 = [tonic key numNotes, submediant key numNotes]
+  | validSub && degree == 4 = [supertonic key numNotes]
+  | validSub && degree == 5 = [subtonic key numNotes]
+  | validSub && degree == 6 = [tonic key numNotes, mediant key numNotes]
+  | validSub && degree == 7 = [dominant key numNotes]
+  where
+    validSub = chord `isDiatonicTo` major key
+    degree = 1 + fromJust (elemIndex (getChordRoot chord) (scaleToNotes (major key)))
+    numNotes = length notes
+
+
+parallelSub :: ExpChord -> [ExpChord]
+parallelSub (chord, notes) =
+  let
+    flippedChord
+      | getQuality chord == CQ.Major = Just (chord {getQuality = CQ.Minor})
+      | getQuality chord == CQ.Minor = Just (chord {getQuality = CQ.Major})
+      | otherwise = Nothing
+  in
+    ([(fromJust flippedChord, chordToNotes (fromJust flippedChord)) | isJust flippedChord])

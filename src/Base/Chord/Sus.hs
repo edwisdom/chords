@@ -32,7 +32,7 @@ susNoNum :: Sus
 susNoNum = SusNoNum
 
 sus :: Int -> Sus
-sus deg = Sus deg
+sus = Sus
 
 noSus :: Sus
 noSus = NoSus

@@ -152,12 +152,12 @@ jumpIntervalFromNote (Interval iQual iNum) r =
 intervalBetweenNotes :: Note -> Note -> Interval
 intervalBetweenNotes start end =
   let
-    letterDist = (modByFrom 7 0) (fromEnum (getLetter end) - fromEnum (getLetter start)) + 1
+    letterDist = modByFrom 7 0 (fromEnum (getLetter end) - fromEnum (getLetter start)) + 1
     currInterval = intervalFrom (baseQuality letterDist) letterDist
     newNote = jumpIntervalFromNote currInterval start
     wantedDist = getPitchClass (noteToPitchClass end) - getPitchClass (noteToPitchClass newNote)
   in
-    currInterval <+> (modByFrom 12 (-6)) wantedDist
+    currInterval <+> modByFrom 12 (- 6) wantedDist
 
 getIntWithSize :: Int -> [Interval] -> Interval
-getIntWithSize i intList = (filter(\x -> (getSize x) == i) intList) !! 0
+getIntWithSize i intList = head (filter (\ x -> getSize x == i) intList)

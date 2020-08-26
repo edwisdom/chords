@@ -1,6 +1,7 @@
 module Base.Chord
   ( canonicalizeChord
   , transpose
+  , transposeToRoot
   ) where
 
 import Base.CQuality
@@ -10,8 +11,10 @@ import Base.Core.Quality.CQuality
 import Base.Chord.Chord as C
 import Base.Chord.HighestNatural
 import Base.Chord.RawChord as RC
+import Base.Chord.Note
 
 import Base.Interval
+
 
 canonicalizeChord :: RC.Chord -> C.Chord
 canonicalizeChord rc =
@@ -22,3 +25,6 @@ canonicalizeChord rc =
 transpose :: C.Chord -> Interval -> C.Chord
 transpose c int =
   C.chordFrom (jumpIntervalFromNote int (C.getChordRoot c)) (C.getQuality c) (C.getHighestNatural c) (C.getExtensions c) (C.getSus c)
+
+transposeToRoot :: C.Chord -> Note -> C.Chord
+transposeToRoot c note = C.chordFrom note (C.getQuality c) (C.getHighestNatural c) (C.getExtensions c) (C.getSus c)

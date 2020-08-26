@@ -13,6 +13,8 @@ module Scale
   , isSubsetMode
   , getSubsetModeByDegree
   , invert
+  , major
+  , minor
   ) where
 
 
@@ -22,7 +24,7 @@ import Base.Interval hiding (invert)
 import qualified Base.Interval as I (invert)
 import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)
 import Data.List (sort, sortBy, intercalate, takeWhile)
-import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic, isSubsetOf)
+import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic, isSubsetOf, toList)
 import qualified Data.Set as S(filter, map)
 import Data.Maybe(fromJust)
 import Data.Function
@@ -32,7 +34,7 @@ import Data.Function
 data Scale = Scale Note Mode
 
 instance Show Scale where
-  show (Scale note mode) = show note ++ show mode
+  show (Scale note mode) = show note ++ " " ++ show mode
 
 data Mode = Mode BaseMode [ScaleExt]
 
@@ -71,6 +73,13 @@ data BaseMode
   | HarmonicMajor
   | DoubleHarmonicMajor
   deriving (Show, Enum)
+
+
+major :: Note -> Scale
+major key = Scale key (Mode Ionian [])
+
+minor :: Note -> Scale
+minor key = Scale key (Mode Aeolian [])
 
 
 nthDegreeIntervals :: Set Interval -> Int -> Set Interval
@@ -134,15 +143,15 @@ modeToIntervals :: Mode -> Set Interval
 modeToIntervals (Mode baseMode exts) = foldr extIntervals (baseModeIntervals baseMode) exts
   where
     extIntervals :: ScaleExt -> Set Interval -> Set Interval
-    extIntervals ext intSet = insert (oldInt <+> (impliedShift $ acc ext)) (delete oldInt intSet)
+    extIntervals ext intSet = insert (oldInt <+> impliedShift (acc ext)) (delete oldInt intSet)
       where
         -- TODO: If there isn't only one interval of a certain degree, the mode is
         -- ambiguously constructed and we should give a warning.
         oldInt = elemAt 0 (S.filter (\a -> getSize a == deg ext) intSet)
 
 
-scaleToNotes :: Scale -> Set Note
-scaleToNotes (Scale note mode) = mapMonotonic (`jumpIntervalFromNote` note) (modeToIntervals mode)
+scaleToNotes :: Scale -> [Note]
+scaleToNotes (Scale note mode) = toList $ mapMonotonic (`jumpIntervalFromNote` note) (modeToIntervals mode)
 
 
 modalDistance :: Set Interval -> Set Interval -> Int
@@ -179,17 +188,17 @@ intervalsToMode intSet =
     sortedModes = sortBy (compare `on` distanceFromIntSet intSet) sameDegreeModes
     exts = modesToExts intSet . baseModeIntervals <$> sortedModes
   in
-    takeWhile (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ (\(x,y) -> Mode x y) <$> zip sortedModes exts
+    filter (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ uncurry Mode <$> zip sortedModes exts
 
 
 isSubsetMode :: Set Interval -> Set Interval -> Bool
-isSubsetMode mode1 mode2 = isSubsetOf mode1 mode2
+isSubsetMode = isSubsetOf
 
 getSubsetModeByDegree :: Set Interval -> Set Int -> Set Interval
-getSubsetModeByDegree mode degs = S.filter (\i -> any (== getSize i) degs) mode
+getSubsetModeByDegree mode degs = S.filter (\i -> getSize i `elem` degs) mode
 
 invert :: Set Interval -> Set Interval
-invert mode = S.map I.invert mode
+invert = S.map I.invert
 
 numAlteredDegsInMode :: Mode -> Int
 numAlteredDegsInMode (Mode base exts) = length exts
