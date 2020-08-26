@@ -31,28 +31,28 @@ import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)
 
 
-chordToNotes :: Chord -> Maybe [Root]
+chordToNotes :: Chord -> [Root]
 chordToNotes chord =
-  do chordInts <- chordToIntervals chord
-     return $ flip jumpIntervalFromNote (getChordRoot chord) <$> S.toList chordInts
+  flip jumpIntervalFromNote (getChordRoot chord) <$> S.toList (chordToIntervals chord)
 
 
-chordToIntervals :: Chord -> Maybe (Set Interval)
+chordToIntervals :: Chord -> Set Interval
 chordToIntervals chord =
-  do qualInts <- qualityToIntervals $ C.getQuality chord
-     baseScale <- highestNaturalToIntervals (getHighestNatural chord) qualInts
-     extendedScale <- extendIntervals baseScale $ getExtensions chord
-     intervals <- susIntervals extendedScale $ getSus chord
-     return $ foldr S.insert S.empty intervals
+  let
+    qualInts  = qualityToIntervals $ C.getQuality chord
+    baseScale = highestNaturalToIntervals (getHighestNatural chord) qualInts
+    extendedScale = extendIntervals baseScale $ getExtensions chord
+    intervals     = susIntervals extendedScale $ getSus chord
+  in
+    foldr S.insert S.empty intervals
 
 
 type HeliotonicScale = Map Int Interval
 
 
-qualityToIntervals :: CQ.Quality -> Maybe HeliotonicScale
+qualityToIntervals :: CQ.Quality -> HeliotonicScale
 qualityToIntervals qual =
-  do bmInts <- baseModeIntervals $ qualityToScale qual
-     return $ fromList $ zip [1 .. 7] $ S.toList bmInts
+  fromList $ zip [1 .. 7] $ S.toList $ baseModeIntervals $ qualityToScale qual
   where
     qualityToScale :: CQ.Quality -> BaseMode
     qualityToScale CQ.Major = Lydian
@@ -62,27 +62,26 @@ qualityToIntervals qual =
     qualityToScale CQ.Diminished = DiminishedQuality
 
 
-susIntervals :: HeliotonicScale -> Sus -> Maybe HeliotonicScale
-susIntervals scale s = maybe (return scale) addSus (getMaybeDeg s)
+susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
+susIntervals scale s = maybe scale addSus (getMaybeDeg s)
   where
-    addSus :: Int -> Maybe HeliotonicScale
-    addSus i = do int <- intervalFrom (baseQuality i) i
-                  return $ insert i int $ delete 3 scale
+    -- intervalFrom (baseQuality i) i is always a valid interval
+    addSus :: Int -> HeliotonicScale
+    addSus i =
+      insert i (fromJust $ intervalFrom (baseQuality i) i) $ delete 3 scale
 
 
-extendIntervals :: HeliotonicScale -> [Extension] -> Maybe HeliotonicScale
-extendIntervals = foldM extendInterval
+extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
+extendIntervals = foldr $ flip extendInterval
   where
-  extendInterval :: HeliotonicScale -> Extension -> Maybe HeliotonicScale
+  extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
   extendInterval scale ext =
-    do int <- intervalFrom (baseQuality deg) deg
-       return $ insert deg (int <+> shift) scale
-    -- insert deg (intervalFrom (baseQuality deg) deg <+> shift) scale
+    insert deg (fromJust (intervalFrom (baseQuality deg) deg) <+> shift) scale
     where
       deg   = degree ext
       shift = sign ext
 
-highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> Maybe HeliotonicScale
+highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
 highestNaturalToIntervals hn scale =
   let
     scaleInts = getIntervals subset scale
@@ -90,7 +89,7 @@ highestNaturalToIntervals hn scale =
     if isMajor hn then
       insertMajorSeven scaleInts
     else
-      return scaleInts
+      scaleInts
   where
     subset =
       let
@@ -111,7 +110,5 @@ highestNaturalToIntervals hn scale =
       in
         (int, fromJust interval)
 
-    insertMajorSeven :: HeliotonicScale -> Maybe HeliotonicScale
-    insertMajorSeven hts =
-      do int <- intervalFrom IQ.Major 7
-         return $ insert 7 int hts
+    insertMajorSeven :: HeliotonicScale -> HeliotonicScale
+    insertMajorSeven hts = insert 7 (fromJust $ intervalFrom IQ.Major 7) hts
