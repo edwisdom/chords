@@ -12,6 +12,7 @@ data Extension
   = ExtSharp Int
   | ExtFlat Int
   | ExtAdd Int
+  deriving(Eq)
 
 instance Show Extension where
   show (ExtSharp x) = "#" ++ show x

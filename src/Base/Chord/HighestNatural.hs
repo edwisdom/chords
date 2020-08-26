@@ -10,6 +10,7 @@ data HighestNatural =
   HighestNatural { isMajor :: Bool
                  , getDegree :: Int
                  }
+  deriving(Eq)
 
 instance Show HighestNatural where
   show highNat =

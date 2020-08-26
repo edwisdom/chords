@@ -23,12 +23,13 @@ data Chord = Chord { getChordRoot :: Note
                    , getExtensions :: [Extension]
                    , getSus :: Sus
                    }
+  deriving(Eq)
 
 instance Show Chord where
   show chord = show     (getChordRoot      chord)
             ++ show     (getQuality     chord)
             ++ show     (getHighestNatural chord)
-            ++ concat (map show (getExtensions  chord))
+            ++ concatMap show (getExtensions chord)
             ++ show     (getSus            chord)
 
 

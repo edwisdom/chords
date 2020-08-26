@@ -16,6 +16,7 @@ module ChordSubs
   , subtonic
   , diatonicFuncSub
   , parallelSub
+  , alteredDominantSub
   ) where
 
 
@@ -250,3 +251,22 @@ parallelSub (chord, notes) =
       | otherwise = Nothing
   in
     ([(fromJust flippedChord, chordToNotes (fromJust flippedChord)) | isJust flippedChord])
+
+alteredDominantSub :: ExpChord -> [ExpChord]
+alteredDominantSub (chord, notes) = zip chords (chordToNotes <$> chords)
+  where
+    chords = delete chord
+      [ chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 9] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 5] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 9, flat 5] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9, sharp 5] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 13, flat 9] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9, sharp 11] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 9) [flat 5] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 9) [sharp 5] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 13) [flat 9] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 13) [] susNoNum
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 9] (sus 4)
+      ]
