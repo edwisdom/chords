@@ -36,6 +36,8 @@ data Interval = Interval { getQuality :: Quality
                          , getSize :: Int
                          } deriving (Generic)
 
+-- TODO: change to use a Maybe returning smart constructor when
+--       such a thing becomes avalible.
 instance Arbitrary Interval where
   arbitrary = suchThat (genericArbitrary uniform) (isJust . intervalToDistance)
 
