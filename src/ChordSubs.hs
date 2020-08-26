@@ -64,10 +64,7 @@ extend1 (chord, _) =  (newChord, chordToNotes newChord)
                (getExtensions chord) (getSus chord)
     extendHighestNat :: HighestNatural -> HighestNatural
     extendHighestNat highNat =
-      if isMajor highNat then
-        majorNatural (getDegree highNat + 2)
-      else
-        nonMajorNatural (getDegree highNat + 2)
+      (if isMajor highNat then majorNatural else nonMajorNatural) $ getDegree highNat + 2
 
 negativeNote :: Note -> Note -> Note
 negativeNote key note =
