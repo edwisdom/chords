@@ -38,6 +38,10 @@ data Interval = Interval { getQuality :: Quality
 
 -- TODO: change to use a Maybe returning smart constructor when
 --       such a thing becomes avalible.
+--       The implemention of arbitrary will look something like:
+--         suchThatMap 
+--           (genericArbitrary uniform)
+--           (\(size, quality) -> intConstructor size quality)
 instance Arbitrary Interval where
   arbitrary = suchThat (genericArbitrary uniform) (isJust . intervalToDistance)
 
