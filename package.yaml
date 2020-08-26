@@ -23,6 +23,8 @@ dependencies:
 - base >= 4.7 && < 5
 - containers
 - parsec
+- generic-random
+- QuickCheck
 
 library:
   source-dirs: src

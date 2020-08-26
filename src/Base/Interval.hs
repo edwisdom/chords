@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Base.Interval
   ( Interval
   , getQuality
@@ -9,7 +10,12 @@ module Base.Interval
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
+  , propInvertSum
   ) where
+
+import GHC.Generics
+import Generic.Random
+import Test.QuickCheck hiding (getSize)
 
 import Base.Core.Accidental
 import Base.Core.Note
@@ -23,11 +29,17 @@ import Base.PitchClass
 
 import Common.Utils (modByFrom)
 
-import Data.Maybe (fromJust)
+import Data.Maybe (isJust, fromJust)
 
 data Interval = Interval { getQuality :: Quality
                          , getSize :: Int
-                         }
+                         } deriving (Generic)
+
+instance Arbitrary Interval where
+  arbitrary = suchThat (genericArbitrary uniform) (isJust . intervalToDistance)
+
+propInvertSum :: Interval -> Bool
+propInvertSum i = (invert i) |+| i == (intervalFrom Perfect 1)
 
 instance Eq Interval where
   int1 == int2 = intervalToDistance int1 == intervalToDistance int2
