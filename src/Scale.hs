@@ -74,8 +74,8 @@ data BaseMode
   deriving (Show, Enum, Eq)
 
 
-nthDegreeIntervals :: Set Interval -> Int -> Maybe (Set Interval)
-nthDegreeIntervals ints n = return $ S.map (|-| rootInterval) ints
+nthDegreeIntervals :: Set Interval -> Int -> Set Interval
+nthDegreeIntervals ints n = S.map (|-| rootInterval) ints
   where
     rootInterval = toAscList ints !! (n - 1)
 
@@ -86,13 +86,14 @@ zipToIntervalSet quals sizes =
      return $ fromList ints
 
 
-baseModeIntervals :: BaseMode -> Maybe (Set Interval)
+baseModeIntervals :: BaseMode -> Set Interval
 baseModeIntervals bm = if fromScratch then
-                         zipToIntervalSet bmQualities [1 .. 7]
+                         fromJust $ zipToIntervalSet bmQualities [1 .. 7]
                        else
-                         do let (mode, shift) = modeAndShift
-                            ints <- baseModeIntervals mode
-                            nthDegreeIntervals ints shift
+                         let
+                           (mode, shift) = modeAndShift
+                         in
+                           nthDegreeIntervals (baseModeIntervals mode) shift
   where
     -- Discriminate between BaseModes for which we build the intervals from
     -- scratch and those that are computed from some other interval set
@@ -145,10 +146,9 @@ baseModeIntervals bm = if fromScratch then
         PhrygianDom -> (HarmonicMinor, 5)
 
 
-modeToIntervals :: Mode -> Maybe (Set Interval)
+modeToIntervals :: Mode -> Set Interval
 modeToIntervals (Mode baseMode exts) =
-  do bmInts <- baseModeIntervals baseMode
-     return $ foldr extIntervals bmInts exts
+  foldr extIntervals (baseModeIntervals baseMode) exts
   where
     extIntervals :: ScaleExt -> Set Interval -> Set Interval
     extIntervals ext intSet = insert (oldInt <+> impliedShift (acc ext)) (delete oldInt intSet)
@@ -158,10 +158,9 @@ modeToIntervals (Mode baseMode exts) =
         oldInt = elemAt 0 (S.filter (\a -> getSize a == deg ext) intSet)
 
 
-scaleToNotes :: Scale -> Maybe (Set Root)
+scaleToNotes :: Scale -> Set Root
 scaleToNotes (Scale root mode) =
-  do modeInts <- modeToIntervals mode
-     return $ mapMonotonic (`jumpIntervalFromNote` root) modeInts
+  mapMonotonic (`jumpIntervalFromNote` root) $ modeToIntervals mode
 
 
 modalDistance :: Set Interval -> Set Interval -> Int
@@ -187,34 +186,30 @@ modesToExts mode1 mode2 =
           zippedInts
 
 
-intervalsToMode :: Set Interval -> Maybe [Mode]
+intervalsToMode :: Set Interval -> [Mode]
 intervalsToMode intSet =
   let
-    eqOnSize :: BaseMode -> Maybe Bool
+    eqOnSize :: BaseMode -> Bool
     eqOnSize bm =
-      do bmInts <- baseModeIntervals bm
-         return $ ((==) `on` S.map getSize) bmInts intSet
+      ((==) `on` S.map getSize) (baseModeIntervals bm) intSet
 
-    mSameDegreeModes :: Maybe [BaseMode]
-    mSameDegreeModes = filterM eqOnSize [Lydian ..]
+    sameDegreeModes :: [BaseMode]
+    sameDegreeModes = filter eqOnSize [Lydian ..]
 
-    distanceFromIntSet :: Set Interval -> BaseMode -> Maybe Int
-    distanceFromIntSet iSet mode =
-      do bmInts <- baseModeIntervals mode
-         return $ modalDistance iSet bmInts
+    distanceFromIntSet :: Set Interval -> BaseMode -> Int
+    distanceFromIntSet iSet mode = modalDistance iSet $ baseModeIntervals mode
 
-    mSortedModes :: Maybe [BaseMode]
-    mSortedModes = sortBy (compare `on` distanceFromIntSet intSet) <$> mSameDegreeModes
+    sortedModes :: [BaseMode]
+    sortedModes = sortBy (compare `on` distanceFromIntSet intSet) sameDegreeModes
 
-    mExts :: Maybe [[ScaleExt]]
-    mExts =
-      do sortedModes <- mSortedModes
-         bmIntss <- sequence $ baseModeIntervals <$> sortedModes
-         return $ modesToExts intSet <$> bmIntss
+    exts :: [[ScaleExt]]
+    exts =
+      let
+        bmIntss = baseModeIntervals <$> sortedModes
+      in
+        modesToExts intSet <$> bmIntss
   in
-    do sortedModes <- mSortedModes
-       exts <- mExts
-       return $ takeWhile (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ uncurry Mode <$> zip sortedModes exts
+    takeWhile (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ uncurry Mode <$> zip sortedModes exts
 
 
 isSubsetMode :: Set Interval -> Set Interval -> Bool
