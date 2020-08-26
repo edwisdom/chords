@@ -22,7 +22,7 @@ import Base.Interval as I
     , jumpIntervalFromNote
     , intervalToDistance
     )
-import Scale (Scale(..), scaleToIntervals)
+import Scale (Scale(..), BaseMode(..), baseModeIntervals)
 import Data.Set(Set(..))
 import qualified Data.Set as S
 import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
@@ -47,14 +47,14 @@ type HeliotonicScale = Map Int Interval
 
 
 qualityToIntervals :: CQ.Quality -> HeliotonicScale
-qualityToIntervals qual = fromList $ zip [1..7] $ scaleToIntervals $ qualityToScale qual
+qualityToIntervals qual = fromList $ zip [1..7] $ S.toList $ baseModeIntervals $ qualityToScale qual
   where
-    qualityToScale :: CQ.Quality -> Scale
-    qualityToScale CQ.Major = SLydian
-    qualityToScale CQ.Minor = SDorian
-    qualityToScale CQ.Dominant = SMixolydian
-    qualityToScale CQ.Augmented = SAugmentedQuality
-    qualityToScale CQ.Diminished = SDiminishedQuality
+    qualityToScale :: CQ.Quality -> BaseMode
+    qualityToScale CQ.Major = Lydian
+    qualityToScale CQ.Minor = Dorian
+    qualityToScale CQ.Dominant = Mixolydian
+    qualityToScale CQ.Augmented = AugmentedQuality
+    qualityToScale CQ.Diminished = DiminishedQuality
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
