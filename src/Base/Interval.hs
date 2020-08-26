@@ -40,7 +40,7 @@ instance Arbitrary Interval where
   arbitrary = suchThat (genericArbitrary uniform) (isJust . intervalToDistance)
 
 propInvertSum :: Interval -> Bool
-propInvertSum i = (invert i) |+| i == (intervalFrom Perfect 1)
+propInvertSum i = invert i |+| i == intervalFrom Perfect 1
 
 instance Eq Interval where
   int1 == int2 = intervalToDistance int1 == intervalToDistance int2
