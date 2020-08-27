@@ -52,9 +52,24 @@ instance Show Interval where
 normalizeIntervalSize :: Int -> Int
 normalizeIntervalSize = modByFrom 7 1
 
--- This smart constructor normalizes the interval size to be between 1 and 7
-intervalFrom :: Quality -> Int -> Interval
-intervalFrom q s = Interval { getQuality = q, getSize = normalizeIntervalSize s }
+-- TODO: This should probably return an Either String Interval (or an error
+-- type in place of String) instead of Maybe Interval, in order to facilitate
+-- more sophisticated error handling / reporting.
+intervalFrom :: Quality -> Int -> Maybe Interval
+intervalFrom q s = if normalizedSize `elem` goodSizes then
+                     Just Interval { getQuality = q, getSize = normalizedSize }
+                   else
+                     Nothing
+  where
+    normalizedSize :: Int
+    normalizedSize = normalizeIntervalSize s
+
+    goodSizes :: [Int]
+    goodSizes = case q of
+                  Perfect -> [1, 4, 5]
+                  Major   -> [2, 3, 6, 7]
+                  Minor   -> [2, 3, 6, 7]
+                  _       -> [1 .. 7]
 
 normalizeInterval :: Interval -> Interval
 normalizeInterval (Interval iQual i) = Interval iQual $ normalizeIntervalSize i
@@ -83,9 +98,12 @@ intervalToDistance interval =
 
     -- Diminished shifts
     Interval (Diminished x) i ->
-      case baseQuality i of
-        Major   -> subtract (x + 1) <$> intervalToDistance (Interval Major i)
-        Perfect -> subtract x <$> intervalToDistance (Interval Perfect i)
+      subtract offset <$> intervalToDistance (Interval bq i)
+      where
+        bq = baseQuality i
+        offset = case bq of
+                   Major   -> x + 1
+                   Perfect -> x
 
     -- Anything else must be an invalid interval
     _ -> Nothing
@@ -110,7 +128,7 @@ invert (Interval iQual i) =
 
 infixl 6 <+>
 (<+>) :: Interval -> Int -> Interval
-(Interval iQual i) <+> x =
+Interval iQual i <+> x =
   Interval (iterate modFunc iQual !! abs x) i
   where
     modFunc =
@@ -152,5 +170,5 @@ jumpIntervalFromNote (Interval iQual iNum) r =
       case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
-    newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist  
+    newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist
   in rootFrom newNote newAcc

@@ -33,7 +33,7 @@ impliedShift (AccFlat i)  = -i
 impliedShift AccNatural   = 0
 
 shiftToAcc :: Int -> Accidental
-shiftToAcc i = 
+shiftToAcc i
   | i > 0     = AccSharp i
   | i < 0     = AccFlat (-i)
   | otherwise = AccNatural

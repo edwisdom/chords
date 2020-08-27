@@ -23,7 +23,9 @@ import Base.Interval as I
     , intervalToDistance
     )
 import Scale (Scale(..), BaseMode(..), baseModeIntervals)
-import Data.Set(Set(..))
+
+import Control.Monad (foldM)
+import Data.Set (Set(..))
 import qualified Data.Set as S
 import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)
@@ -37,8 +39,10 @@ chordToNotes chord =
 chordToIntervals :: Chord -> Set Interval
 chordToIntervals chord =
   let
-    baseScale = highestNaturalToIntervals (getHighestNatural chord) $ qualityToIntervals $ C.getQuality chord
-    intervals = susIntervals (extendIntervals baseScale $ getExtensions chord) $ getSus chord
+    qualInts  = qualityToIntervals $ C.getQuality chord
+    baseScale = highestNaturalToIntervals (getHighestNatural chord) qualInts
+    extendedScale = extendIntervals baseScale $ getExtensions chord
+    intervals     = susIntervals extendedScale $ getSus chord
   in
     foldr S.insert S.empty intervals
 
@@ -47,7 +51,8 @@ type HeliotonicScale = Map Int Interval
 
 
 qualityToIntervals :: CQ.Quality -> HeliotonicScale
-qualityToIntervals qual = fromList $ zip [1..7] $ S.toList $ baseModeIntervals $ qualityToScale qual
+qualityToIntervals qual =
+  fromList $ zip [1 .. 7] $ S.toList $ baseModeIntervals $ qualityToScale qual
   where
     qualityToScale :: CQ.Quality -> BaseMode
     qualityToScale CQ.Major = Lydian
@@ -58,14 +63,20 @@ qualityToIntervals qual = fromList $ zip [1..7] $ S.toList $ baseModeIntervals $
 
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
-susIntervals scale s = maybe scale (\i -> insert i (intervalFrom (baseQuality i) i) $ delete 3 scale) (getMaybeDeg s)
+susIntervals scale s = maybe scale addSus (getMaybeDeg s)
+  where
+    -- intervalFrom (baseQuality i) i is always a valid interval
+    addSus :: Int -> HeliotonicScale
+    addSus i =
+      insert i (fromJust $ intervalFrom (baseQuality i) i) $ delete 3 scale
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
   extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-  extendInterval scale ext = insert deg (intervalFrom (baseQuality deg) deg <+> shift) scale
+  extendInterval scale ext =
+    insert deg (fromJust (intervalFrom (baseQuality deg) deg) <+> shift) scale
     where
       deg   = degree ext
       shift = sign ext
@@ -100,5 +111,4 @@ highestNaturalToIntervals hn scale =
         (int, fromJust interval)
 
     insertMajorSeven :: HeliotonicScale -> HeliotonicScale
-    insertMajorSeven hts = insert 7 (intervalFrom IQ.Major 7) hts
-
+    insertMajorSeven hts = insert 7 (fromJust $ intervalFrom IQ.Major 7) hts
