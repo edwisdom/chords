@@ -6,6 +6,7 @@ module Base.Chord.Chord
   , getExtensions
   , getSus
   , chordFrom
+  , ExpChord
   ) where
 
 import Base.Core.Quality.CQuality
@@ -35,3 +36,5 @@ instance Show Chord where
 
 chordFrom :: Note -> Quality -> HighestNatural -> [Extension] -> Sus -> Chord
 chordFrom = Chord
+
+type ExpChord = (Chord, [Note])
