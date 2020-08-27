@@ -1,3 +1,16 @@
+{-|
+Module      : ChordSubs
+Description : Provides functions to perform common chord substitutions
+Copyright   : (c) Uhhhh
+License     : GPL-3
+Maintainers : cphifer@galois.com, ejain49@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module exports functions that, when given a chord (and
+sometimes other information such as key or interval), return
+possible chord substitutions.
+-}
 module ChordSubs
   ( remove5
   , extend1
@@ -33,26 +46,48 @@ import Base.PitchClass(pitchClass)
 import qualified Data.Map.Strict as M (lookup, elems)
 import Scale
 import Diatonic
+import Language.Parser
 
-
-
+-- | Removes the P5 interval from a given chord's note if it exists
+-- and returns the same chord symbol.
+--
+-- prop> remove5 (chord, _) == chord
+--
+-- >>> c = canonicalizeChord $ fromJust $ parseChord "CM7"
+-- >>> notes = chordToNotes c
+-- >>> remove5 (c, notes)
+-- (CM7,[C,E,B])
 remove5 :: ExpChord -> ExpChord
 remove5 (chord, _) = (chord, toNotes (getChordRoot chord) (S.delete (fromJust(intervalFrom Perfect 5)) (chordToIntervals chord)))
   where
     toNotes :: Note -> Set Interval -> [Note]
     toNotes root intSet = flip jumpIntervalFromNote root <$> toList intSet
 
-
-extend1 :: ExpChord -> ExpChord
-extend1 (chord, _) =  (newChord, chordToNotes newChord)
+-- | Extends a chord triadically (e.g. CM7 becomes CM9). If it's a
+-- 6 chord, then it's extended to a 7add13 chord. If it's already a
+-- 13 chord, then this function returns Nothing.
+extend1 :: ExpChord -> Maybe ExpChord
+extend1 (chord, _)
+  | isJust newChord = Just (fromJust newChord, chordToNotes $ fromJust newChord)
+  | otherwise = Nothing
   where
-    newChord = chordFrom (getChordRoot chord) (C.getQuality chord)
-               (extendHighestNat (getHighestNatural chord))
-               (getExtensions chord) (getSus chord)
-    extendHighestNat :: HighestNatural -> HighestNatural
-    extendHighestNat highNat =
-      (if isMajor highNat then majorNatural else nonMajorNatural) $ getDegree highNat + 2
+      newChord
+        | getDegree (getHighestNatural chord) == 6
+          = Just (chordFrom (getChordRoot chord) (C.getQuality chord)
+                 (nonMajorNatural 7) (getExtensions chord ++ [add 13]) (getSus chord))
+        | getDegree (getHighestNatural chord) == 13 = Nothing
+        | otherwise
+          = Just (chordFrom (getChordRoot chord) (C.getQuality chord)
+            (extendHighestNat (getHighestNatural chord)) (getExtensions chord) (getSus chord))
+      extendHighestNat :: HighestNatural -> HighestNatural
+      extendHighestNat highNat =
+        (if isMajor highNat then majorNatural else nonMajorNatural) $ getDegree highNat + 2
 
+-- | Given a key and another note, this function flips the note over
+-- the axis of the key, as done in Ernst Levy's idea of negative harmony.
+--
+-- Flipping a note twice over the same key should return the same note:
+-- prop> negativeNote key (negativeNote key note) == note
 negativeNote :: Note -> Note -> Note
 negativeNote key note =
   let
@@ -64,14 +99,23 @@ negativeNote key note =
   in
     jumpIntervalFromNote newInt key
 
-
+-- | Given a key and a chord, this function flips the chord over
+-- the axis of the key, as done in Ernst Levy's idea of negative harmony.
+--
+-- Like with a single note, flipping a chord twice should give the same
+-- set of notes back.
+-- prop> negative key (negative key (_, notes)) == notes
 negative :: Note -> ExpChord -> ExpChord
 negative key (chord, notes) = (newChord, newNotes)
   where
     newNotes = negativeNote key <$> notes
     newChord = head (notesToChord newNotes)
 
-
+-- | Given a chord, an interval quality, and an interval size,
+-- this transposes the chord by that interval. Because this function
+-- is only used internally by the module, it assumes the intervals are
+-- validly constructed.
+-- TODO: Make this a safe, general-purpose, exportable function
 transposeExpChord :: ExpChord -> IQ.Quality -> Int -> ExpChord
 transposeExpChord (chord, notes) iQual i =
   let
@@ -79,17 +123,30 @@ transposeExpChord (chord, notes) iQual i =
   in
     (newChord, chordToNotes newChord)
 
+-- | Given a dominant chord or a minor 6 chord, this returns
+-- a list of chord substitutions from its diminished family.
+--
+-- >>> c = canonicalizeChord $ fromJust $ parseChord "C7"
+-- >>> notes = chordToNotes c
+-- >>> dimFamilySub (c, notes)
+-- [(Eb7,[Eb,G,Bb,Db]),(Gb7,[Gb,Bb,Db,Fb]),(A7,[A,C#,E,G])]
 dimFamilySub :: ExpChord -> [ExpChord]
-dimFamilySub eChord@(chord, notes)
+dimFamilySub eChord@(chord, _)
   |  getQuality chord == CQ.Dominant ||
     (getQuality chord == CQ.Minor && (fromJust (intervalFrom IQ.Major 6) `member` chordToIntervals chord))
     = [transposeExpChord eChord IQ.Minor 3, transposeExpChord eChord (IQ.Diminished 1) 5, transposeExpChord eChord IQ.Major 6]
   | otherwise = []
 
-
+-- | Returns the same chord, but a tritone away.
+-- If applied twice in a row, returns the same chord:
+-- prop> tritoneSub $ tritoneSub (chord, notes) == (_, notes)
 tritoneSub :: ExpChord -> ExpChord
 tritoneSub eChord = transposeExpChord eChord (IQ.Augmented 1) 4
 
+-- | Given a key, and a chord in the key, this returns
+-- a list of chords that are diatonic functional substitutes.
+--
+-- If the chord is not diatonic to the key, then this returns [].
 diatonicFuncSub :: Note -> ExpChord -> [ExpChord]
 diatonicFuncSub key (chord, notes)
   | validSub && degree == 1 = [fromJust (mediant key numNotes), fromJust (submediant key numNotes)]
@@ -104,25 +161,47 @@ diatonicFuncSub key (chord, notes)
     degree = 1 + fromJust (elemIndex (getChordRoot chord) (scaleToNotes (major key)))
     numNotes = length notes
 
-
-parallelSub :: ExpChord -> [ExpChord]
-parallelSub (chord, notes) =
-  let
+-- | Given a major quality chord, this returns a minor chord, and vice versa.
+-- If the quality is neither, then this returns Nothing.
+parallelSub :: ExpChord -> Maybe ExpChord
+parallelSub (chord, notes)
+  | isJust flippedChord = Just (fromJust flippedChord, chordToNotes $ fromJust flippedChord)
+  | otherwise = Nothing
+  where
     flippedChord
       | getQuality chord == CQ.Major = Just (chord {getQuality = CQ.Minor})
       | getQuality chord == CQ.Minor = Just (chord {getQuality = CQ.Major})
       | otherwise = Nothing
-  in
-    ([(fromJust flippedChord, chordToNotes (fromJust flippedChord)) | isJust flippedChord])
 
+{-| Given a dominant chord, this returns a list of common
+altered dominant substitutions. If the chord is not dominant,
+this returns an empty list.
+
+* List of Common Altered Dominants
+1. 7b9
+2. 7#9
+3. 7b5
+4. 7#5
+5. 7b9b5
+6. 7#9#5
+7. 7b13b9
+8. 7#11#9
+9. 9b5
+10. 9#5
+11. 13b9
+12. 13sus
+13. 7b9sus4
+-}
 alteredDominantSub :: ExpChord -> [ExpChord]
-alteredDominantSub (chord, notes) = zip chords (chordToNotes <$> chords)
+alteredDominantSub (chord, notes)
+  | getQuality chord == CQ.Dominant = zip chords (chordToNotes <$> chords)
+  | otherwise = []
   where
     chords = delete chord
       [ chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 9] noSus
       , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9] noSus
       , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 5] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9] noSus
+      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 5] noSus
       , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 9, flat 5] noSus
       , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9, sharp 5] noSus
       , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 13, flat 9] noSus

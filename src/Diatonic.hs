@@ -48,7 +48,7 @@ isDiatonicTo chord scale = all (`elem` scaleToNotes scale) (chordToNotes chord)
 
   3. The root of the resulting chord will be equal to (scale !! (degree-1))
 
-  ** Returns Nothing if constraints are invalid.
+  Returns Nothing if constraints are invalid.
 
   * Invalid Constraints :
 
