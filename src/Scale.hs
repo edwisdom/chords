@@ -23,6 +23,7 @@ import Base.Chord.Note
 import Base.Interval hiding (invert)
 import qualified Base.Interval as I (invert)
 import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)
+import Control.Monad (filterM, zipWithM)
 import Data.List (sort, sortBy, intercalate, takeWhile)
 import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic, isSubsetOf, toList)
 import qualified Data.Set as S(filter, map)
@@ -72,7 +73,7 @@ data BaseMode
   | DoubleHarmonicMinor
   | HarmonicMajor
   | DoubleHarmonicMajor
-  deriving (Show, Enum)
+  deriving (Show, Enum, Eq)
 
 
 major :: Note -> Scale
@@ -88,59 +89,75 @@ nthDegreeIntervals ints n = S.map (|-| noteInterval) ints
    noteInterval = toAscList ints !! (n - 1)
 
 
-zipToIntervalSet :: [Quality] -> [Int] -> Set Interval
-zipToIntervalSet qualities ints = fromList $ uncurry intervalFrom <$> zip qualities ints
+zipToIntervalSet :: [Quality] -> [Int] -> Maybe (Set Interval)
+zipToIntervalSet quals sizes =
+  do ints <- zipWithM intervalFrom quals sizes
+     return $ fromList ints
 
 
 baseModeIntervals :: BaseMode -> Set Interval
-baseModeIntervals Ionian =
-  zipToIntervalSet
-  [Perfect, Major, Major, Perfect, Perfect, Major, Major] [1..7]
-baseModeIntervals Dorian =
-  nthDegreeIntervals (baseModeIntervals Ionian) 2
-baseModeIntervals Phrygian =
-  nthDegreeIntervals (baseModeIntervals Ionian) 3
-baseModeIntervals Lydian =
-  nthDegreeIntervals (baseModeIntervals Ionian) 4
-baseModeIntervals Mixolydian =
-  nthDegreeIntervals (baseModeIntervals Ionian) 5
-baseModeIntervals Aeolian =
-  nthDegreeIntervals (baseModeIntervals Ionian) 6
-baseModeIntervals Locrian =
-  nthDegreeIntervals (baseModeIntervals Ionian) 7
-baseModeIntervals AugmentedQuality =
-  zipToIntervalSet
-  [Perfect, Major, Major, Augmented 1, Augmented 1, Major, Minor] [1..7]
-baseModeIntervals DiminishedQuality =
-  zipToIntervalSet
-  [Perfect, Major, Minor, Perfect, Diminished 1, Minor, Diminished 1] [1..7]
-baseModeIntervals MelodicMinor =
-  zipToIntervalSet
-  [Perfect, Major, Minor, Perfect, Perfect, Major, Major] [1..7]
-baseModeIntervals LydianAug =
-  nthDegreeIntervals (baseModeIntervals MelodicMinor) 3
-baseModeIntervals LydianDom =
-  nthDegreeIntervals (baseModeIntervals MelodicMinor) 4
-baseModeIntervals Altered =
-  nthDegreeIntervals (baseModeIntervals MelodicMinor) 7
-baseModeIntervals HarmonicMinor =
-  zipToIntervalSet
-  [Perfect, Major, Minor, Perfect, Perfect, Minor, Major] [1..7]
-baseModeIntervals PhrygianDom =
-  nthDegreeIntervals (baseModeIntervals HarmonicMinor) 5
-baseModeIntervals DoubleHarmonicMinor =
-  zipToIntervalSet
-  [Perfect, Major, Minor, Augmented 1, Perfect, Minor, Major] [1..7]
-baseModeIntervals HarmonicMajor =
-  zipToIntervalSet
-  [Perfect, Major, Major, Perfect, Perfect, Minor, Major] [1..7]
-baseModeIntervals DoubleHarmonicMajor =
-  zipToIntervalSet
-  [Perfect, Minor, Major, Perfect, Perfect, Minor, Major] [1..7]
+baseModeIntervals bm = if fromScratch then
+                         fromJust $ zipToIntervalSet bmQualities [1 .. 7]
+                       else
+                         let
+                           (mode, shift) = modeAndShift
+                         in
+                           nthDegreeIntervals (baseModeIntervals mode) shift
+  where
+    -- Discriminate between BaseModes for which we build the intervals from
+    -- scratch and those that are computed from some other interval set
+    fromScratch :: Bool
+    fromScratch = bm `elem` [ Ionian
+                            , AugmentedQuality
+                            , DiminishedQuality
+                            , MelodicMinor
+                            , HarmonicMinor
+                            , DoubleHarmonicMinor
+                            , HarmonicMajor
+                            , DoubleHarmonicMajor
+                            ]
+
+    -- The interval qualities for the modal interval sets built from scratch
+    bmQualities :: [Quality]
+    bmQualities =
+      case bm of
+        Ionian ->
+          [Perfect, Major, Major, Perfect, Perfect, Major, Major]
+        AugmentedQuality ->
+          [Perfect, Major, Major, Augmented 1, Augmented 1, Major, Minor]
+        DiminishedQuality ->
+          [Perfect, Major, Minor, Perfect, Diminished 1, Minor, Diminished 1]
+        MelodicMinor ->
+          [Perfect, Major, Minor, Perfect, Perfect, Major, Major]
+        HarmonicMinor ->
+          [Perfect, Major, Minor, Perfect, Perfect, Minor, Major]
+        DoubleHarmonicMinor ->
+          [Perfect, Major, Minor, Augmented 1, Perfect, Minor, Major]
+        HarmonicMajor ->
+          [Perfect, Major, Major, Perfect, Perfect, Minor, Major]
+        DoubleHarmonicMajor ->
+          [Perfect, Minor, Major, Perfect, Perfect, Minor, Major]
+
+    -- The starting mode and shift for modal interval sets built from other
+    -- interval sets
+    modeAndShift :: (BaseMode, Int)
+    modeAndShift =
+      case bm of
+        Dorian      -> (Ionian, 2)
+        Phrygian    -> (Ionian, 3)
+        Lydian      -> (Ionian, 4)
+        Mixolydian  -> (Ionian, 5)
+        Aeolian     -> (Ionian, 6)
+        Locrian     -> (Ionian, 7)
+        LydianAug   -> (MelodicMinor, 3)
+        LydianDom   -> (MelodicMinor, 4)
+        Altered     -> (MelodicMinor, 7)
+        PhrygianDom -> (HarmonicMinor, 5)
 
 
 modeToIntervals :: Mode -> Set Interval
-modeToIntervals (Mode baseMode exts) = foldr extIntervals (baseModeIntervals baseMode) exts
+modeToIntervals (Mode baseMode exts) =
+  foldr extIntervals (baseModeIntervals baseMode) exts
   where
     extIntervals :: ScaleExt -> Set Interval -> Set Interval
     extIntervals ext intSet = insert (oldInt <+> impliedShift (acc ext)) (delete oldInt intSet)
@@ -180,13 +197,25 @@ modesToExts mode1 mode2 =
 intervalsToMode :: Set Interval -> [Mode]
 intervalsToMode intSet =
   let
-    sameDegreeModes =
-        filter (\bm -> ((==) `on` S.map getSize) (baseModeIntervals bm) intSet)
-               [Lydian ..]
+    eqOnSize :: BaseMode -> Bool
+    eqOnSize bm =
+      ((==) `on` S.map getSize) (baseModeIntervals bm) intSet
+
+    sameDegreeModes :: [BaseMode]
+    sameDegreeModes = filter eqOnSize [Lydian ..]
+
     distanceFromIntSet :: Set Interval -> BaseMode -> Int
     distanceFromIntSet iSet mode = modalDistance iSet $ baseModeIntervals mode
+
+    sortedModes :: [BaseMode]
     sortedModes = sortBy (compare `on` distanceFromIntSet intSet) sameDegreeModes
-    exts = modesToExts intSet . baseModeIntervals <$> sortedModes
+
+    exts :: [[ScaleExt]]
+    exts =
+      let
+        bmIntss = baseModeIntervals <$> sortedModes
+      in
+        modesToExts intSet <$> bmIntss
   in
     filter (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ uncurry Mode <$> zip sortedModes exts
 
