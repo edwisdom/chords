@@ -11,7 +11,7 @@ data Quality
  | Minor
  | Diminished Int
  | Augmented Int
- 
+
 instance Show Quality where
   show Major = "M"
   show Perfect = "P"
