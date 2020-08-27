@@ -63,19 +63,22 @@ qualityToIntervals qual =
 
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
 susIntervals scale s
-  | isSus s = maybe (delete 3 scale) (\i -> insert i (fromJust (intervalFrom (baseQuality i) i)) $ delete 3 scale) (getMaybeDeg s)
+  | isSus s = maybe scale' (\i -> insert i (fromJust $ intervalFrom (baseQuality i) i) scale') $ getMaybeDeg s
   | otherwise = scale
+  where
+    scale' :: HeliotonicScale
+    scale' = delete 3 scale
 
 
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
-  extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
-  extendInterval scale ext =
-    insert deg (fromJust (intervalFrom (baseQuality deg) deg) <+> shift) scale
-    where
-      deg   = degree ext
-      shift = sign ext
+    extendInterval :: HeliotonicScale -> Extension -> HeliotonicScale
+    extendInterval scale ext =
+      insert deg (fromJust (intervalFrom (baseQuality deg) deg) <+> shift) scale
+      where
+        deg   = degree ext
+        shift = sign ext
 
 highestNaturalToIntervals :: HighestNatural -> HeliotonicScale -> HeliotonicScale
 highestNaturalToIntervals hn scale =
@@ -91,13 +94,13 @@ highestNaturalToIntervals hn scale =
       let
         deg = getDegree hn
       in
-        if even $ getDegree hn then
+        if even deg then
           [1, 3, 5, deg]
         else
           [1, 3 .. deg]
 
     getIntervals :: [Int] -> HeliotonicScale -> HeliotonicScale
-    getIntervals ints hts = fromList $ map ($ hts) (getInterval <$> ints)
+    getIntervals ints hts = fromList $ map ($ hts) $ getInterval <$> ints
 
     getInterval :: Int -> HeliotonicScale -> (Int, Interval)
     getInterval int hts =
@@ -112,7 +115,9 @@ highestNaturalToIntervals hn scale =
 notesToChord :: [Note] -> [Chord]
 notesToChord notes =
   let
+    roots :: [Note]
     roots = sortBy (compare `on` noteToPitchClass) notes
+
     findQuality :: Note -> CQ.Quality
     findQuality root
       | hasInterval IQ.Major 3 && hasInterval IQ.Minor 7 = CQ.Dominant
@@ -127,8 +132,13 @@ notesToChord notes =
         notesContainIntervalFromNote :: [Note] -> Note -> Interval -> Bool
         notesContainIntervalFromNote notes key interval =
           jumpIntervalFromNote interval key `elem` notes
-        hasInterval iQual iSize = notesContainIntervalFromNote notes root $ fromJust (intervalFrom iQual iSize)
+
+        hasInterval :: IQ.Quality -> Int -> Bool
+        hasInterval iQual iSize = notesContainIntervalFromNote notes root $ fromJust $ intervalFrom iQual iSize
+
+    qualities :: [CQ.Quality]
     qualities = findQuality <$> roots
+
     findHighNat :: Note -> CQ.Quality -> HighestNatural
     findHighNat root quality
       |      has 7  &&     (has 9  ||      has 11) &&       has 13 = majorOrNot 13
@@ -138,16 +148,25 @@ notesToChord notes =
       | not (has 7) && not (has 9) && not (has 11) &&       has 13 = majorOrNot 6
       |                                                  otherwise = majorOrNot 5
       where
+        qInts :: [Interval]
         qInts = catMaybes $ ($ qualityToIntervals quality) <$> (M.lookup <$> [7, 2, 4, 6])
+
+        cInts :: [Interval]
         cInts = intervalBetweenNotes root <$> roots
+
+        majorOrNot :: Int -> HighestNatural
         majorOrNot = if (quality /= CQ.Major) && fromJust (intervalFrom IQ.Major 7) `elem` cInts
                      then majorNatural
                      else nonMajorNatural
+
         has :: Int -> Bool
         has int =
           let i = normalizeIntervalSize int
           in i `elem` (getSize <$> cInts) && (getIntWithSize i cInts == getIntWithSize i qInts)
+
+    highNats :: [HighestNatural]
     highNats = uncurry findHighNat <$> zip roots qualities
+
     findSus :: Note -> HighestNatural -> Sus
     findSus root highNat
       | containsThird || getDegree highNat == 6                = noSus
@@ -156,33 +175,57 @@ notesToChord notes =
       | has4                                                   = sus 4
       | otherwise                                              = noSus
       where
+        cInts :: [Interval]
         cInts = intervalBetweenNotes root <$> roots
+
+        containsThird :: Bool
         containsThird = 3 `elem` (getSize <$> cInts)
+
+        has2 :: Bool
         has2 = fromJust (intervalFrom IQ.Major 2) `elem` cInts
+
+        has4 :: Bool
         has4 = fromJust (intervalFrom IQ.Perfect 4) `elem` cInts
+
+    chordSuses :: [Sus]
     chordSuses = uncurry findSus <$> zip roots highNats
+
     findExts :: Note -> CQ.Quality -> HighestNatural -> Sus -> [Extension]
     findExts root quality highNat chordSus =
       let
+        qInts :: [Interval]
         qInts = M.elems $ qualityToIntervals quality
+
+        cInts :: [Interval]
         cInts = intervalBetweenNotes root <$> roots
+
+        numHighNat :: Int
         numHighNat = getDegree highNat
+
+        removableDegs :: [Int]
         removableDegs = map normalizeIntervalSize [1, 3 .. numHighNat] ++ ([6 | numHighNat == 6])
+
+        noNatInts :: [Interval]
         noNatInts = filter (\x -> not $ (x `elem` qInts) && getSize x `elem` removableDegs) cInts
+
+        noSusInts :: [Interval]
         noSusInts
           | chordSus == sus 2 = L.delete (fromJust (intervalFrom IQ.Major 2)) noNatInts
           | chordSus == sus 4 = L.delete (fromJust (intervalFrom IQ.Perfect 4)) noNatInts
           | (chordSus == susNoNum && numHighNat < 9) = L.delete (fromJust (intervalFrom IQ.Major 2))
                                                      $ L.delete (fromJust (intervalFrom IQ.Perfect 4)) noNatInts
           | otherwise = noNatInts
+
         intToExt :: Interval -> Extension
         intToExt int
           | getSize int == 5 = distToExt (fromJust $ intervalToDistance $ int |-| getIntWithSize (getSize int) qInts) (getSize int)
           | otherwise = distToExt (fromJust $ intervalToDistance $ int |-| getIntWithSize (getSize int) qInts) (getSize int + 7)
       in
         intToExt <$> noSusInts
-    exts = uncurry4 findExts <$> zip4 roots qualities highNats chordSuses
+
+    extss :: [[Extension]]
+    extss = uncurry4 findExts <$> zip4 roots qualities highNats chordSuses
     sortByExtLen :: [Chord] -> [Chord]
     sortByExtLen = sortBy (compare `on` length . getExtensions)
   in
-    sortByExtLen $ uncurry5 chordFrom <$> zip5 roots qualities highNats exts chordSuses
+    sortByExtLen $ uncurry5 chordFrom <$> zip5 roots qualities highNats extss chordSuses
