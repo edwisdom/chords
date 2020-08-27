@@ -92,13 +92,13 @@ tritoneSub eChord = transposeExpChord eChord (IQ.Augmented 1) 4
 
 diatonicFuncSub :: Note -> ExpChord -> [ExpChord]
 diatonicFuncSub key (chord, notes)
-  | validSub && degree == 1 = [mediant key numNotes, submediant key numNotes]
-  | validSub && degree == 2 = [subdominant key numNotes]
-  | validSub && degree == 3 = [tonic key numNotes, submediant key numNotes]
-  | validSub && degree == 4 = [supertonic key numNotes]
-  | validSub && degree == 5 = [subtonic key numNotes]
-  | validSub && degree == 6 = [tonic key numNotes, mediant key numNotes]
-  | validSub && degree == 7 = [dominant key numNotes]
+  | validSub && degree == 1 = [fromJust (mediant key numNotes), fromJust (submediant key numNotes)]
+  | validSub && degree == 2 = [fromJust (subdominant key numNotes)]
+  | validSub && degree == 3 = [fromJust (tonic key numNotes), fromJust (submediant key numNotes)]
+  | validSub && degree == 4 = [fromJust (supertonic key numNotes)]
+  | validSub && degree == 5 = [fromJust (subtonic key numNotes)]
+  | validSub && degree == 6 = [fromJust (tonic key numNotes), fromJust (mediant key numNotes)]
+  | validSub && degree == 7 = [fromJust (dominant key numNotes)]
   where
     validSub = chord `isDiatonicTo` major key
     degree = 1 + fromJust (elemIndex (getChordRoot chord) (scaleToNotes (major key)))

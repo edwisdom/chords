@@ -76,7 +76,7 @@ diatonicChord scale@(Scale note mode) numNotes degree jumpSize =
     then
       Nothing
     else
-      (fromJust (find (\ c -> getChordRoot c == notes !! (degree - 1)) (notesToChord chordTones)), chordTones)
+      Just (fromJust (find (\ c -> getChordRoot c == notes !! (degree - 1)) (notesToChord chordTones)), chordTones)
 
 
 -- | Given a degree, returns a function that creates a diatonic triadic major chord
@@ -91,30 +91,30 @@ tonic = getMajorFuncChord 1
 
 -- | Given a key and a number of notes, this returns a triadic IIm chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-supertonic :: Note -> Int -> ExpChord
+supertonic :: Note -> Int -> Maybe ExpChord
 supertonic = getMajorFuncChord 2
 
 -- | Given a key and a number of notes, this returns a triadic IIIm chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-mediant :: Note -> Int -> ExpChord
+mediant :: Note -> Int -> Maybe ExpChord
 mediant = getMajorFuncChord 3
 
 -- | Given a key and a number of notes, this returns a triadic IV chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-subdominant :: Note -> Int -> ExpChord
+subdominant :: Note -> Int -> Maybe ExpChord
 subdominant = getMajorFuncChord 4
 
 -- | Given a key and a number of notes, this returns a triadic V chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-dominant :: Note -> Int -> ExpChord
+dominant :: Note -> Int -> Maybe ExpChord
 dominant = getMajorFuncChord 5
 
 -- | Given a key and a number of notes, this returns a triadic VIm chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-submediant :: Note -> Int -> ExpChord
+submediant :: Note -> Int -> Maybe ExpChord
 submediant = getMajorFuncChord 6
 
 -- | Given a key and a number of notes, this returns a triadic VII0 chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-subtonic :: Note -> Int -> ExpChord
+subtonic :: Note -> Int -> Maybe ExpChord
 subtonic = getMajorFuncChord 7
