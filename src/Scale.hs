@@ -15,6 +15,7 @@ module Scale
   , invert
   , major
   , minor
+  , scaleLength
   ) where
 
 
@@ -170,6 +171,8 @@ modeToIntervals (Mode baseMode exts) =
 scaleToNotes :: Scale -> [Note]
 scaleToNotes (Scale note mode) = toList $ mapMonotonic (`jumpIntervalFromNote` note) (modeToIntervals mode)
 
+scaleLength :: Scale -> Int
+scaleLength s = length $ scaleToNotes s
 
 modalDistance :: Set Interval -> Set Interval -> Int
 modalDistance mode1 mode2 = sum $ intDistance <$> (zip `on` toAscList) mode1 mode2
