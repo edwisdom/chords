@@ -12,13 +12,16 @@ note.
 -}
 
 module Base.Chord.ChordSymbol
-  (
+  ( ChordSymbol
+  , getChordRoot
+  , getShape
+  , chordSymbolFrom
   ) where
 
 import Base.Chord.ChordShape
 import Base.Chord.Root
 
-data ChordSymbol = ChordSymbol { getRoot :: Root
+data ChordSymbol = ChordSymbol { getChordRoot :: Root
                                , getShape :: ChordShape
                                } deriving Show
 
