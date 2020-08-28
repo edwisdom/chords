@@ -218,8 +218,8 @@ notesToChord notes =
 
         intToExt :: Interval -> Extension
         intToExt int
-          | getSize int == 5 = distToExt (fromJust $ intervalToDistance $ int |-| getIntWithSize (getSize int) qInts) (getSize int)
-          | otherwise = distToExt (fromJust $ intervalToDistance $ int |-| getIntWithSize (getSize int) qInts) (getSize int + 7)
+          | getSize int == 5 = fromJust (distToExt (fromJust $ intervalToDistance $ int |-| getIntWithSize (getSize int) qInts)) (getSize int)
+          | otherwise = fromJust (distToExt (fromJust $ intervalToDistance $ int |-| getIntWithSize (getSize int) qInts)) (getSize int + 7)
       in
         intToExt <$> noSusInts
 

@@ -119,7 +119,7 @@ parserHighestNatural =
 parserSus :: Parser Sus
 parserSus =
   do msus <- optionMaybe parserSusPresent
-     return (maybe noSus id (maybe susNoNum sus <$> msus))
+     return (maybe noSus (maybe susNoNum sus) msus)
   where
     parserSusPresent :: Parser (Maybe Int)
     parserSusPresent =
