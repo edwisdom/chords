@@ -32,14 +32,14 @@ library
       Base.Chord.ChordSymbol
       Base.Chord.Extension
       Base.Chord.HighestNatural
+      Base.Chord.Note
       Base.Chord.RawChord
-      Base.Chord.Root
       Base.Chord.Sus
       Base.ChordSymbol
       Base.Class.Chordal
       Base.Class.Rooted
       Base.Core.Accidental
-      Base.Core.Note
+      Base.Core.Letter
       Base.Core.Quality.CQuality
       Base.Core.Quality.IQuality
       Base.CQuality
@@ -47,7 +47,9 @@ library
       Base.Interval
       Base.IQuality
       Base.PitchClass
+      ChordSubs
       Common.Utils
+      Diatonic
       Language.Parser
       Scale
   other-modules:

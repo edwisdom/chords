@@ -10,13 +10,17 @@ module Base.Interval
   , (|+|)
   , (|-|)
   , invert
+  , intervalBetweenNotes
+  , modByFrom
+  , normalizeIntervalSize
+  , getIntWithSize
   ) where
 
 import Base.Core.Accidental
-import Base.Core.Note
+import Base.Core.Letter
 import Base.Core.Quality.IQuality
 
-import Base.Chord.Root
+import Base.Chord.Note
 
 import Base.IQuality
 
@@ -37,17 +41,7 @@ instance Ord Interval where
   int1 `compare` int2 = intervalToDistance int1 `compare` intervalToDistance int2
 
 instance Show Interval where
-  show (Interval iQual i) =
-    let
-      qualString =
-        case iQual of
-          Major          -> "M"
-          Minor          -> "m"
-          Perfect        -> "P"
-          Diminished x -> show x ++ "dim"
-          Augmented x  -> show x ++ "aug"
-    in
-      qualString ++ show i
+  show (Interval iQual i) = show iQual ++ show i
 
 normalizeIntervalSize :: Int -> Int
 normalizeIntervalSize = modByFrom 7 1
@@ -142,7 +136,7 @@ Interval iQual i <+> x =
 
 infixl 6 <->
 (<->) :: Interval -> Int -> Interval
-interval <-> x =  interval <+> (-x)
+interval <-> x = interval <+> (-x)
 
 infixl 6 |+|
 (|+|) :: Interval -> Interval -> Interval
@@ -161,14 +155,27 @@ infixl 6 |-|
 (|-|) :: Interval -> Interval -> Interval
 int1 |-| int2 = normalizeInterval $ int1 |+| invert int2
 
-jumpIntervalFromNote :: Interval -> Root -> Root
+jumpIntervalFromNote :: Interval -> Note -> Note
 jumpIntervalFromNote (Interval iQual iNum) r =
   let
-    newNote    = nextNthNote (getRoot r) $ iNum - 1
-    currDist   = getPitchClass (rootToPitchClass (rootFrom newNote natural)) - getPitchClass (rootToPitchClass r)
+    newNote    = nextNthLetter (getLetter r) $ iNum - 1
+    currDist   = getPitchClass (noteToPitchClass (noteFrom newNote natural)) - getPitchClass (noteToPitchClass r)
     wantedDist =
       case intervalToDistance $ Interval iQual iNum of
         Just dist -> dist
         Nothing -> error "Invalid interval in jumpIntervalFromNote"
     newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist
-  in rootFrom newNote newAcc
+  in noteFrom newNote newAcc
+
+intervalBetweenNotes :: Note -> Note -> Interval
+intervalBetweenNotes start end =
+  let
+    letterDist = modByFrom 7 0 (fromEnum (getLetter end) - fromEnum (getLetter start)) + 1
+    currInterval = fromJust $ intervalFrom (baseQuality letterDist) letterDist
+    newNote = jumpIntervalFromNote currInterval start
+    wantedDist = getPitchClass (noteToPitchClass end) - getPitchClass (noteToPitchClass newNote)
+  in
+    currInterval <+> modByFrom 12 (- 6) wantedDist
+
+getIntWithSize :: Int -> [Interval] -> Interval
+getIntWithSize i intList = head (filter (\ x -> getSize x == i) intList)

@@ -1,13 +1,14 @@
 module Base.Chord.Chord
   ( Chord
   , chordFrom
+  , ExpChord
   ) where
 
 import Base.Chord.ChordShape
 import Base.Chord.ChordSymbol
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Root
+import Base.Chord.Note
 import Base.Chord.Sus
 
 import Base.Core.Quality.CQuality
