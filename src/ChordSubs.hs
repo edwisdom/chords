@@ -24,12 +24,15 @@ module ChordSubs
 
 
 
-import Base.Chord
+import Base.ChordSymbol
 import Base.Chord.Chord as C
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Note
 import Base.Chord.Sus
+
+import Base.Class.Chordal
+import Base.Class.Rooted
 
 import Base.Core.Quality.CQuality as CQ
 import Base.Core.Quality.IQuality as IQ
@@ -40,7 +43,6 @@ import qualified Base.Interval as I(getQuality)
 import Common.Utils (uncurry3)
 
 import Data.List(sortBy, delete, zip4, zip5, find, elemIndex)
-import Lib(chordToIntervals, chordToNotes, qualityToIntervals, notesToChord)
 import Data.Set(Set(..), toList, member, isSubsetOf, fromList)
 import qualified Data.Set as S (delete)
 import Data.Maybe(fromJust, catMaybes, isJust)
@@ -59,8 +61,8 @@ import Language.Parser
 -- >>> notes = chordToNotes c
 -- >>> remove5 (c, notes)
 -- (CM7,[C,E,B])
-remove5 :: ExpChord -> ExpChord
-remove5 (chord, _) = (chord, toNotes (getChordRoot chord) (S.delete (fromJust(intervalFrom Perfect 5)) (chordToIntervals chord)))
+remove5 :: Chord -> Chord
+remove5 chord = updateNotes chord $ toNotes (root chord) $ S.delete (fromJust(intervalFrom Perfect 5)) (toIntervals chord)
   where
     toNotes :: Note -> Set Interval -> [Note]
     toNotes root intSet = flip jumpIntervalFromNote root <$> toList intSet
@@ -68,20 +70,20 @@ remove5 (chord, _) = (chord, toNotes (getChordRoot chord) (S.delete (fromJust(in
 -- | Extends a chord triadically (e.g. CM7 becomes CM9). If it's a
 -- 6 chord, then it's extended to a 7add13 chord. If it's already a
 -- 13 chord, then this function returns Nothing.
-extend1 :: ExpChord -> Maybe ExpChord
-extend1 (chord, _)
-  | isJust newChord = Just (fromJust newChord, chordToNotes $ fromJust newChord)
+extend1 :: Chord -> Maybe Chord
+extend1 chord
+  | isJust newChord = Just $ updateNotes (fromJust newChord) (toNotes $ fromJust newChord)
   | otherwise = Nothing
   where
     newChord :: Maybe Chord
     newChord
-      | getDegree (getHighestNatural chord) == 6
-        = Just (chordFrom (getChordRoot chord) (C.getQuality chord)
-                (nonMajorNatural 7) (getExtensions chord ++ [add 13]) (getSus chord))
-      | getDegree (getHighestNatural chord) == 13 = Nothing
+      | getDegree (highestNatural chord) == 6
+        = Just (chordFrom (root chord) (quality chord)
+                (nonMajorNatural 7) (extensions chord ++ [add 13]) (suspension chord))
+      | getDegree (highestNatural chord) == 13 = Nothing
       | otherwise
-        = Just (chordFrom (getChordRoot chord) (C.getQuality chord)
-          (extendHighestNat (getHighestNatural chord)) (getExtensions chord) (getSus chord))
+        = Just (chordFrom (root chord) (quality chord)
+          (extendHighestNat (highestNatural chord)) (extensions chord) (suspension chord))
 
     extendHighestNat :: HighestNatural -> HighestNatural
     extendHighestNat highNat =
@@ -109,23 +111,22 @@ negativeNote key note =
 -- Like with a single note, flipping a chord twice should give the same
 -- set of notes back.
 -- prop> negative key (negative key (_, notes)) == notes
-negative :: Note -> ExpChord -> ExpChord
-negative key (chord, notes) = (newChord, newNotes)
+negative :: Note -> Chord -> Chord
+negative key chord = head $ notesToChord newNotes
   where
-    newNotes = negativeNote key <$> notes
-    newChord = head (notesToChord newNotes)
+    newNotes = negativeNote key <$> toNotes chord
 
 -- | Given a chord, an interval quality, and an interval size,
 -- this transposes the chord by that interval. Because this function
 -- is only used internally by the module, it assumes the intervals are
 -- validly constructed.
 -- TODO: Make this a safe, general-purpose, exportable function
-transposeExpChord :: ExpChord -> IQ.Quality -> Int -> ExpChord
-transposeExpChord (chord, notes) iQual i =
+transposeChord :: Chord -> IQ.Quality -> Int -> Chord
+transposeChord chord iQual i =
   let
-    newChord = transposeToRoot chord $ respell $ jumpIntervalFromNote (fromJust (intervalFrom iQual i)) $ getChordRoot chord
+    newChord = transposeToRoot (getSymbol chord )$ respell $ jumpIntervalFromNote (fromJust (intervalFrom iQual i)) $ root chord
   in
-    (newChord, chordToNotes newChord)
+    chordFromSymbol newChord
 
 -- | Given a dominant chord or a minor 6 chord, this returns
 -- a list of chord substitutions from its diminished family.
@@ -134,25 +135,25 @@ transposeExpChord (chord, notes) iQual i =
 -- >>> notes = chordToNotes c
 -- >>> dimFamilySub (c, notes)
 -- [(Eb7,[Eb,G,Bb,Db]),(Gb7,[Gb,Bb,Db,Fb]),(A7,[A,C#,E,G])]
-dimFamilySub :: ExpChord -> [ExpChord]
-dimFamilySub eChord@(chord, _)
-  |  getQuality chord == CQ.Dominant ||
-    (getQuality chord == CQ.Minor && (fromJust (intervalFrom IQ.Major 6) `member` chordToIntervals chord))
-    = [transposeExpChord eChord IQ.Minor 3, transposeExpChord eChord (IQ.Diminished 1) 5, transposeExpChord eChord IQ.Major 6]
+dimFamilySub :: Chord -> [Chord]
+dimFamilySub eChord
+  |  quality eChord == CQ.Dominant ||
+    (quality eChord == CQ.Minor && (fromJust (intervalFrom IQ.Major 6) `member` toIntervals eChord))
+    = [transposeChord eChord IQ.Minor 3, transposeChord eChord (IQ.Diminished 1) 5, transposeChord eChord IQ.Major 6]
   | otherwise = []
 
 -- | Returns the same chord, but a tritone away.
 -- If applied twice in a row, returns the same chord:
 -- prop> tritoneSub $ tritoneSub (chord, notes) == (_, notes)
-tritoneSub :: ExpChord -> ExpChord
-tritoneSub eChord = transposeExpChord eChord (IQ.Augmented 1) 4
+tritoneSub :: Chord -> Chord
+tritoneSub eChord = transposeChord eChord (IQ.Augmented 1) 4
 
 -- | Given a key, and a chord in the key, this returns
 -- a list of chords that are diatonic functional substitutes.
 --
 -- If the chord is not diatonic to the key, then this returns [].
-diatonicFuncSub :: Note -> ExpChord -> [ExpChord]
-diatonicFuncSub key (chord, notes)
+diatonicFuncSub :: Note -> Chord -> [Chord]
+diatonicFuncSub key chord
   | validSub && degree == 1 = [fromJust (mediant key numNotes), fromJust (submediant key numNotes)]
   | validSub && degree == 2 = [fromJust (subdominant key numNotes)]
   | validSub && degree == 3 = [fromJust (tonic key numNotes), fromJust (submediant key numNotes)]
@@ -165,22 +166,22 @@ diatonicFuncSub key (chord, notes)
     validSub = chord `isDiatonicTo` major key
 
     degree :: Int
-    degree = 1 + fromJust (elemIndex (getChordRoot chord) (scaleToNotes (major key)))
+    degree = 1 + fromJust (elemIndex (root chord) (scaleToNotes (major key)))
 
     numNotes :: Int
-    numNotes = length notes
+    numNotes = length $ toNotes chord
 
 -- | Given a major quality chord, this returns a minor chord, and vice versa.
 -- If the quality is neither, then this returns Nothing.
-parallelSub :: ExpChord -> Maybe ExpChord
-parallelSub (chord, notes)
-  | isJust flippedChord = Just (fromJust flippedChord, chordToNotes $ fromJust flippedChord)
-  | otherwise = Nothing
+parallelSub :: Chord -> Maybe Chord
+parallelSub chord = flippedChord
   where
     flippedChord :: Maybe Chord
     flippedChord
-      | getQuality chord == CQ.Major = Just (chord {getQuality = CQ.Minor})
-      | getQuality chord == CQ.Minor = Just (chord {getQuality = CQ.Major})
+      | quality chord == CQ.Major =
+        Just $ chordFrom (root chord) CQ.Minor (highestNatural chord) (extensions chord) (suspension chord)
+      | quality chord == CQ.Minor =
+        Just $ chordFrom (root chord) CQ.Major (highestNatural chord) (extensions chord) (suspension chord)
       | otherwise = Nothing
 
 {-| Given a dominant chord, this returns a list of common
@@ -202,12 +203,12 @@ this returns an empty list.
 12. 13sus
 13. 7b9sus4
 -}
-alteredDominantSub :: ExpChord -> [ExpChord]
-alteredDominantSub (chord, notes)
-  | getQuality chord == CQ.Dominant = zip chords (chordToNotes <$> chords)
+alteredDominantSub :: Chord -> [Chord]
+alteredDominantSub chord
+  | quality chord == CQ.Dominant = chords
   | otherwise = []
   where
-    chords = delete chord $ map (uncurry3 $ chordFrom (getChordRoot chord) CQ.Dominant)
+    chords = delete chord $ map (uncurry3 $ chordFrom (root chord) CQ.Dominant)
       [ (nonMajorNatural 7, [flat 9], noSus)
       , (nonMajorNatural 7, [sharp 9], noSus)
       , (nonMajorNatural 7, [flat 5], noSus)

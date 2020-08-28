@@ -15,10 +15,10 @@ module Base.Class.Rooted
   ( Rooted (..)
   ) where
 
-import Base.Chord.Root
+import Base.Chord.Note
 
 import Base.Class.Chordal
 
 class Chordal a => Rooted a where
-  root :: a -> Root
-  toNotes :: a -> [Root]
+  root :: a -> Note
+  toNotes :: a -> [Note]

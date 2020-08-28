@@ -1,6 +1,7 @@
 module Base.ChordSymbol
   ( canonicalizeChord
   , transpose
+  , transposeToRoot
   ) where
 
 import Base.CQuality
@@ -10,6 +11,7 @@ import Base.Core.Quality.CQuality
 import Base.Chord.ChordShape
 import Base.Chord.ChordSymbol
 import Base.Chord.HighestNatural
+import Base.Chord.Note
 import Base.Chord.RawChord
 
 import Base.Interval
@@ -27,5 +29,10 @@ canonicalizeChord rc =
 transpose :: ChordSymbol -> Interval -> ChordSymbol
 transpose c int =
   chordSymbolFrom (jumpIntervalFromNote int (root c)) shape
+  where
+    shape = chordShapeFrom (quality c) (highestNatural c) (extensions c) (suspension c)
+
+transposeToRoot :: ChordSymbol -> Note -> ChordSymbol
+transposeToRoot c note = chordSymbolFrom note shape
   where
     shape = chordShapeFrom (quality c) (highestNatural c) (extensions c) (suspension c)

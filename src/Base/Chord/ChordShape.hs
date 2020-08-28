@@ -32,7 +32,7 @@ data ChordShape = ChordShape { getQuality :: Quality
                              , getHighestNatural :: HighestNatural
                              , getExtensions :: [Extension]
                              , getSus :: Sus
-                             } deriving Show
+                             } deriving (Eq, Show)
 
 instance Chordal ChordShape where
   quality = getQuality

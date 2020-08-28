@@ -18,7 +18,7 @@ module Base.Chord.ChordSymbol
   ) where
 
 import Base.Chord.ChordShape
-import Base.Chord.Root
+import Base.Chord.Note
 
 import Base.Class.Chordal
 import Base.Class.Rooted
@@ -27,9 +27,9 @@ import Base.Interval
 
 import Data.Set
 
-data ChordSymbol = ChordSymbol { getChordRoot :: Root
+data ChordSymbol = ChordSymbol { getChordRoot :: Note
                                , getShape :: ChordShape
-                               } deriving Show
+                               } deriving (Eq, Show)
 
 instance Chordal ChordSymbol where
   quality = quality . getShape
@@ -43,5 +43,5 @@ instance Rooted ChordSymbol where
   toNotes sym =
     flip jumpIntervalFromNote (getChordRoot sym) <$> toList (toIntervals sym)
 
-chordSymbolFrom :: Root -> ChordShape -> ChordSymbol
+chordSymbolFrom :: Note -> ChordShape -> ChordSymbol
 chordSymbolFrom = ChordSymbol
