@@ -2,7 +2,7 @@ module Main where
 
 import Lib
 import Language.Parser
-import Base.Chord
+import Base.ChordSymbol
 import Control.Monad (unless)
 
 main :: IO ()
