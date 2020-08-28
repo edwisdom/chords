@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ee4c89d7bed6b5301ea76804b74ab74db2265473402e362135317ea273e7ff33
+-- hash: f837b4f562ba53b2d2f26f2e7af5f96f55ac5c2865d732d975cabd9a52a90dc1
 
 name:           chords
 version:        0.1.0.0
@@ -51,8 +51,10 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      QuickCheck
+    , base >=4.7 && <5
     , containers
+    , generic-random
     , parsec
   default-language: Haskell2010
 
@@ -64,9 +66,11 @@ executable chords-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      QuickCheck
+    , base >=4.7 && <5
     , chords
     , containers
+    , generic-random
     , parsec
   default-language: Haskell2010
 
@@ -79,8 +83,10 @@ test-suite chords-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      QuickCheck
+    , base >=4.7 && <5
     , chords
     , containers
+    , generic-random
     , parsec
   default-language: Haskell2010

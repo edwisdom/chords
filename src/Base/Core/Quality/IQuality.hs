@@ -1,7 +1,12 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Base.Core.Quality.IQuality
   ( Quality(..)
   , baseQuality
   ) where
+
+import GHC.Generics
+import Generic.Random
+import Test.QuickCheck
 
 import Common.Utils (modByFrom)
 
@@ -11,7 +16,10 @@ data Quality
  | Minor
  | Diminished Int
  | Augmented Int
- deriving Show
+ deriving (Show, Generic)
+
+instance Arbitrary Quality where
+  arbitrary = genericArbitrary uniform
 
 baseQuality :: Int -> Quality
 baseQuality n
