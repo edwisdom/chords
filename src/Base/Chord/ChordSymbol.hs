@@ -13,7 +13,6 @@ note.
 
 module Base.Chord.ChordSymbol
   ( ChordSymbol
-  , getChordRoot
   , getShape
   , chordSymbolFrom
   ) where
@@ -21,9 +20,23 @@ module Base.Chord.ChordSymbol
 import Base.Chord.ChordShape
 import Base.Chord.Root
 
+import Base.Class.Chordal
+import Base.Class.Rooted
+
 data ChordSymbol = ChordSymbol { getChordRoot :: Root
                                , getShape :: ChordShape
                                } deriving Show
+
+instance Chordal ChordSymbol where
+  quality = quality . getShape
+  highestNatural = highestNatural . getShape
+  extensions = extensions . getShape
+  suspension = suspension . getShape
+  toIntervals = undefined
+
+instance Rooted ChordSymbol where
+  root = getChordRoot
+  toNotes = undefined
 
 chordSymbolFrom :: Root -> ChordShape -> ChordSymbol
 chordSymbolFrom = ChordSymbol

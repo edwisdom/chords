@@ -13,10 +13,6 @@ chord's root. The only functions exported are a constructor and accessors.
 
 module Base.Chord.ChordShape
   ( ChordShape
-  , getQuality
-  , getHighestNatural
-  , getExtensions
-  , getSus
   , chordShapeFrom
   ) where
 
@@ -26,11 +22,20 @@ import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Sus
 
+import Base.Class.Chordal
+
 data ChordShape = ChordShape { getQuality :: Quality
                              , getHighestNatural :: HighestNatural
                              , getExtensions :: [Extension]
                              , getSus :: Sus
                              } deriving Show
+
+instance Chordal ChordShape where
+  quality = getQuality
+  highestNatural = getHighestNatural
+  extensions = getExtensions
+  suspension = getSus
+  toIntervals = undefined
 
 chordShapeFrom :: Quality -> HighestNatural -> [Extension] -> Sus -> ChordShape
 chordShapeFrom = ChordShape

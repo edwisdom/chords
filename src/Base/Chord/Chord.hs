@@ -1,46 +1,39 @@
 module Base.Chord.Chord
   ( Chord
-  , getChordRoot
-  , getQuality
-  , getHighestNatural
-  , getExtensions
-  , getSus
   , chordFrom
   ) where
 
-import qualified Base.Chord.ChordShape as Shape
-import qualified Base.Chord.ChordSymbol as Sym
+import Base.Chord.ChordShape
+import Base.Chord.ChordSymbol
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Root
 import Base.Chord.Sus
 
-import Base.Core.Note
 import Base.Core.Quality.CQuality
 
-data Chord = Chord { getSymbol :: Sym.ChordSymbol
-                   , getNotes :: [Note]
+import Base.Class.Chordal
+import Base.Class.Rooted
+
+data Chord = Chord { getSymbol :: ChordSymbol
+                   , getNotes :: [Root]
                    } deriving Show
 
-getChordRoot :: Chord -> Root
-getChordRoot = Sym.getChordRoot . getSymbol
+instance Chordal Chord where
+  quality = quality . getSymbol
+  highestNatural = highestNatural . getSymbol
+  extensions = extensions . getSymbol
+  suspension = suspension . getSymbol
+  toIntervals = undefined
 
-getQuality :: Chord -> Quality
-getQuality = Shape.getQuality . Sym.getShape . getSymbol
-
-getHighestNatural :: Chord -> HighestNatural
-getHighestNatural = Shape.getHighestNatural . Sym.getShape . getSymbol
-
-getExtensions :: Chord -> [Extension]
-getExtensions = Shape.getExtensions . Sym.getShape . getSymbol
-
-getSus :: Chord -> Sus
-getSus = Shape.getSus . Sym.getShape . getSymbol
+instance Rooted Chord where
+  root = root . getSymbol
+  toNotes = getNotes
 
 -- TODO: Actually get `chordToNotes` somewhere where we can put the real list
 -- of notes here
 chordFrom :: Root -> Quality -> HighestNatural -> [Extension] -> Sus -> Chord
 chordFrom r q hn exts s =
-  Chord { getSymbol = Sym.chordSymbolFrom r $ Shape.chordShapeFrom q hn exts s
+  Chord { getSymbol = chordSymbolFrom r $ chordShapeFrom q hn exts s
         , getNotes = []
         }
