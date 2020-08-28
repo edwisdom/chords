@@ -1,9 +1,22 @@
+{-|
+Module      : Base.Core.Letter
+Description : Implements the Letter datatype and its basic functions
+Copyright   : (c) Uhhhh
+License     : GPL-3
+Maintainers : cphifer@galois.com, ejain49@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module exports the Letter datatype and functions to get the
+nexf or previous letter in a cyclical fashion.
+-}
 module Base.Core.Letter
   ( Letter(..)
   , nextNthLetter
   , prevNthLetter
   ) where
 
+-- | Musical letter names are one of A-G.
 data Letter
  = A
  | B
@@ -14,6 +27,8 @@ data Letter
  | G
  deriving (Show, Read, Eq)
 
+-- | This instance allows each letter to be converted to a number
+-- to allow for easy cyclical sequencing.
 instance Enum Letter where
   toEnum 0 = A
   toEnum 1 = B
@@ -32,8 +47,12 @@ instance Enum Letter where
   fromEnum F = 5
   fromEnum G = 6
 
+-- Given a letter and some number of letters to skip ahead, this function
+-- returns the resulting letter.
 nextNthLetter :: Letter -> Int -> Letter
 nextNthLetter letter i = iterate succ letter !! i
 
+-- Given a letter and some number of letters to go backwards, this function
+-- returns the resulting letter.
 prevNthLetter :: Letter -> Int -> Letter
 prevNthLetter letter i = iterate pred letter !! i
