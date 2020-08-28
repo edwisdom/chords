@@ -1,15 +1,38 @@
 module Base.Chord.Sus
   ( Sus
   , getMaybeDeg
+  , isSus
   , sus
   , noSus
+  , susNoNum
   ) where
 
-newtype Sus = Sus { getMaybeDeg :: Maybe Int }
-  deriving Show
+data Sus
+  = Sus Int
+  | SusNoNum
+  | NoSus
+  deriving(Eq)
+
+getMaybeDeg :: Sus -> Maybe Int
+getMaybeDeg (Sus i) = Just i
+getMaybeDeg _ = Nothing
+
+isSus :: Sus -> Bool
+isSus NoSus = False
+isSus _ = True
+
+instance Show Sus where
+  show sus =
+    case sus of
+      (Sus x) -> "sus" ++ show x
+      SusNoNum -> "sus"
+      NoSus -> ""
+
+susNoNum :: Sus
+susNoNum = SusNoNum
 
 sus :: Int -> Sus
-sus deg = Sus $ Just deg
+sus = Sus
 
 noSus :: Sus
-noSus = Sus Nothing
+noSus = NoSus

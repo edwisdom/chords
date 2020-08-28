@@ -13,27 +13,30 @@ module Scale
   , isSubsetMode
   , getSubsetModeByDegree
   , invert
+  , major
+  , minor
+  , scaleLength
   ) where
 
 
 import Base.Core.Quality.IQuality
-import Base.Chord.Root
+import Base.Chord.Note
 import Base.Interval hiding (invert)
 import qualified Base.Interval as I (invert)
 import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)
 import Control.Monad (filterM, zipWithM)
 import Data.List (sort, sortBy, intercalate, takeWhile)
-import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic, isSubsetOf)
+import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic, isSubsetOf, toList)
 import qualified Data.Set as S(filter, map)
 import Data.Maybe(fromJust)
 import Data.Function
 
 
 
-data Scale = Scale Root Mode
+data Scale = Scale Note Mode
 
 instance Show Scale where
-  show (Scale root mode) = show root ++ show mode
+  show (Scale note mode) = show note ++ " " ++ show mode
 
 data Mode = Mode BaseMode [ScaleExt]
 
@@ -74,10 +77,17 @@ data BaseMode
   deriving (Show, Enum, Eq)
 
 
+major :: Note -> Scale
+major key = Scale key (Mode Ionian [])
+
+minor :: Note -> Scale
+minor key = Scale key (Mode Aeolian [])
+
+
 nthDegreeIntervals :: Set Interval -> Int -> Set Interval
-nthDegreeIntervals ints n = S.map (|-| rootInterval) ints
+nthDegreeIntervals ints n = S.map (|-| noteInterval) ints
   where
-    rootInterval = toAscList ints !! (n - 1)
+   noteInterval = toAscList ints !! (n - 1)
 
 
 zipToIntervalSet :: [Quality] -> [Int] -> Maybe (Set Interval)
@@ -158,10 +168,11 @@ modeToIntervals (Mode baseMode exts) =
         oldInt = elemAt 0 (S.filter (\a -> getSize a == deg ext) intSet)
 
 
-scaleToNotes :: Scale -> Set Root
-scaleToNotes (Scale root mode) =
-  mapMonotonic (`jumpIntervalFromNote` root) $ modeToIntervals mode
+scaleToNotes :: Scale -> [Note]
+scaleToNotes (Scale note mode) = toList $ mapMonotonic (`jumpIntervalFromNote` note) (modeToIntervals mode)
 
+scaleLength :: Scale -> Int
+scaleLength s = length $ scaleToNotes s
 
 modalDistance :: Set Interval -> Set Interval -> Int
 modalDistance mode1 mode2 = sum $ intDistance <$> (zip `on` toAscList) mode1 mode2
@@ -209,7 +220,7 @@ intervalsToMode intSet =
       in
         modesToExts intSet <$> bmIntss
   in
-    takeWhile (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ uncurry Mode <$> zip sortedModes exts
+    filter (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ uncurry Mode <$> zip sortedModes exts
 
 
 isSubsetMode :: Set Interval -> Set Interval -> Bool

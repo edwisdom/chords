@@ -13,7 +13,7 @@ import Base.Chord
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.RawChord
-import Base.Chord.Root
+import Base.Chord.Note
 import Base.Chord.Sus
 
 import Common.Utils (rightToMaybe)
@@ -56,11 +56,11 @@ parserAccidental =
                         accs <- many1 $ char acc
                         return $ constructor $ length accs
 
-parserRoot :: Parser Root
-parserRoot = do noteChar <- oneOf "ABCDEFG"
+parserNote :: Parser Note
+parserNote = do letterChar <- oneOf "ABCDEFG"
                 let
-                  note = read [noteChar]
-                rootFrom note <$> parserAccidental
+                  letter = read [letterChar]
+                noteFrom letter <$> parserAccidental
 
 parserQuality :: Parser Quality
 parserQuality = choice $ parseQualfromString <$> qualStrings
@@ -97,13 +97,13 @@ parserHighestNatural =
 parserSus :: Parser Sus
 parserSus =
   do msus <- optionMaybe parserSusPresent
-     return $ maybe noSus sus msus
+     return (maybe noSus id (maybe susNoNum sus <$> msus))
   where
-    parserSusPresent :: Parser Int
+    parserSusPresent :: Parser (Maybe Int)
     parserSusPresent =
       do string "sus"
          number <- optionMaybe $ many1 digit
-         return $ maybe 2 read number
+         return $ read <$> number
 
 parserExtension :: Parser Extension
 parserExtension =
@@ -113,17 +113,17 @@ parserExtension =
   where
     parserSf :: Parser (Int -> Extension)
     parserSf =
-      do sf <- oneOf "b#"
-         return $ case sf of
-                    'b' -> flat
-                    '#' -> sharp
+      do sf <- string "b" <||> string "#" <|> string "add"
+         return $ if sf == "b" then flat
+                  else if sf == "#" then sharp
+                  else add
 
 parserChord :: Parser Chord
 parserChord =
-  do root <- parserRoot
+  do note <- parserNote
      mqual <- optionMaybe parserQuality
      highestQual <- option (nonMajorNatural 5) parserHighestNatural
      exts <- many parserExtension
      sus <- parserSus
      eof
-     return $ chordFrom root mqual highestQual exts sus
+     return $ chordFrom note mqual highestQual exts sus
