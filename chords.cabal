@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bb03c553064cfb3a0ddd292153f9eb5f0e39b0560ceb3e50d346caa7b4211bd8
+-- hash: 13ab1bc2e47ccb05e5045e3b9b52072b93eb9da720e06518d34e36fd02f4cd20
 
 name:           chords
 version:        0.1.0.0
@@ -27,7 +27,6 @@ source-repository head
 
 library
   exposed-modules:
-      Base.Chord
       Base.Chord.Chord
       Base.Chord.ChordShape
       Base.Chord.ChordSymbol
@@ -36,17 +35,20 @@ library
       Base.Chord.RawChord
       Base.Chord.Root
       Base.Chord.Sus
+      Base.ChordSymbol
+      Base.Class.Chordal
+      Base.Class.Rooted
       Base.Core.Accidental
       Base.Core.Note
       Base.Core.Quality.CQuality
       Base.Core.Quality.IQuality
       Base.CQuality
+      Base.Heliotonic
       Base.Interval
       Base.IQuality
       Base.PitchClass
       Common.Utils
       Language.Parser
-      Lib
       Scale
   other-modules:
       Paths_chords
