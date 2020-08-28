@@ -37,6 +37,8 @@ import Base.Core.Quality.IQuality as IQ
 import Base.Interval hiding (getQuality)
 import qualified Base.Interval as I(getQuality)
 
+import Common.Utils (uncurry3)
+
 import Data.List(sortBy, delete, zip4, zip5, find, elemIndex)
 import Lib(chordToIntervals, chordToNotes, qualityToIntervals, notesToChord)
 import Data.Set(Set(..), toList, member, isSubsetOf, fromList)
@@ -71,17 +73,19 @@ extend1 (chord, _)
   | isJust newChord = Just (fromJust newChord, chordToNotes $ fromJust newChord)
   | otherwise = Nothing
   where
-      newChord
-        | getDegree (getHighestNatural chord) == 6
-          = Just (chordFrom (getChordRoot chord) (C.getQuality chord)
-                 (nonMajorNatural 7) (getExtensions chord ++ [add 13]) (getSus chord))
-        | getDegree (getHighestNatural chord) == 13 = Nothing
-        | otherwise
-          = Just (chordFrom (getChordRoot chord) (C.getQuality chord)
-            (extendHighestNat (getHighestNatural chord)) (getExtensions chord) (getSus chord))
-      extendHighestNat :: HighestNatural -> HighestNatural
-      extendHighestNat highNat =
-        (if isMajor highNat then majorNatural else nonMajorNatural) $ getDegree highNat + 2
+    newChord :: Maybe Chord
+    newChord
+      | getDegree (getHighestNatural chord) == 6
+        = Just (chordFrom (getChordRoot chord) (C.getQuality chord)
+                (nonMajorNatural 7) (getExtensions chord ++ [add 13]) (getSus chord))
+      | getDegree (getHighestNatural chord) == 13 = Nothing
+      | otherwise
+        = Just (chordFrom (getChordRoot chord) (C.getQuality chord)
+          (extendHighestNat (getHighestNatural chord)) (getExtensions chord) (getSus chord))
+
+    extendHighestNat :: HighestNatural -> HighestNatural
+    extendHighestNat highNat =
+      (if isMajor highNat then majorNatural else nonMajorNatural) $ getDegree highNat + 2
 
 -- | Given a key and another note, this function flips the note over
 -- the axis of the key, as done in Ernst Levy's idea of negative harmony.
@@ -157,8 +161,13 @@ diatonicFuncSub key (chord, notes)
   | validSub && degree == 6 = [fromJust (tonic key numNotes), fromJust (mediant key numNotes)]
   | validSub && degree == 7 = [fromJust (dominant key numNotes)]
   where
+    validSub :: Bool
     validSub = chord `isDiatonicTo` major key
+
+    degree :: Int
     degree = 1 + fromJust (elemIndex (getChordRoot chord) (scaleToNotes (major key)))
+
+    numNotes :: Int
     numNotes = length notes
 
 -- | Given a major quality chord, this returns a minor chord, and vice versa.
@@ -168,6 +177,7 @@ parallelSub (chord, notes)
   | isJust flippedChord = Just (fromJust flippedChord, chordToNotes $ fromJust flippedChord)
   | otherwise = Nothing
   where
+    flippedChord :: Maybe Chord
     flippedChord
       | getQuality chord == CQ.Major = Just (chord {getQuality = CQ.Minor})
       | getQuality chord == CQ.Minor = Just (chord {getQuality = CQ.Major})
@@ -197,18 +207,18 @@ alteredDominantSub (chord, notes)
   | getQuality chord == CQ.Dominant = zip chords (chordToNotes <$> chords)
   | otherwise = []
   where
-    chords = delete chord
-      [ chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 9] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 5] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 5] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 9, flat 5] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9, sharp 5] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 13, flat 9] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [sharp 9, sharp 11] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 9) [flat 5] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 9) [sharp 5] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 13) [flat 9] noSus
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 13) [] susNoNum
-      , chordFrom (getChordRoot chord) CQ.Dominant (nonMajorNatural 7) [flat 9] (sus 4)
+    chords = delete chord $ map (uncurry3 $ chordFrom (getChordRoot chord) CQ.Dominant)
+      [ (nonMajorNatural 7, [flat 9], noSus)
+      , (nonMajorNatural 7, [sharp 9], noSus)
+      , (nonMajorNatural 7, [flat 5], noSus)
+      , (nonMajorNatural 7, [sharp 5], noSus)
+      , (nonMajorNatural 7, [flat 9, flat 5], noSus)
+      , (nonMajorNatural 7, [sharp 9, sharp 5], noSus)
+      , (nonMajorNatural 7, [flat 13, flat 9], noSus)
+      , (nonMajorNatural 7, [sharp 9, sharp 11], noSus)
+      , (nonMajorNatural 9, [flat 5], noSus)
+      , (nonMajorNatural 9, [sharp 5], noSus)
+      , (nonMajorNatural 13, [flat 9], noSus)
+      , (nonMajorNatural 13, [], susNoNum)
+      , (nonMajorNatural 7, [flat 9], sus 4)
       ]
