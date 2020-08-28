@@ -23,6 +23,10 @@ import Base.Chord.Root
 import Base.Class.Chordal
 import Base.Class.Rooted
 
+import Base.Interval
+
+import Data.Set
+
 data ChordSymbol = ChordSymbol { getChordRoot :: Root
                                , getShape :: ChordShape
                                } deriving Show
@@ -32,11 +36,12 @@ instance Chordal ChordSymbol where
   highestNatural = highestNatural . getShape
   extensions = extensions . getShape
   suspension = suspension . getShape
-  toIntervals = undefined
+  toIntervals = toIntervals . getShape
 
 instance Rooted ChordSymbol where
   root = getChordRoot
-  toNotes = undefined
+  toNotes sym =
+    flip jumpIntervalFromNote (getChordRoot sym) <$> toList (toIntervals sym)
 
 chordSymbolFrom :: Root -> ChordShape -> ChordSymbol
 chordSymbolFrom = ChordSymbol

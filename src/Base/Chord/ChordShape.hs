@@ -24,6 +24,10 @@ import Base.Chord.Sus
 
 import Base.Class.Chordal
 
+import Base.Heliotonic
+
+import Data.Set hiding (foldr)
+
 data ChordShape = ChordShape { getQuality :: Quality
                              , getHighestNatural :: HighestNatural
                              , getExtensions :: [Extension]
@@ -35,7 +39,14 @@ instance Chordal ChordShape where
   highestNatural = getHighestNatural
   extensions = getExtensions
   suspension = getSus
-  toIntervals = undefined
+  toIntervals shape =
+    let
+      qualInts  = qualityToIntervals $ getQuality shape
+      baseScale = highestNaturalToIntervals qualInts $ getHighestNatural shape
+      extendedScale = extendIntervals baseScale $ getExtensions shape
+      intervals     = susIntervals extendedScale $ getSus shape
+    in
+      foldr insert empty intervals
 
 chordShapeFrom :: Quality -> HighestNatural -> [Extension] -> Sus -> ChordShape
 chordShapeFrom = ChordShape

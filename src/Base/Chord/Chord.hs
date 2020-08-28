@@ -24,16 +24,16 @@ instance Chordal Chord where
   highestNatural = highestNatural . getSymbol
   extensions = extensions . getSymbol
   suspension = suspension . getSymbol
-  toIntervals = undefined
+  toIntervals = toIntervals. getSymbol
 
 instance Rooted Chord where
   root = root . getSymbol
   toNotes = getNotes
 
--- TODO: Actually get `chordToNotes` somewhere where we can put the real list
--- of notes here
 chordFrom :: Root -> Quality -> HighestNatural -> [Extension] -> Sus -> Chord
 chordFrom r q hn exts s =
   Chord { getSymbol = chordSymbolFrom r $ chordShapeFrom q hn exts s
-        , getNotes = []
+        , getNotes = toNotes sym
         }
+  where
+    sym = chordSymbolFrom r $ chordShapeFrom q hn exts s
