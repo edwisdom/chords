@@ -45,7 +45,7 @@ instance Show Note where
 -- Convert notes to a pitch class
 noteToPitchClass :: Note -> PitchClass
 noteToPitchClass r =
-  shiftPitchClassBy (impliedShift $ getAcc r) (letterToPitchClass $ getLetter r)
+  letterToPitchClass (getLetter r) @+@ impliedShift (getAcc r)
 
 -- Respell a note to its simplest form, i.e. with the fewest accidentals.
 -- If there are multiple equally simple respellings, this will return the one
