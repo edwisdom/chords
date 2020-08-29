@@ -1,5 +1,5 @@
 {-|
-Module      : ChordSubs
+Module      : Base.Chord.Subs
 Description : Provides functions to perform common chord substitutions
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -11,7 +11,7 @@ This module exports functions that, when given a chord (and
 sometimes other information such as key or interval), return
 possible chord substitutions.
 -}
-module ChordSubs
+module Base.Chord.Subs
   ( remove5
   , extend1
   , negativeNote
