@@ -49,7 +49,7 @@ import qualified Data.Set as S (delete)
 import Data.Maybe(fromJust, catMaybes, isJust)
 import Base.PitchClass(pitchClass)
 import qualified Data.Map.Strict as M (lookup, elems)
-import Scale
+import Base.Scale
 import Language.Parser
 
 -- | Removes the P5 interval from a given chord's note if it exists

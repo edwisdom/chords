@@ -1,4 +1,4 @@
-module Scale
+module Base.Scale
   ( Scale(..)
   , BaseMode(..)
   , Mode(..)

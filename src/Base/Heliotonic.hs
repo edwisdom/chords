@@ -29,7 +29,7 @@ import Base.Chord.Sus
 
 import Base.Interval
 
-import Scale (BaseMode(..), baseModeIntervals)
+import Base.Scale (BaseMode(..), baseModeIntervals)
 
 import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)

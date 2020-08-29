@@ -24,7 +24,7 @@ module Base.Chord.Diatonic
   , subtonic
   ) where
 
-import Scale
+import Base.Scale
 import Base.Chord.Chord
 import Base.Chord.Note
 import Base.Class.Rooted
