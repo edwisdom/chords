@@ -10,7 +10,6 @@ Portability : POSIX
 The type class @Invertible@ encompasses those types which can undergo a
 sensible notion of musical inversion.
 -}
-
 {-# LANGUAGE FlexibleInstances #-}
 
 module Base.Class.Invertible

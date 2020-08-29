@@ -10,7 +10,6 @@ Portability : POSIX
 Abstractly represent a chord symbol, i.e. a chord shape with a specified root
 note, but without the set of actual pitches in the chord.
 -}
-
 module Base.Chord.Symbol
   ( ChordSymbol
   , getShape

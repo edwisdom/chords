@@ -17,7 +17,6 @@ module Base.Scale
   , scaleLength
   ) where
 
-
 import Base.Core.Quality.IQuality
 import Base.Chord.Note
 import Base.Interval hiding (invert)
@@ -29,8 +28,6 @@ import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonoton
 import qualified Data.Set as S(filter, map)
 import Data.Maybe(fromJust)
 import Data.Function
-
-
 
 data Scale = Scale Note Mode
 
@@ -53,7 +50,6 @@ data ScaleExt = ScaleExt { acc :: Accidental
 instance Show ScaleExt where
   show ext = show (acc ext) ++ show (deg ext)
 
-
 data BaseMode
   = Lydian
   | Dorian
@@ -75,25 +71,21 @@ data BaseMode
   | DoubleHarmonicMajor
   deriving (Show, Enum, Eq)
 
-
 major :: Note -> Scale
 major key = Scale key (Mode Ionian [])
 
 minor :: Note -> Scale
 minor key = Scale key (Mode Aeolian [])
 
-
 nthDegreeIntervals :: Set Interval -> Int -> Set Interval
 nthDegreeIntervals ints n = S.map (|-| noteInterval) ints
   where
    noteInterval = toAscList ints !! (n - 1)
 
-
 zipToIntervalSet :: [Quality] -> [Int] -> Maybe (Set Interval)
 zipToIntervalSet quals sizes =
   do ints <- zipWithM intervalFrom quals sizes
      return $ fromList ints
-
 
 baseModeIntervals :: BaseMode -> Set Interval
 baseModeIntervals bm = if fromScratch then
@@ -154,7 +146,6 @@ baseModeIntervals bm = if fromScratch then
         Altered     -> (MelodicMinor, 7)
         PhrygianDom -> (HarmonicMinor, 5)
 
-
 modeToIntervals :: Mode -> Set Interval
 modeToIntervals (Mode baseMode exts) =
   foldr extIntervals (baseModeIntervals baseMode) exts
@@ -165,7 +156,6 @@ modeToIntervals (Mode baseMode exts) =
         -- TODO: If there isn't only one interval of a certain degree, the mode is
         -- ambiguously constructed and we should give a warning.
         oldInt = elemAt 0 (S.filter (\a -> getSize a == deg ext) intSet)
-
 
 scaleToNotes :: Scale -> [Note]
 scaleToNotes (Scale note mode) = toList $ mapMonotonic (`jumpIntervalFromNote` note) (modeToIntervals mode)
@@ -195,7 +185,6 @@ modesToExts mode1 mode2 =
           []
           zippedInts
 
-
 intervalsToMode :: Set Interval -> [Mode]
 intervalsToMode intSet =
   let
@@ -220,7 +209,6 @@ intervalsToMode intSet =
         modesToExts intSet <$> bmIntss
   in
     filter (\mode -> numAlteredDegsInMode mode == minimum (length <$> exts)) $ uncurry Mode <$> zip sortedModes exts
-
 
 isSubsetMode :: Set Interval -> Set Interval -> Bool
 isSubsetMode = isSubsetOf

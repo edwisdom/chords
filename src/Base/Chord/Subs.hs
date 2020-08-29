@@ -22,8 +22,6 @@ module Base.Chord.Subs
   , alteredDominantSub
   ) where
 
-
-
 import Base.ChordSymbol
 import Base.Chord.Chord as C
 import Base.Chord.Diatonic

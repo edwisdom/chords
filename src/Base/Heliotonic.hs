@@ -10,7 +10,6 @@ Portability : POSIX
 Create and modify heliotonic scales, which form the basis of turning chords and
 other constructs into sets of intervals/sets of notes.
 -}
-
 module Base.Heliotonic
   ( HeliotonicScale
   , qualityToIntervals

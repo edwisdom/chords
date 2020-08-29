@@ -22,7 +22,6 @@ module Base.PitchClass
 import Base.Core.Letter
 import Base.Core.Accidental
 
-
 -- | A pitch class is just an integer mod 12.
 newtype PitchClass = PitchClass { getPitchClass :: Int }
   deriving (Show, Eq, Ord)
@@ -43,7 +42,6 @@ infixl 6 @+@
 (@+@) :: PitchClass -> Int -> PitchClass
 (PitchClass p) @+@ i = pitchClass $ p + i
 
-
 -- | Convert a letter to a pitch class. The default is set for C to be 0
 -- and to work upwards from there.
 letterToPitchClass :: Letter -> PitchClass
@@ -54,6 +52,3 @@ letterToPitchClass F = pitchClass 5
 letterToPitchClass G = pitchClass 7
 letterToPitchClass A = pitchClass 9
 letterToPitchClass B = pitchClass 11
-
-
-

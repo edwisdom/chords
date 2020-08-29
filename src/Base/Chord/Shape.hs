@@ -10,7 +10,6 @@ Portability : POSIX
 @ChordShape@ captures all of the information in a 'Chord', other than the
 chord's root. The only functions exported are a constructor and accessors.
 -}
-
 module Base.Chord.Shape
   ( ChordShape
   , chordShapeFrom

@@ -32,7 +32,6 @@ import Data.Maybe(fromJust)
 import Common.Utils
 import Data.List(find)
 
-
 -- | Returns True if a given chord is diatonic to a given scale, i.e.
 -- the notes of the chord are all part of the scale.
 isDiatonicTo :: Chord -> Scale -> Bool
@@ -77,7 +76,6 @@ diatonicChord scale@(Scale note mode) numNotes degree jumpSize =
       Nothing
     else
       Just $ fromJust (find (\ c -> root c == notes !! (degree - 1)) (notesToChord chordTones))
-
 
 -- | Given a degree, returns a function that creates a diatonic triadic major chord
 -- from a key (i.e. a Note) and the number of notes.

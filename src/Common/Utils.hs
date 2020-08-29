@@ -32,15 +32,15 @@ rightToMaybe :: Either a b -> Maybe b
 rightToMaybe (Left _)  = Nothing
 rightToMaybe (Right b) = Just b
 
--- | Uncurries a tuple of 3 arguments
+-- | Uncurries a function of 3 arguments
 uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
 uncurry3 f (a, b, c) = f a b c
 
--- | Uncurries a tuple of 4 arguments
+-- | Uncurries a function of 4 arguments
 uncurry4 :: (a -> b -> c -> d -> e) -> (a, b, c, d) -> e
 uncurry4 f (a, b, c, d) = f a b c d
 
--- | Uncurries a tuple of 5 arguments
+-- | Uncurries a function of 5 arguments
 uncurry5 :: (a -> b -> c -> d -> e -> g) -> (a, b, c, d, e) -> g
 uncurry5 f (a, b, c, d, e) = f a b c d e
 
