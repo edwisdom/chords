@@ -1,3 +1,15 @@
+{-|
+Module      : Base.Chord.Chord
+Description : Representation of a chord
+Copyright   : (c) Uhhhh
+License     : GPL-3
+Maintainers : cphifer@galois.com, ejain49@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module provides the Chord datatype, its smart constructor
+and accessors, and a function to infer a chord from a set of notes.
+-}
 module Base.Chord.Chord
   ( Chord
   , chordFrom
@@ -32,10 +44,13 @@ import qualified Data.List as L
 import Data.Map as M
 import Data.Maybe (catMaybes, fromJust)
 
+-- | The chord datatype is simply a chord symbol,
+-- but with the specific notes as well.
 data Chord = Chord { getSymbol :: ChordSymbol
                    , getNotes :: [Note]
                    } deriving (Eq, Show)
 
+-- | A Chord has all the properties of the Chordal typeclass
 instance Chordal Chord where
   quality = quality . getSymbol
   highestNatural = highestNatural . getSymbol
@@ -43,10 +58,12 @@ instance Chordal Chord where
   suspension = suspension . getSymbol
   toIntervals = toIntervals. getSymbol
 
+-- | A Chord has all the properties of the Rooted typeclass
 instance Rooted Chord where
   root = root . getSymbol
   toNotes = getNotes
 
+-- | Smart constructor for a chord from its basic chordal structure
 chordFrom :: Note -> CQ.Quality -> HighestNatural -> [Extension] -> Sus -> Chord
 chordFrom r q hn exts s =
   Chord { getSymbol = chordSymbolFrom r $ chordShapeFrom q hn exts s
@@ -55,12 +72,23 @@ chordFrom r q hn exts s =
   where
     sym = chordSymbolFrom r $ chordShapeFrom q hn exts s
 
+-- | Smart constructor for a chord from a chord symbol
 chordFromSymbol :: ChordSymbol -> Chord
 chordFromSymbol sym = Chord { getSymbol = sym, getNotes = toNotes sym }
 
+-- | Given a chord and a set of new notes, updates the chord to
+-- have those notes instead. Note that this doesn't check if the
+-- given notes are actually associated with the same chord symbol.
 updateNotes :: Chord -> [Note] -> Chord
 updateNotes chord notes = chord { getNotes = notes }
 
+-- | Given a set of notes, converts them to a list of possible
+-- chords, one rooted at each note, sorted by their complexity,
+-- i.e. the number of extensions.
+--
+-- If a chord is converted to a set of notes and back, then
+-- the original chord must be in the list of possible chord options.
+-- prop> getSymbol chord `elem` $ getSymbol $ notesToChord $ toNotes chord
 notesToChord :: [Note] -> [Chord]
 notesToChord notes =
   let
