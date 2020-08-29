@@ -25,9 +25,9 @@ module Diatonic
   ) where
 
 import Scale
-import Lib
 import Base.Chord.Chord
 import Base.Chord.Note
+import Base.Class.Rooted
 import Data.Maybe(fromJust)
 import Common.Utils
 import Data.List(find)
@@ -36,7 +36,7 @@ import Data.List(find)
 -- | Returns True if a given chord is diatonic to a given scale, i.e.
 -- the notes of the chord are all part of the scale.
 isDiatonicTo :: Chord -> Scale -> Bool
-isDiatonicTo chord scale = all (`elem` scaleToNotes scale) (chordToNotes chord)
+isDiatonicTo chord scale = all (`elem` scaleToNotes scale) (toNotes chord)
 
 {-| Generates a diatonic chord given a scale and some constraints.
 
@@ -62,7 +62,7 @@ diatonicChord :: Scale -- ^ The scale, i.e. a list of notes
               -> Int   -- ^ The number of notes in the chord
               -> Int   -- ^ The scale degree that's the chord root
               -> Int   -- ^ The number of notes to skip ahead from the root on each jump
-              -> Maybe ExpChord -- ^ The resulting chord name and list of notes, or Nothing
+              -> Maybe Chord -- ^ The resulting chord name and list of notes, or Nothing
 diatonicChord scale@(Scale note mode) numNotes degree jumpSize =
   let
     notes = scaleToNotes scale
@@ -76,45 +76,45 @@ diatonicChord scale@(Scale note mode) numNotes degree jumpSize =
     then
       Nothing
     else
-      Just (fromJust (find (\ c -> getChordRoot c == notes !! (degree - 1)) (notesToChord chordTones)), chordTones)
+      Just $ fromJust (find (\ c -> root c == notes !! (degree - 1)) (notesToChord chordTones))
 
 
 -- | Given a degree, returns a function that creates a diatonic triadic major chord
 -- from a key (i.e. a Note) and the number of notes.
-getMajorFuncChord :: Int -> Note -> Int -> Maybe ExpChord
+getMajorFuncChord :: Int -> Note -> Int -> Maybe Chord
 getMajorFuncChord deg key numNotes = diatonicChord (Scale key (Mode Ionian [])) numNotes deg 2
 
 -- | Given a key and a number of notes, this returns a triadic I chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-tonic :: Note -> Int -> Maybe ExpChord
+tonic :: Note -> Int -> Maybe Chord
 tonic = getMajorFuncChord 1
 
 -- | Given a key and a number of notes, this returns a triadic IIm chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-supertonic :: Note -> Int -> Maybe ExpChord
+supertonic :: Note -> Int -> Maybe Chord
 supertonic = getMajorFuncChord 2
 
 -- | Given a key and a number of notes, this returns a triadic IIIm chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-mediant :: Note -> Int -> Maybe ExpChord
+mediant :: Note -> Int -> Maybe Chord
 mediant = getMajorFuncChord 3
 
 -- | Given a key and a number of notes, this returns a triadic IV chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-subdominant :: Note -> Int -> Maybe ExpChord
+subdominant :: Note -> Int -> Maybe Chord
 subdominant = getMajorFuncChord 4
 
 -- | Given a key and a number of notes, this returns a triadic V chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-dominant :: Note -> Int -> Maybe ExpChord
+dominant :: Note -> Int -> Maybe Chord
 dominant = getMajorFuncChord 5
 
 -- | Given a key and a number of notes, this returns a triadic VIm chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-submediant :: Note -> Int -> Maybe ExpChord
+submediant :: Note -> Int -> Maybe Chord
 submediant = getMajorFuncChord 6
 
 -- | Given a key and a number of notes, this returns a triadic VII0 chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
-subtonic :: Note -> Int -> Maybe ExpChord
+subtonic :: Note -> Int -> Maybe Chord
 subtonic = getMajorFuncChord 7
