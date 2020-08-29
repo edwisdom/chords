@@ -10,7 +10,6 @@ Portability : POSIX
 @ChordShape@ captures all of the information in a 'Chord', other than the
 chord's root. The only functions exported are a constructor and accessors.
 -}
-
 module Base.Chord.ChordShape
   ( ChordShape
   , chordShapeFrom
@@ -28,12 +27,14 @@ import Base.Heliotonic
 
 import Data.Set hiding (foldr)
 
+-- | A ChordShape, e.g. a M7 chord, is a rootless abstract shape.
 data ChordShape = ChordShape { getQuality :: Quality
                              , getHighestNatural :: HighestNatural
                              , getExtensions :: [Extension]
                              , getSus :: Sus
                              } deriving (Eq, Show)
 
+-- | ChordShape has all the properties of the Chordal typeclass
 instance Chordal ChordShape where
   quality = getQuality
   highestNatural = getHighestNatural
@@ -48,5 +49,6 @@ instance Chordal ChordShape where
     in
       foldr insert empty intervals
 
+-- | Smart constructor for ChordShape
 chordShapeFrom :: Quality -> HighestNatural -> [Extension] -> Sus -> ChordShape
 chordShapeFrom = ChordShape

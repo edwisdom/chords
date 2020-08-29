@@ -1,3 +1,15 @@
+{-|
+Module      : Language.Parser
+Description : Parses chord symbols from raw strings
+Copyright   : (c) Uhhhh
+License     : GPL-3
+Maintainers : cphifer@galois.com, ejain49@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module provides functions that parse user-entered
+raw strings into chord symbols.
+-}
 module Language.Parser
   ( parseChord
   , parserChord
@@ -35,14 +47,18 @@ import Text.Parsec.String (Parser) -- TODO: We're gonna want to do better than
 import Text.Parsec.Char (string, char, oneOf, digit)
 import Text.Parsec.Prim (try)
 
--- TODO: Let's be a little more robust here
+-- | Returns a chord symbol from a string if possible. If not, returns Nothing.
 parseChord :: String -> Maybe Chord
 parseChord s = rightToMaybe $ parse parserChord "" s
 
+-- | Combine two parsers in a specific order so that if they
+-- have shared prefixes, one of them is used first.
 -- N.B. This should only be used when it's absolutely necessary
 (<||>) :: Parser a -> Parser a -> Parser a
 p <||> q = try p <|> q
 
+-- | Returns a parser for accidentals. Note that
+-- the natural symbol is not accounted for.
 parserAccidental :: Parser Accidental
 parserAccidental =
   option natural (parseAllOf '#' <|> parseAllOf 'b')
@@ -55,12 +71,16 @@ parserAccidental =
                         accs <- many1 $ char acc
                         return $ constructor $ length accs
 
+-- | Returns a parser for a note by first
+-- parsing the letter and then the accidental.
 parserNote :: Parser Note
 parserNote = do letterChar <- oneOf "ABCDEFG"
                 let
                   letter = read [letterChar]
                 noteFrom letter <$> parserAccidental
 
+-- | Returns a parser for chord qualities.
+-- TODO: Add Maj and min as options
 parserQuality :: Parser Quality
 parserQuality = choice $ parseQualfromString <$> qualStrings
   where
@@ -78,6 +98,7 @@ parserQuality = choice $ parseQualfromString <$> qualStrings
     parseQualfromString :: (String, Quality) -> Parser Quality
     parseQualfromString (qualName, quality) = string qualName >> return quality
 
+-- | Returns a parser for the highest natural degree.
 parserHighestNatural :: Parser HighestNatural
 parserHighestNatural =
   do
@@ -93,10 +114,11 @@ parserHighestNatural =
                   else
                     nonMajorNatural
 
+-- | Returns a parser for the sus component.
 parserSus :: Parser Sus
 parserSus =
   do msus <- optionMaybe parserSusPresent
-     return (maybe noSus id (maybe susNoNum sus <$> msus))
+     return (maybe noSus (maybe susNoNum sus) msus)
   where
     parserSusPresent :: Parser (Maybe Int)
     parserSusPresent =
@@ -104,6 +126,7 @@ parserSus =
          number <- optionMaybe $ many1 digit
          return $ read <$> number
 
+-- | Returns a parser for chord extensions.
 parserExtension :: Parser Extension
 parserExtension =
   do sharpOrFlat <- parserSf
@@ -117,6 +140,7 @@ parserExtension =
                   else if sf == "#" then sharp
                   else add
 
+-- | Combines all the previous parsers to fully parse a ChordSymbol
 parserChord :: Parser Chord
 parserChord =
   do note <- parserNote
