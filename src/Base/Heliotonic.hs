@@ -35,8 +35,11 @@ import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)
 import qualified Data.Set as S
 
+-- | A heliotonic scale is a unique set of numbers, each associated
+-- with a different interval.
 type HeliotonicScale = Map Int Interval
 
+-- | This function turns chord qualities into their implied heliotonic scale.
 qualityToIntervals :: CQ.Quality -> HeliotonicScale
 qualityToIntervals qual =
   fromList $ zip [1 .. 7] $ S.toList $ baseModeIntervals $ qualityToScale qual
@@ -48,6 +51,10 @@ qualityToIntervals qual =
     qualityToScale CQ.Augmented = AugmentedQuality
     qualityToScale CQ.Diminished = DiminishedQuality
 
+-- | This function takes a heliotonic scale and modifies it given a sus.
+-- If there's a degree indicated, this replaces the 3 with that degree.
+-- If there's no degree, this just removes the 3.
+-- If there's no sus, this returns the original scale.
 susIntervals :: HeliotonicScale -> Sus -> HeliotonicScale
 susIntervals scale s
   | isSus s = maybe scale' (\i -> insert i (fromJust $ intervalFrom (IQ.baseQuality i) i) scale') $ getMaybeDeg s
@@ -56,7 +63,9 @@ susIntervals scale s
     scale' :: HeliotonicScale
     scale' = delete 3 scale
 
-
+-- | This function modifies a heliotonic scale given a list of extensions.
+-- If the integer exists in thescale, its associated interval is modified.
+-- If it doesn't exist, it's added with the appropriate interval.
 extendIntervals :: HeliotonicScale -> [Extension] -> HeliotonicScale
 extendIntervals = foldr $ flip extendInterval
   where
@@ -67,6 +76,9 @@ extendIntervals = foldr $ flip extendInterval
         deg   = degree ext
         shift = sign ext
 
+-- | This function extracts the right intervals from the heliotonic scale
+-- given the highestNatural and returns a new Heliotonic scale. If the
+-- highestNatural is Major, then the 7 is changed to be a Major 7.
 highestNaturalToIntervals :: HeliotonicScale -> HighestNatural -> HeliotonicScale
 highestNaturalToIntervals scale hn =
   let

@@ -1,3 +1,15 @@
+{-|
+Module      : Base.Chord.Note
+Description : Implements Note datatype and its utility functions
+Copyright   : (c) Uhhhh
+License     : GPL-3
+Maintainers : cphifer@galois.com, ejain49@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module provides the Note datatype, its smart constructors and
+accessors, and some basic functions on Notes.
+-}
 module Base.Chord.Note
   ( Note
   , getLetter
@@ -11,22 +23,36 @@ import Base.Core.Accidental
 import Base.Core.Letter
 import Base.PitchClass
 
+import Data.Function(on)
 
+-- | A Note consists of a Letter and an Accidental
 data Note = Note { getLetter :: Letter
                  , getAcc :: Accidental
                  }
-  deriving (Eq)
 
+-- | Two Notes are equal if they're enharmonically equivalent
+instance Eq Note where
+  n1 == n2 = ((==) `on` noteToPitchClass) n1 n2
+
+-- | Smart constructor for notes
 noteFrom :: Letter -> Accidental -> Note
 noteFrom letter acc = Note { getLetter = letter, getAcc = acc }
 
+-- | Show notes by concatenating the letter and accidental
 instance Show Note where
   show (Note letter acc) = show letter ++ show acc
 
+-- Convert notes to a pitch class
 noteToPitchClass :: Note -> PitchClass
 noteToPitchClass r =
-  shiftPitchClassBy (impliedShift $ getAcc r) (letterToPitchClass $ getLetter r)
+  letterToPitchClass (getLetter r) @+@ impliedShift (getAcc r)
 
+-- | Respell a note to its simplest form, i.e. with the fewest accidentals.
+-- If there are multiple equally simple respellings, this will return the one
+-- with the same type of accidentals as the original.
+
+-- This function is idempotent.
+-- prop> respell note == respell $ respell note
 respell :: Note -> Note
 respell (Note letter acc) =
   let
