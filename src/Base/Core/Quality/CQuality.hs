@@ -13,7 +13,7 @@ module Base.Core.Quality.CQuality
   ( Quality(..)
   ) where
 
--- This function implements certain reasonable defaults
+-- | This function implements certain reasonable defaults
 -- for showing chord qualities. Other options are possible,
 -- such as ^ for Major and - for Minor but while the parser
 -- can read these, we don't generally use them to show chord qualities.
@@ -26,7 +26,7 @@ instance Show Quality where
       Diminished -> "dim"
       Augmented -> "aug"
 
--- Chord qualities can be one of:
+-- | Chord qualities can be one of:
 -- 1. Major
 -- 2. Minor
 -- 3. Dominant

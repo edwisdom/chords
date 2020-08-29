@@ -26,7 +26,7 @@ import Base.Chord.HighestNatural
 import Base.Chord.Note
 import Base.Chord.Sus
 
--- The raw Chord datatype
+-- | The raw Chord datatype
 data Chord = Chord { -- | Get the root of the chord
                      getChordRoot :: Note
                      -- | Get the quality of the chord if it's indicated.
@@ -39,6 +39,6 @@ data Chord = Chord { -- | Get the root of the chord
                    , getSus :: Sus
                    } deriving Show
 
--- Smart constructor for a raw chord
+-- | Smart constructor for a raw chord
 chordFrom :: Note -> Maybe Quality -> HighestNatural -> [Extension] -> Sus -> Chord
 chordFrom = Chord

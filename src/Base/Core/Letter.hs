@@ -47,12 +47,12 @@ instance Enum Letter where
   fromEnum F = 5
   fromEnum G = 6
 
--- Given a letter and some number of letters to skip ahead, this function
+-- | Given a letter and some number of letters to skip ahead, this function
 -- returns the resulting letter.
 nextNthLetter :: Letter -> Int -> Letter
 nextNthLetter letter i = iterate succ letter !! i
 
--- Given a letter and some number of letters to go backwards, this function
+-- | Given a letter and some number of letters to go backwards, this function
 -- returns the resulting letter.
 prevNthLetter :: Letter -> Int -> Letter
 prevNthLetter letter i = iterate pred letter !! i

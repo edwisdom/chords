@@ -17,7 +17,7 @@ module Base.Core.Quality.IQuality
 
 import Common.Utils (modByFrom)
 
-{- Interval qualities can be one of:
+{-| Interval qualities can be one of:
 1. Major
 2. Perfect
 3. Minor
@@ -34,7 +34,7 @@ data Quality
  | Diminished Int
  | Augmented Int
 
--- Reasonable defaults for showing interval qualities. Note that
+-- | Reasonable defaults for showing interval qualities. Note that
 -- there is no standard for multiple diminished or augmented intervals
 -- so we simply show the integer followed by dim or aug.
 instance Show Quality where
@@ -44,7 +44,7 @@ instance Show Quality where
   show (Diminished i) = if i == 1 then "dim" else show i ++ "dim"
   show (Augmented i)  = if i == 1 then "aug" else show i ++ "aug"
 
--- Given an interval size, we return the base quality, either Perfect or Major
+-- | Given an interval size, we return the base quality, either Perfect or Major
 baseQuality :: Int -> Quality
 baseQuality n
   | canonicalized `elem` [1, 4, 5]    = Perfect

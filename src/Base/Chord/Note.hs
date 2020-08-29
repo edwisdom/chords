@@ -25,20 +25,20 @@ import Base.PitchClass
 
 import Data.Function(on)
 
--- A Note consists of a Letter and an Accidental
+-- | A Note consists of a Letter and an Accidental
 data Note = Note { getLetter :: Letter
                  , getAcc :: Accidental
                  }
 
--- Two Notes are equal if they're enharmonically equivalent
+-- | Two Notes are equal if they're enharmonically equivalent
 instance Eq Note where
   n1 == n2 = ((==) `on` noteToPitchClass) n1 n2
 
--- Smart constructor for notes
+-- | Smart constructor for notes
 noteFrom :: Letter -> Accidental -> Note
 noteFrom letter acc = Note { getLetter = letter, getAcc = acc }
 
--- Show notes by concatenating the letter and accidental
+-- | Show notes by concatenating the letter and accidental
 instance Show Note where
   show (Note letter acc) = show letter ++ show acc
 
@@ -47,7 +47,7 @@ noteToPitchClass :: Note -> PitchClass
 noteToPitchClass r =
   letterToPitchClass (getLetter r) @+@ impliedShift (getAcc r)
 
--- Respell a note to its simplest form, i.e. with the fewest accidentals.
+-- | Respell a note to its simplest form, i.e. with the fewest accidentals.
 -- If there are multiple equally simple respellings, this will return the one
 -- with the same type of accidentals as the original.
 

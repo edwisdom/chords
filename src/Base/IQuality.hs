@@ -19,7 +19,7 @@ module Base.IQuality
 
 import Base.Core.Quality.IQuality
 
--- Given an interval quality, this raises that quality by a semitone
+-- | Given an interval quality, this raises that quality by a semitone
 -- assuming that its base quality is Perfect.
 raisePerfect :: Quality -> Quality
 raisePerfect Perfect = Augmented 1
@@ -27,7 +27,7 @@ raisePerfect (Augmented x)  = Augmented $ x + 1
 raisePerfect (Diminished 1) = Perfect
 raisePerfect (Diminished x) = Diminished $ x - 1
 
--- Given an interval quality, this raises that quality by a semitone
+-- | Given an interval quality, this raises that quality by a semitone
 -- assuming that its base quality is Major.
 raiseMajor :: Quality -> Quality
 raiseMajor Major = Augmented 1
@@ -36,7 +36,7 @@ raiseMajor Minor          = Major
 raiseMajor (Diminished 1) = Minor
 raiseMajor (Diminished x) = Diminished $ x - 1
 
--- Given an interval quality, this lowers that quality by a semitone
+-- | Given an interval quality, this lowers that quality by a semitone
 -- assuming that its base quality is Perfect.
 lowerPerfect :: Quality -> Quality
 lowerPerfect Perfect        = Diminished 1
@@ -44,7 +44,7 @@ lowerPerfect (Diminished x) = Diminished $ x + 1
 lowerPerfect (Augmented 1)  = Perfect
 lowerPerfect (Augmented x)  = Augmented $ x-1
 
--- Given an interval quality, this lowers that quality by a semitone
+-- | Given an interval quality, this lowers that quality by a semitone
 -- assuming that its base quality is Major.
 lowerMajor :: Quality -> Quality
 lowerMajor Major          = Minor

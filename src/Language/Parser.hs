@@ -47,17 +47,17 @@ import Text.Parsec.String (Parser) -- TODO: We're gonna want to do better than
 import Text.Parsec.Char (string, char, oneOf, digit)
 import Text.Parsec.Prim (try)
 
--- Returns a chord symbol from a string if possible. If not, returns Nothing.
+-- | Returns a chord symbol from a string if possible. If not, returns Nothing.
 parseChord :: String -> Maybe Chord
 parseChord s = rightToMaybe $ parse parserChord "" s
 
--- Combine two parsers in a specific order so that if they
+-- | Combine two parsers in a specific order so that if they
 -- have shared prefixes, one of them is used first.
 -- N.B. This should only be used when it's absolutely necessary
 (<||>) :: Parser a -> Parser a -> Parser a
 p <||> q = try p <|> q
 
--- Returns a parser for accidentals. Note that
+-- | Returns a parser for accidentals. Note that
 -- the natural symbol is not accounted for.
 parserAccidental :: Parser Accidental
 parserAccidental =
@@ -71,7 +71,7 @@ parserAccidental =
                         accs <- many1 $ char acc
                         return $ constructor $ length accs
 
--- Returns a parser for a note by first
+-- | Returns a parser for a note by first
 -- parsing the letter and then the accidental.
 parserNote :: Parser Note
 parserNote = do letterChar <- oneOf "ABCDEFG"
@@ -79,7 +79,7 @@ parserNote = do letterChar <- oneOf "ABCDEFG"
                   letter = read [letterChar]
                 noteFrom letter <$> parserAccidental
 
--- Returns a parser for chord qualities.
+-- | Returns a parser for chord qualities.
 -- TODO: Add Maj and min as options
 parserQuality :: Parser Quality
 parserQuality = choice $ parseQualfromString <$> qualStrings
@@ -98,7 +98,7 @@ parserQuality = choice $ parseQualfromString <$> qualStrings
     parseQualfromString :: (String, Quality) -> Parser Quality
     parseQualfromString (qualName, quality) = string qualName >> return quality
 
--- Returns a parser for the highest natural degree.
+-- | Returns a parser for the highest natural degree.
 parserHighestNatural :: Parser HighestNatural
 parserHighestNatural =
   do
@@ -114,7 +114,7 @@ parserHighestNatural =
                   else
                     nonMajorNatural
 
--- Returns a parser for the sus component.
+-- | Returns a parser for the sus component.
 parserSus :: Parser Sus
 parserSus =
   do msus <- optionMaybe parserSusPresent
@@ -126,7 +126,7 @@ parserSus =
          number <- optionMaybe $ many1 digit
          return $ read <$> number
 
--- Returns a parser for chord extensions.
+-- | Returns a parser for chord extensions.
 parserExtension :: Parser Extension
 parserExtension =
   do sharpOrFlat <- parserSf
@@ -140,7 +140,7 @@ parserExtension =
                   else if sf == "#" then sharp
                   else add
 
--- Combines all the previous parsers to fully parse a ChordSymbol
+-- | Combines all the previous parsers to fully parse a ChordSymbol
 parserChord :: Parser Chord
 parserChord =
   do note <- parserNote

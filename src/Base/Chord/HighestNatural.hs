@@ -17,14 +17,14 @@ module Base.Chord.HighestNatural
   , nonMajorNatural
   ) where
 
--- The highest natural number of a chord is either major or not.
+-- | The highest natural number of a chord is either major or not.
 data HighestNatural =
   HighestNatural { isMajor :: Bool
                  , getDegree :: Int
                  }
   deriving(Eq)
 
--- Show highest naturals by printing an M if major.
+-- | Show highest naturals by printing an M if major.
 instance Show HighestNatural where
   show highNat =
     case (isMajor highNat, getDegree highNat) of
@@ -32,10 +32,10 @@ instance Show HighestNatural where
       (False, 5) -> ""
       (False, _) -> show (getDegree highNat)
 
--- Create a major variant of the HighestNatural given a degree
+-- | Create a major variant of the HighestNatural given a degree
 majorNatural :: Int -> HighestNatural
 majorNatural deg = HighestNatural { isMajor = True, getDegree = deg }
 
--- Create a nonmajor variant of the HighestNatural given a degree
+-- | Create a nonmajor variant of the HighestNatural given a degree
 nonMajorNatural :: Int -> HighestNatural
 nonMajorNatural deg = HighestNatural { isMajor = False, getDegree = deg }
