@@ -16,6 +16,8 @@ module Base.Interval
   , getIntWithSize
   ) where
 
+import Base.Class.Invertible
+
 import Base.Core.Accidental
 import Base.Core.Letter
 import Base.Core.Quality.IQuality
@@ -105,20 +107,19 @@ intervalToDistance interval =
 lowestAbsValue :: Int -> Int
 lowestAbsValue = modByFrom 12 (-6)
 
-
-invert :: Interval -> Interval
-invert (Interval iQual i) =
-  let
-    newI = normalizeIntervalSize $ 9 - normalizeIntervalSize i
-    newQual =
-      case iQual of
-        Major          -> Minor
-        Minor          -> Major
-        Perfect        -> Perfect
-        (Augmented x)  -> Diminished x
-        (Diminished x) -> Augmented x
-  in
-    Interval newQual newI
+instance Invertible Interval where
+  invert (Interval iQual i) =
+    let
+      newI = normalizeIntervalSize $ 9 - normalizeIntervalSize i
+      newQual =
+        case iQual of
+          Major          -> Minor
+          Minor          -> Major
+          Perfect        -> Perfect
+          (Augmented x)  -> Diminished x
+          (Diminished x) -> Augmented x
+    in
+      Interval newQual newI
 
 infixl 6 <+>
 (<+>) :: Interval -> Int -> Interval

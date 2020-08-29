@@ -12,7 +12,6 @@ module Scale
   , zipToIntervalSet
   , isSubsetMode
   , getSubsetModeByDegree
-  , invert
   , major
   , minor
   , scaleLength
@@ -228,9 +227,6 @@ isSubsetMode = isSubsetOf
 
 getSubsetModeByDegree :: Set Interval -> Set Int -> Set Interval
 getSubsetModeByDegree mode degs = S.filter (\i -> getSize i `elem` degs) mode
-
-invert :: Set Interval -> Set Interval
-invert = S.map I.invert
 
 numAlteredDegsInMode :: Mode -> Int
 numAlteredDegsInMode (Mode base exts) = length exts
