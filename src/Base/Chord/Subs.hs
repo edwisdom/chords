@@ -26,6 +26,7 @@ module Base.Chord.Subs
 
 import Base.ChordSymbol
 import Base.Chord.Chord as C
+import Base.Chord.Diatonic
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Note
@@ -49,7 +50,6 @@ import Data.Maybe(fromJust, catMaybes, isJust)
 import Base.PitchClass(pitchClass)
 import qualified Data.Map.Strict as M (lookup, elems)
 import Scale
-import Diatonic
 import Language.Parser
 
 -- | Removes the P5 interval from a given chord's note if it exists

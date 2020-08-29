@@ -1,5 +1,5 @@
 {-|
-Module      : Diatonic
+Module      : Base.Chord.Diatonic
 Description : Provides functions related to diatonic function
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -12,7 +12,7 @@ and generate diatonic chords given some basic constraints,
 such as the key, degree/function, number of notes, and
 interval structure (e.g. triadic, quartal, quintal).
 -}
-module Diatonic
+module Base.Chord.Diatonic
   ( diatonicChord
   , isDiatonicTo
   , tonic

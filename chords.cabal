@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9774d26ae55af4d2ac245aa4ae0bd92de52590d06131dc3df25bf32327f25285
+-- hash: 4718eaa7d539322eab59ad6459ef9f17d7fdefb9b38d72d19c4fb75f455d7fe5
 
 name:           chords
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Base.Chord.Chord
+      Base.Chord.Diatonic
       Base.Chord.Extension
       Base.Chord.HighestNatural
       Base.Chord.Note
@@ -50,7 +51,6 @@ library
       Base.IQuality
       Base.PitchClass
       Common.Utils
-      Diatonic
       Language.Parser
       Scale
   other-modules:
