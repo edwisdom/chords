@@ -20,7 +20,6 @@ import Data.Maybe ( isJust, fromMaybe )
 
 import Base.Core.Accidental
 import Base.Core.Quality.CQuality
-import Base.Chord
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
