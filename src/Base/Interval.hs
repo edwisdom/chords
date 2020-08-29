@@ -1,3 +1,16 @@
+{-|
+Module      : Base.Interval
+Description : Representation of, and functions on, intervals
+Copyright   : (c) Uhhhh
+License     : GPL-3
+Maintainers : cphifer@galois.com, ejain49@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module provides the Interval datatype, its accessors and
+smart constructors, functions to compute with intervals, and
+functions to infer intervals from other information (e.g. notes).
+-}
 module Base.Interval
   ( Interval
   , getQuality
@@ -30,25 +43,35 @@ import Common.Utils (modByFrom)
 
 import Data.Maybe (fromJust)
 
+-- | Intervals are defined by a quality and a size.
 data Interval = Interval { getQuality :: Quality
                          , getSize :: Int
                          }
 
+-- | Two intervals are equal if they're enharmonically equivalent.
 instance Eq Interval where
   int1 == int2 = intervalToDistance int1 == intervalToDistance int2
 
+-- | Intervals can be ordered by their distance in semitones.
 instance Ord Interval where
   int1 `compare` int2 = intervalToDistance int1 `compare` intervalToDistance int2
 
+-- | Show an interval by showing its constitutent parts
 instance Show Interval where
   show (Interval iQual i) = show iQual ++ show i
 
+-- | This converts interval sizes to [1-7] to avoid compound intervals.
 normalizeIntervalSize :: Int -> Int
 normalizeIntervalSize = modByFrom 7 1
 
+-- | Smart constructor for intervals to check whether the combination of
+-- quality and size is valid. If it's invalid, this returns Nothing.
+--
 -- TODO: This should probably return an Either String Interval (or an error
 -- type in place of String) instead of Maybe Interval, in order to facilitate
 -- more sophisticated error handling / reporting.
+--
+-- TODO: Make sure diminished and augmented don't get arguments > 11
 intervalFrom :: Quality -> Int -> Maybe Interval
 intervalFrom q s = if normalizedSize `elem` goodSizes then
                      Just Interval { getQuality = q, getSize = normalizedSize }
@@ -65,9 +88,12 @@ intervalFrom q s = if normalizedSize `elem` goodSizes then
                   Minor   -> [2, 3, 6, 7]
                   _       -> [1 .. 7]
 
+-- | Normalize an interval's size to [1-7] to avoid compound intervals.
 normalizeInterval :: Interval -> Interval
 normalizeInterval (Interval iQual i) = Interval iQual $ normalizeIntervalSize i
 
+-- | Convert an interval to a distance in semitones. If the input is an
+-- invalid interval, then this returns Nothing.
 intervalToDistance :: Interval -> Maybe Int
 intervalToDistance interval =
   case normalizeInterval interval of
@@ -102,10 +128,17 @@ intervalToDistance interval =
     -- Anything else must be an invalid interval
     _ -> Nothing
 
+-- | This function converts numbers to a range of [-6, 5]. This
+-- is primarily used to compute the smallest number of accidentals
+-- required to make interval math work out, i.e. we can represent
+-- any note with 6 flats and 5 sharps.
 lowestAbsValue :: Int -> Int
 lowestAbsValue = modByFrom 12 (-6)
 
-
+-- | Invert an interval, i.e. return the interval that, when added
+-- to the original interval, results in a perfect octave.
+--
+-- prop> invert i |+| i == fromJust $ intervalFrom Perfect 1
 invert :: Interval -> Interval
 invert (Interval iQual i) =
   let
@@ -120,6 +153,15 @@ invert (Interval iQual i) =
   in
     Interval newQual newI
 
+-- | When adding an integer to an interval with this infix operator,
+-- the interval's distance is increased by that integer without
+-- changing its size.
+--
+-- TODO: Figure out what to do if dim and aug < 11 and this function
+-- receives an integer argument > 11.
+--
+-- prop> intervalToDistance i + x == intervalToDistance (i <+> x)
+-- prop> getSize (i <+> _) == getSize i
 infixl 6 <+>
 (<+>) :: Interval -> Int -> Interval
 Interval iQual i <+> x =
@@ -133,11 +175,19 @@ Interval iQual i <+> x =
         (Major, -1)   -> lowerMajor
         (_, 0)         -> id
 
-
+-- | When subtracting an integer from an interval with this infix operator,
+-- the interval's distance is decreased by that integer without
+-- changing its size.
+--
+-- This has the same properties as <+> but it's the inverse.
+--
+-- prop> (i <+> x) <-> x == i
 infixl 6 <->
 (<->) :: Interval -> Int -> Interval
 interval <-> x = interval <+> (-x)
 
+-- | This infix operator adds two intervals to give a new interval. Note that
+-- this function may return compund intervals, i.e. getSize i > 7.
 infixl 6 |+|
 (|+|) :: Interval -> Interval -> Interval
 int1@(Interval q1 i1) |+| int2@(Interval q2 i2) =
@@ -151,10 +201,19 @@ int1@(Interval q1 i1) |+| int2@(Interval q2 i2) =
   in
     Interval defQual newI <+> diff
 
+-- | This infix operator subtracts one interval from another to give a
+-- new interval. Note that this function will only return intervals with
+-- getSize 0 < i < 8.
+--
+-- It is the inverse of |+|.
+--
+-- prop> (i1 |+| i2) |-| i2 == i1
 infixl 6 |-|
 (|-|) :: Interval -> Interval -> Interval
 int1 |-| int2 = normalizeInterval $ int1 |+| invert int2
 
+-- | Given an interval and a note, this returns the note that's
+-- __higher__ than the given note by the given interval.
 jumpIntervalFromNote :: Interval -> Note -> Note
 jumpIntervalFromNote (Interval iQual iNum) r =
   let
@@ -167,6 +226,7 @@ jumpIntervalFromNote (Interval iQual iNum) r =
     newAcc     = shiftToAcc $ lowestAbsValue $ wantedDist - currDist
   in noteFrom newNote newAcc
 
+-- | Given two notes, this function returns the interval between them.
 intervalBetweenNotes :: Note -> Note -> Interval
 intervalBetweenNotes start end =
   let
@@ -177,5 +237,8 @@ intervalBetweenNotes start end =
   in
     currInterval <+> modByFrom 12 (- 6) wantedDist
 
+-- | Given an interval size and a list of intervals, this returns the
+-- first occurrence of that interval size. Note that if the list
+-- doesn't contain the interval size, this function will panic.
 getIntWithSize :: Int -> [Interval] -> Interval
 getIntWithSize i intList = head (filter (\ x -> getSize x == i) intList)
