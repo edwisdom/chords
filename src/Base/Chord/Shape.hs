@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Chord.ChordShape
+Module      : Base.Chord.Shape
 Description : Abstract representation of a chord's shape
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -11,7 +11,7 @@ Portability : POSIX
 chord's root. The only functions exported are a constructor and accessors.
 -}
 
-module Base.Chord.ChordShape
+module Base.Chord.Shape
   ( ChordShape
   , chordShapeFrom
   ) where

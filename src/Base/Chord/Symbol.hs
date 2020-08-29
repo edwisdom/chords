@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Chord.ChordSymbol
+Module      : Base.Chord.Symbol
 Description : Abstract representation of a chord symbol
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -11,13 +11,13 @@ Abstractly represent a chord symbol, i.e. a chord shape with a specified root
 note.
 -}
 
-module Base.Chord.ChordSymbol
+module Base.Chord.Symbol
   ( ChordSymbol
   , getShape
   , chordSymbolFrom
   ) where
 
-import Base.Chord.ChordShape
+import Base.Chord.Shape
 import Base.Chord.Note
 
 import Base.Class.Chordal

@@ -7,8 +7,8 @@ module Base.Chord.Chord
   , notesToChord
   ) where
 
-import Base.Chord.ChordShape
-import Base.Chord.ChordSymbol
+import Base.Chord.Shape
+import Base.Chord.Symbol
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Note

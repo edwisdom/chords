@@ -8,8 +8,8 @@ import Base.CQuality
 
 import Base.Core.Quality.CQuality
 
-import Base.Chord.ChordShape
-import Base.Chord.ChordSymbol
+import Base.Chord.Shape
+import Base.Chord.Symbol
 import Base.Chord.HighestNatural
 import Base.Chord.Note
 import Base.Chord.RawChord
