@@ -19,11 +19,11 @@ module Base.Chord.RawChord
   , chordFrom
   ) where
 
+import Base.Core.Note
 import Base.Core.Quality.CQuality
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Note
 import Base.Chord.Sus
 
 -- | The raw Chord datatype

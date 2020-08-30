@@ -23,9 +23,9 @@ import Base.Chord.Shape
 import Base.Chord.Symbol
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Note
 import Base.Chord.Sus
 
+import Base.Core.Note
 import Base.Core.Quality.CQuality as CQ
 import Base.Core.Quality.IQuality as IQ
 

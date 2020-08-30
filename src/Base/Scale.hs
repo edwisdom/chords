@@ -18,7 +18,7 @@ module Base.Scale
   ) where
 
 import Base.Core.Quality.IQuality
-import Base.Chord.Note
+import Base.Core.Note
 import Base.Core.Interval hiding (invert)
 import qualified Base.Core.Interval as I (invert)
 import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)

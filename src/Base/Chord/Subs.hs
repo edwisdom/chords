@@ -26,13 +26,13 @@ import Base.Chord.Chord as C
 import Base.Chord.Diatonic
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Note
 import Base.Chord.Sus
 import Base.Chord.Symbol
 
 import Base.Class.Chordal
 import Base.Class.Rooted
 
+import Base.Core.Note
 import Base.Core.Quality.CQuality as CQ
 import Base.Core.Quality.IQuality as IQ
 

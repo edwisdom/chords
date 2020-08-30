@@ -26,7 +26,7 @@ module Base.Chord.Diatonic
 
 import Base.Scale
 import Base.Chord.Chord
-import Base.Chord.Note
+import Base.Core.Note
 import Base.Class.Rooted
 import Data.Maybe(fromJust)
 import Common.Utils

@@ -19,10 +19,10 @@ module Base.Chord.Symbol
   , transposeToRoot
   ) where
 
-import Base.Chord.Note
 import qualified Base.Chord.RawChord as RC
 import Base.Chord.Shape
 
+import Base.Core.Note
 import Base.Core.Quality.CQuality
 
 import Base.Class.Chordal

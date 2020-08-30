@@ -14,7 +14,7 @@ module Base.Class.Rooted
   ( Rooted (..)
   ) where
 
-import Base.Chord.Note
+import Base.Core.Note
 
 import Base.Class.Chordal
 

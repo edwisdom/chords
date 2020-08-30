@@ -35,7 +35,7 @@ import Base.Core.Accidental
 import Base.Core.Letter
 import Base.Core.Quality.IQuality
 
-import Base.Chord.Note
+import Base.Core.Note
 
 import Base.Core.PitchClass
 

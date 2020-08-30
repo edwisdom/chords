@@ -23,10 +23,10 @@ import qualified Base.Core.Quality.IQuality as IQ
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Note
 import Base.Chord.Sus
 
 import Base.Core.Interval
+import Base.Core.Note
 
 import Base.Scale (BaseMode(..), baseModeIntervals)
 
