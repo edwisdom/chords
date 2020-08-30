@@ -13,6 +13,10 @@ function to get the base quality of an interval size.
 module Base.Core.Quality.IQuality
   ( Quality(..)
   , baseQuality
+  , raisePerfect
+  , raiseMajor
+  , lowerPerfect
+  , lowerMajor
   ) where
 
 import Common.Utils (modByFrom)
@@ -51,3 +55,37 @@ baseQuality n
   | canonicalized `elem` [2, 3, 6, 7] = Major
   where
     canonicalized = modByFrom 7 1 n
+
+-- | Given an interval quality, this raises that quality by a semitone
+-- assuming that its base quality is Perfect.
+raisePerfect :: Quality -> Quality
+raisePerfect Perfect = Augmented 1
+raisePerfect (Augmented x)  = Augmented $ x + 1
+raisePerfect (Diminished 1) = Perfect
+raisePerfect (Diminished x) = Diminished $ x - 1
+
+-- | Given an interval quality, this raises that quality by a semitone
+-- assuming that its base quality is Major.
+raiseMajor :: Quality -> Quality
+raiseMajor Major = Augmented 1
+raiseMajor (Augmented x)  = Augmented $ x + 1
+raiseMajor Minor          = Major
+raiseMajor (Diminished 1) = Minor
+raiseMajor (Diminished x) = Diminished $ x - 1
+
+-- | Given an interval quality, this lowers that quality by a semitone
+-- assuming that its base quality is Perfect.
+lowerPerfect :: Quality -> Quality
+lowerPerfect Perfect        = Diminished 1
+lowerPerfect (Diminished x) = Diminished $ x + 1
+lowerPerfect (Augmented 1)  = Perfect
+lowerPerfect (Augmented x)  = Augmented $ x-1
+
+-- | Given an interval quality, this lowers that quality by a semitone
+-- assuming that its base quality is Major.
+lowerMajor :: Quality -> Quality
+lowerMajor Major          = Minor
+lowerMajor Minor          = Diminished 1
+lowerMajor (Diminished x) = Diminished $ x + 1
+lowerMajor (Augmented 1)  = Major
+lowerMajor (Augmented x)  = Augmented $ x - 1

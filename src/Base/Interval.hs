@@ -37,9 +37,7 @@ import Base.Core.Quality.IQuality
 
 import Base.Chord.Note
 
-import Base.IQuality
-
-import Base.PitchClass
+import Base.Core.PitchClass
 
 import Common.Utils (modByFrom)
 

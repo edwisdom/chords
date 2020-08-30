@@ -21,7 +21,7 @@ module Base.Chord.Note
 
 import Base.Core.Accidental
 import Base.Core.Letter
-import Base.PitchClass
+import Base.Core.PitchClass
 
 import Data.Function(on)
 

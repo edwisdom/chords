@@ -22,13 +22,13 @@ module Base.Chord.Subs
   , alteredDominantSub
   ) where
 
-import Base.ChordSymbol
 import Base.Chord.Chord as C
 import Base.Chord.Diatonic
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
 import Base.Chord.Note
 import Base.Chord.Sus
+import Base.Chord.Symbol
 
 import Base.Class.Chordal
 import Base.Class.Rooted
@@ -45,7 +45,7 @@ import Data.List(sortBy, delete, zip4, zip5, find, elemIndex)
 import Data.Set(Set(..), toList, member, isSubsetOf, fromList)
 import qualified Data.Set as S (delete)
 import Data.Maybe(fromJust, catMaybes, isJust)
-import Base.PitchClass(pitchClass)
+import Base.Core.PitchClass(pitchClass)
 import qualified Data.Map.Strict as M (lookup, elems)
 import Base.Scale
 import Language.Parser

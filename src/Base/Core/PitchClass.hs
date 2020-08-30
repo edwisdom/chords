@@ -1,5 +1,5 @@
 {-|
-Module      : Base.PitchClass
+Module      : Base.Core.PitchClass
 Description : Abstract representation of a pitch class
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -10,7 +10,7 @@ Portability : POSIX
 This module provides the PitchClass datatype, its smart constructor,
 and functions to compute with pitch classes.
 -}
-module Base.PitchClass
+module Base.Core.PitchClass
   ( pitchClass
   , PitchClass
   , letterToPitchClass

@@ -1,7 +1,7 @@
 module Main where
 
 import Language.Parser
-import Base.ChordSymbol
+import Base.Chord.Symbol
 import Base.Class.Rooted
 import Control.Monad (unless)
 
