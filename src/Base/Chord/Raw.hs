@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Chord.RawChord
+Module      : Base.Chord.Raw
 Description : Implements the raw chord datatype (pre-canonicalization)
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -9,7 +9,7 @@ Portability : POSIX
 
 This module provides the RawChord datatype and its smart constructor.
 -}
-module Base.Chord.RawChord
+module Base.Chord.Raw
   ( Chord
   , getChordRoot
   , getMQuality

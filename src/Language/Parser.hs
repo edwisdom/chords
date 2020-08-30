@@ -24,7 +24,7 @@ import Base.Core.Quality.CQuality
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.RawChord
+import Base.Chord.Raw
 import Base.Chord.Sus
 
 import Common.Utils (rightToMaybe)

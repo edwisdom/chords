@@ -19,7 +19,7 @@ module Base.Chord.Symbol
   , transposeToRoot
   ) where
 
-import qualified Base.Chord.RawChord as RC
+import qualified Base.Chord.Raw as RC
 import Base.Chord.Shape
 
 import Base.Core.Note
