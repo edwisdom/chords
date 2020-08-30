@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Heliotonic
+Module      : Base.Scale.Heliotonic
 Description : Construction of heliotonic scales from basic components.
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -10,7 +10,7 @@ Portability : POSIX
 Create and modify heliotonic scales, which form the basis of turning chords and
 other constructs into sets of intervals/sets of notes.
 -}
-module Base.Heliotonic
+module Base.Scale.Heliotonic
   ( HeliotonicScale
   , qualityToIntervals
   , susIntervals
@@ -26,7 +26,7 @@ import Base.Chord.HighestNatural
 import Base.Chord.Note
 import Base.Chord.Sus
 
-import Base.Interval
+import Base.Core.Interval
 
 import Base.Scale (BaseMode(..), baseModeIntervals)
 

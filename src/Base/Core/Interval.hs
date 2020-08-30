@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Interval
+Module      : Base.Core.Interval
 Description : Representation of, and functions on, intervals
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -11,7 +11,7 @@ This module provides the Interval datatype, its accessors and
 smart constructors, functions to compute with intervals, and
 functions to infer intervals from other information (e.g. notes).
 -}
-module Base.Interval
+module Base.Core.Interval
   ( Interval
   , getQuality
   , getSize

@@ -20,7 +20,7 @@ import Base.Chord.HighestNatural
 import Base.Chord.Extension
 import Base.Chord.Sus
 
-import Base.Interval
+import Base.Core.Interval
 
 import Data.Set
 

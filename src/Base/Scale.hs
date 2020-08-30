@@ -19,8 +19,8 @@ module Base.Scale
 
 import Base.Core.Quality.IQuality
 import Base.Chord.Note
-import Base.Interval hiding (invert)
-import qualified Base.Interval as I (invert)
+import Base.Core.Interval hiding (invert)
+import qualified Base.Core.Interval as I (invert)
 import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)
 import Control.Monad (filterM, zipWithM)
 import Data.List (sort, sortBy, intercalate, takeWhile)

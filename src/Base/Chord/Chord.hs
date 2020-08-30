@@ -32,9 +32,9 @@ import Base.Core.Quality.IQuality as IQ
 import Base.Class.Chordal
 import Base.Class.Rooted
 
-import Base.Heliotonic
+import Base.Scale.Heliotonic
 
-import Base.Interval
+import Base.Core.Interval
 
 import Common.Utils (uncurry4, uncurry5)
 

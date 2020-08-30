@@ -23,7 +23,7 @@ import Base.Chord.Sus
 
 import Base.Class.Chordal
 
-import Base.Heliotonic
+import Base.Scale.Heliotonic
 
 import Data.Set hiding (foldr)
 

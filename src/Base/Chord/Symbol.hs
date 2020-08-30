@@ -28,7 +28,7 @@ import Base.Core.Quality.CQuality
 import Base.Class.Chordal
 import Base.Class.Rooted
 
-import Base.Interval
+import Base.Core.Interval
 
 import Data.Set
 

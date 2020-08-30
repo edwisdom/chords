@@ -36,8 +36,8 @@ import Base.Class.Rooted
 import Base.Core.Quality.CQuality as CQ
 import Base.Core.Quality.IQuality as IQ
 
-import Base.Interval hiding (getQuality)
-import qualified Base.Interval as I(getQuality)
+import Base.Core.Interval hiding (getQuality)
+import qualified Base.Core.Interval as I(getQuality)
 
 import Common.Utils (uncurry3)
 
