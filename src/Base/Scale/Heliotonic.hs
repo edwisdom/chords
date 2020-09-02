@@ -28,7 +28,7 @@ import Base.Chord.Sus
 import Base.Core.Interval
 import Base.Core.Note
 
-import Base.Scale (BaseMode(..), baseModeIntervals)
+import Base.Scale.BaseMode
 
 import Data.Map.Strict (Map, insert, fromList, toList, (!), delete, (!?))
 import Data.Maybe (fromJust)

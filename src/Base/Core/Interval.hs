@@ -26,6 +26,8 @@ module Base.Core.Interval
   , modByFrom
   , normalizeIntervalSize
   , getIntWithSize
+  , nthDegreeIntervals
+  , zipToIntervalSet
   ) where
 
 import Base.Class.Invertible
@@ -40,7 +42,10 @@ import Base.Core.PitchClass
 
 import Common.Utils (modByFrom)
 
+import Control.Monad (zipWithM)
+
 import Data.Maybe (fromJust)
+import Data.Set as S hiding (filter)
 
 -- | Intervals are defined by a quality and a size.
 data Interval = Interval { getQuality :: Quality
@@ -241,3 +246,13 @@ intervalBetweenNotes start end =
 -- doesn't contain the interval size, this function will panic.
 getIntWithSize :: Int -> [Interval] -> Interval
 getIntWithSize i intList = head (filter (\ x -> getSize x == i) intList)
+
+nthDegreeIntervals :: Set Interval -> Int -> Set Interval
+nthDegreeIntervals ints n = S.map (|-| noteInterval) ints
+  where
+   noteInterval = toAscList ints !! (n - 1)
+
+zipToIntervalSet :: [Quality] -> [Int] -> Maybe (Set Interval)
+zipToIntervalSet quals sizes =
+  do ints <- zipWithM intervalFrom quals sizes
+     return $ fromList ints

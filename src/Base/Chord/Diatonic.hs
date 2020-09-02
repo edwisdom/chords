@@ -24,7 +24,9 @@ module Base.Chord.Diatonic
   , subtonic
   ) where
 
-import Base.Scale
+import Base.Scale.BaseMode
+import Base.Scale.Mode
+import Base.Scale.Scale
 import Base.Chord.Chord
 import Base.Core.Note
 import Base.Class.Rooted
@@ -80,7 +82,7 @@ diatonicChord scale@(Scale note mode) numNotes degree jumpSize =
 -- | Given a degree, returns a function that creates a diatonic triadic major chord
 -- from a key (i.e. a Note) and the number of notes.
 getMajorFuncChord :: Int -> Note -> Int -> Maybe Chord
-getMajorFuncChord deg key numNotes = diatonicChord (Scale key (Mode Ionian [])) numNotes deg 2
+getMajorFuncChord deg key numNotes = diatonicChord (Scale key (modeFrom Ionian [])) numNotes deg 2
 
 -- | Given a key and a number of notes, this returns a triadic I chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
