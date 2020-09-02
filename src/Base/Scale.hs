@@ -2,7 +2,6 @@ module Base.Scale
   ( Scale(..)
   , BaseMode(..)
   , Mode(..)
-  , ScaleExt(..)
   , baseModeIntervals
   , modeToIntervals
   , scaleToNotes
@@ -19,9 +18,9 @@ module Base.Scale
 
 import Base.Core.Quality.IQuality
 import Base.Core.Note
-import Base.Core.Interval hiding (invert)
-import qualified Base.Core.Interval as I (invert)
+import Base.Core.Interval
 import Base.Core.Accidental(Accidental(..), impliedShift, shiftToAcc, natural)
+import Base.Scale.Extension
 import Control.Monad (filterM, zipWithM)
 import Data.List (sort, sortBy, intercalate, takeWhile)
 import Data.Set(Set(..), fromList, toAscList, elemAt, insert, delete, mapMonotonic, isSubsetOf, toList)
@@ -34,7 +33,7 @@ data Scale = Scale Note Mode
 instance Show Scale where
   show (Scale note mode) = show note ++ " " ++ show mode
 
-data Mode = Mode BaseMode [ScaleExt]
+data Mode = Mode BaseMode [Extension]
 
 instance Show Mode where
   show (Mode base exts) = show base
@@ -42,13 +41,6 @@ instance Show Mode where
                        ++ if null exts then "" else " "
                        --Add extensions separated by a comma...
                        ++ intercalate ", " (show <$> exts)
-
-data ScaleExt = ScaleExt { acc :: Accidental
-                         , deg :: Int
-                         }
-
-instance Show ScaleExt where
-  show ext = show (acc ext) ++ show (deg ext)
 
 data BaseMode
   = Lydian
@@ -150,12 +142,12 @@ modeToIntervals :: Mode -> Set Interval
 modeToIntervals (Mode baseMode exts) =
   foldr extIntervals (baseModeIntervals baseMode) exts
   where
-    extIntervals :: ScaleExt -> Set Interval -> Set Interval
-    extIntervals ext intSet = insert (oldInt <+> impliedShift (acc ext)) (delete oldInt intSet)
+    extIntervals :: Extension -> Set Interval -> Set Interval
+    extIntervals ext intSet = insert (oldInt <+> impliedShift (getAccidental ext)) (delete oldInt intSet)
       where
         -- TODO: If there isn't only one interval of a certain degree, the mode is
         -- ambiguously constructed and we should give a warning.
-        oldInt = elemAt 0 (S.filter (\a -> getSize a == deg ext) intSet)
+        oldInt = elemAt 0 (S.filter (\a -> getSize a == getDegree ext) intSet)
 
 scaleToNotes :: Scale -> [Note]
 scaleToNotes (Scale note mode) = toList $ mapMonotonic (`jumpIntervalFromNote` note) (modeToIntervals mode)
@@ -170,16 +162,16 @@ modalDistance mode1 mode2 = sum $ intDistance <$> (zip `on` toAscList) mode1 mod
     intDistance (i1, i2) = abs $ fromJust $ intervalToDistance (i1 |-| i2)
 
 
-modesToExts :: Set Interval -> Set Interval -> [ScaleExt]
+modesToExts :: Set Interval -> Set Interval -> [Extension]
 modesToExts mode1 mode2 =
   let
     zippedInts = zip (toAscList mode1) (toAscList mode2)
     intervalDiffToAcc :: Interval -> Interval -> Accidental
     intervalDiffToAcc i1 i2 = shiftToAcc $ fromJust $ intervalToDistance $ i2 |-| i1
-    accToExtList :: Accidental -> Int -> [ScaleExt] -> [ScaleExt]
+    accToExtList :: Accidental -> Int -> [Extension] -> [Extension]
     accToExtList accidental degree
       | accidental == natural = id
-      | otherwise             = (ScaleExt { acc = accidental, deg = degree } :)
+      | otherwise             = (scaleExtensionFrom accidental degree :)
   in
     foldr (\(i1,i2) exts -> accToExtList (intervalDiffToAcc i2 i1) (getSize i1) exts)
           []
@@ -201,7 +193,7 @@ intervalsToMode intSet =
     sortedModes :: [BaseMode]
     sortedModes = sortBy (compare `on` distanceFromIntSet intSet) sameDegreeModes
 
-    exts :: [[ScaleExt]]
+    exts :: [[Extension]]
     exts =
       let
         bmIntss = baseModeIntervals <$> sortedModes

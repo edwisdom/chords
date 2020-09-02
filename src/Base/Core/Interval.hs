@@ -22,7 +22,6 @@ module Base.Core.Interval
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
-  , invert
   , intervalBetweenNotes
   , modByFrom
   , normalizeIntervalSize
