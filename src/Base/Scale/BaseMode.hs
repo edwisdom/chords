@@ -1,3 +1,15 @@
+{-|
+Module      : Base.Scale.BaseMode
+Description : Representation of a base mode
+Copyright   : (c) Uhhhh
+License     : GPL-3
+Maintainers : cphifer@galois.com, ejain49@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module provides the representation for a base mode
+and a function to convert base modes to a set of intervals.
+-}
 module Base.Scale.BaseMode
   ( BaseMode(..)
   , baseModeIntervals
@@ -9,6 +21,9 @@ import Base.Core.Quality.IQuality
 import Data.Maybe (fromJust)
 import Data.Set
 
+-- | A BaseMode must be one of these names.
+-- TODO: Implement: Blues scale, pentatonics
+-- TODO: Figure out if we're missing any more.
 data BaseMode
   = Lydian
   | Dorian
@@ -30,6 +45,9 @@ data BaseMode
   | DoubleHarmonicMajor
   deriving (Show, Enum, Eq)
 
+-- | Given a base mode, this returns a set of intervals. Whereas
+-- some base modes are created from scratch (like Ionian), others
+-- (e.g. Dorian, Phrygian, etc.) can be derived by shifting those modes.
 baseModeIntervals :: BaseMode -> Set Interval
 baseModeIntervals bm = if fromScratch then
                          fromJust $ zipToIntervalSet bmQualities [1 .. 7]
