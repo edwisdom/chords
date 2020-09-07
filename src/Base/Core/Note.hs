@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Chord.Note
+Module      : Base.Core.Note
 Description : Implements Note datatype and its utility functions
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -10,7 +10,7 @@ Portability : POSIX
 This module provides the Note datatype, its smart constructors and
 accessors, and some basic functions on Notes.
 -}
-module Base.Chord.Note
+module Base.Core.Note
   ( Note
   , getLetter
   , getAcc
@@ -21,7 +21,7 @@ module Base.Chord.Note
 
 import Base.Core.Accidental
 import Base.Core.Letter
-import Base.PitchClass
+import Base.Core.PitchClass
 
 import Data.Function(on)
 

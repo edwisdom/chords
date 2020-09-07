@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Chord.ChordSymbol
+Module      : Base.Chord.Symbol
 Description : Abstract representation of a chord symbol
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -10,20 +10,25 @@ Portability : POSIX
 Abstractly represent a chord symbol, i.e. a chord shape with a specified root
 note, but without the set of actual pitches in the chord.
 -}
-
-module Base.Chord.ChordSymbol
+module Base.Chord.Symbol
   ( ChordSymbol
   , getShape
   , chordSymbolFrom
+  , canonicalizeChord
+  , transpose
+  , transposeToRoot
   ) where
 
-import Base.Chord.ChordShape
-import Base.Chord.Note
+import qualified Base.Chord.Raw as RC
+import Base.Chord.Shape
+
+import Base.Core.Note
+import Base.Core.Quality.CQuality
 
 import Base.Class.Chordal
 import Base.Class.Rooted
 
-import Base.Interval
+import Base.Core.Interval
 
 import Data.Set
 
@@ -52,3 +57,29 @@ instance Rooted ChordSymbol where
 -- | Smart constructor for a ChordSymbol
 chordSymbolFrom :: Note -> ChordShape -> ChordSymbol
 chordSymbolFrom = ChordSymbol
+
+-- | Canonicalize a raw chord into a chord symbol. This is used
+-- as the last step to parse user-inputted chord symbol strings.
+canonicalizeChord :: RC.Chord -> ChordSymbol
+canonicalizeChord rc =
+  chordSymbolFrom (RC.getChordRoot rc) shape
+  where
+    hn = RC.getHighestNatural rc
+    shape = chordShapeFrom (canonicalizeQuality (RC.getMQuality rc) hn) hn (RC.getExtensions rc) (RC.getSus rc)
+
+-- | Transpose a chord symbol __up__ by a given interval, returning a new chord symbol.
+-- The chord shape remains unchanged.
+-- prop> getShape $ transpose c _ == getShape c
+transpose :: ChordSymbol -> Interval -> ChordSymbol
+transpose c int =
+  chordSymbolFrom (jumpIntervalFromNote int (root c)) shape
+  where
+    shape = chordShapeFrom (quality c) (highestNatural c) (extensions c) (suspension c)
+
+-- | Transpose a chord symbol to a new root note, keeping the same chord shape.
+-- | The chord shape remains unchanged.
+-- prop> getShape $ transposeToRoot c _ == getShape c
+transposeToRoot :: ChordSymbol -> Note -> ChordSymbol
+transposeToRoot c note = chordSymbolFrom note shape
+  where
+    shape = chordShapeFrom (quality c) (highestNatural c) (extensions c) (suspension c)

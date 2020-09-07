@@ -10,7 +10,6 @@ Portability : POSIX
 The type class @Chordal@ stands for those types admitting a sensible notion of
 chord structure, divorced from any notion of being rooted at a particular note.
 -}
-
 module Base.Class.Chordal
   ( Chordal (..)
   ) where
@@ -21,7 +20,7 @@ import Base.Chord.HighestNatural
 import Base.Chord.Extension
 import Base.Chord.Sus
 
-import Base.Interval
+import Base.Core.Interval
 
 import Data.Set
 

@@ -19,22 +19,22 @@ module Base.Chord.Chord
   , notesToChord
   ) where
 
-import Base.Chord.ChordShape
-import Base.Chord.ChordSymbol
+import Base.Chord.Shape
+import Base.Chord.Symbol
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Note
 import Base.Chord.Sus
 
+import Base.Core.Note
 import Base.Core.Quality.CQuality as CQ
 import Base.Core.Quality.IQuality as IQ
 
 import Base.Class.Chordal
 import Base.Class.Rooted
 
-import Base.Heliotonic
+import Base.Scale.Heliotonic
 
-import Base.Interval
+import Base.Core.Interval
 
 import Common.Utils (uncurry4, uncurry5)
 

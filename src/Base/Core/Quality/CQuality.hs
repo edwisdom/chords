@@ -11,7 +11,10 @@ This module exports the (chord) Quality datatype.
 -}
 module Base.Core.Quality.CQuality
   ( Quality(..)
+  , canonicalizeQuality
   ) where
+
+import Base.Chord.HighestNatural
 
 -- | This function implements certain reasonable defaults
 -- for showing chord qualities. Other options are possible,
@@ -39,3 +42,9 @@ data Quality
   | Diminished
   | Augmented
   deriving(Eq)
+
+-- | Given the user-provided quality (which may be Nothing) and the
+-- HighestNatural, this infers the quality of the chord and returns it.
+canonicalizeQuality :: Maybe Quality -> HighestNatural -> Quality
+canonicalizeQuality Nothing  hn = if getDegree hn < 7 then Major else Dominant
+canonicalizeQuality (Just q) _  = q

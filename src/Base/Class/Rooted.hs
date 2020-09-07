@@ -10,12 +10,11 @@ Portability : POSIX
 The type class @Rooted@ encompasses all of the 'Chordal' types that also admit
 a sensible notion of being rooted, i.e. having a root note.
 -}
-
 module Base.Class.Rooted
   ( Rooted (..)
   ) where
 
-import Base.Chord.Note
+import Base.Core.Note
 
 import Base.Class.Chordal
 

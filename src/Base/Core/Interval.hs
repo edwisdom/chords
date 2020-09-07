@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Interval
+Module      : Base.Core.Interval
 Description : Representation of, and functions on, intervals
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -11,7 +11,7 @@ This module provides the Interval datatype, its accessors and
 smart constructors, functions to compute with intervals, and
 functions to infer intervals from other information (e.g. notes).
 -}
-module Base.Interval
+module Base.Core.Interval
   ( Interval
   , getQuality
   , getSize
@@ -22,26 +22,30 @@ module Base.Interval
   , jumpIntervalFromNote
   , (|+|)
   , (|-|)
-  , invert
   , intervalBetweenNotes
   , modByFrom
   , normalizeIntervalSize
   , getIntWithSize
+  , nthDegreeIntervals
+  , zipToIntervalSet
   ) where
+
+import Base.Class.Invertible
 
 import Base.Core.Accidental
 import Base.Core.Letter
 import Base.Core.Quality.IQuality
 
-import Base.Chord.Note
+import Base.Core.Note
 
-import Base.IQuality
-
-import Base.PitchClass
+import Base.Core.PitchClass
 
 import Common.Utils (modByFrom)
 
+import Control.Monad (zipWithM)
+
 import Data.Maybe (fromJust)
+import Data.Set as S hiding (filter)
 
 -- | Intervals are defined by a quality and a size.
 data Interval = Interval { getQuality :: Quality
@@ -139,19 +143,19 @@ lowestAbsValue = modByFrom 12 (-6)
 -- to the original interval, results in a perfect octave.
 --
 -- prop> invert i |+| i == fromJust $ intervalFrom Perfect 1
-invert :: Interval -> Interval
-invert (Interval iQual i) =
-  let
-    newI = normalizeIntervalSize $ 9 - normalizeIntervalSize i
-    newQual =
-      case iQual of
-        Major          -> Minor
-        Minor          -> Major
-        Perfect        -> Perfect
-        (Augmented x)  -> Diminished x
-        (Diminished x) -> Augmented x
-  in
-    Interval newQual newI
+instance Invertible Interval where
+  invert (Interval iQual i) =
+    let
+      newI = normalizeIntervalSize $ 9 - normalizeIntervalSize i
+      newQual =
+        case iQual of
+          Major          -> Minor
+          Minor          -> Major
+          Perfect        -> Perfect
+          (Augmented x)  -> Diminished x
+          (Diminished x) -> Augmented x
+    in
+      Interval newQual newI
 
 -- | When adding an integer to an interval with this infix operator,
 -- the interval's distance is increased by that integer without
@@ -242,3 +246,13 @@ intervalBetweenNotes start end =
 -- doesn't contain the interval size, this function will panic.
 getIntWithSize :: Int -> [Interval] -> Interval
 getIntWithSize i intList = head (filter (\ x -> getSize x == i) intList)
+
+nthDegreeIntervals :: Set Interval -> Int -> Set Interval
+nthDegreeIntervals ints n = S.map (|-| noteInterval) ints
+  where
+   noteInterval = toAscList ints !! (n - 1)
+
+zipToIntervalSet :: [Quality] -> [Int] -> Maybe (Set Interval)
+zipToIntervalSet quals sizes =
+  do ints <- zipWithM intervalFrom quals sizes
+     return $ fromList ints

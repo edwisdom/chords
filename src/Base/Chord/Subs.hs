@@ -1,5 +1,5 @@
 {-|
-Module      : ChordSubs
+Module      : Base.Chord.Subs
 Description : Provides functions to perform common chord substitutions
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -11,7 +11,7 @@ This module exports functions that, when given a chord (and
 sometimes other information such as key or interval), return
 possible chord substitutions.
 -}
-module ChordSubs
+module Base.Chord.Subs
   ( remove5
   , extend1
   , negativeNote
@@ -22,23 +22,22 @@ module ChordSubs
   , alteredDominantSub
   ) where
 
-
-
-import Base.ChordSymbol
 import Base.Chord.Chord as C
+import Base.Chord.Diatonic
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.Note
 import Base.Chord.Sus
+import Base.Chord.Symbol
 
 import Base.Class.Chordal
 import Base.Class.Rooted
 
+import Base.Core.Note
 import Base.Core.Quality.CQuality as CQ
 import Base.Core.Quality.IQuality as IQ
 
-import Base.Interval hiding (getQuality)
-import qualified Base.Interval as I(getQuality)
+import Base.Core.Interval hiding (getQuality)
+import qualified Base.Core.Interval as I(getQuality)
 
 import Common.Utils (uncurry3)
 
@@ -46,10 +45,9 @@ import Data.List(sortBy, delete, zip4, zip5, find, elemIndex)
 import Data.Set(Set(..), toList, member, isSubsetOf, fromList)
 import qualified Data.Set as S (delete)
 import Data.Maybe(fromJust, catMaybes, isJust)
-import Base.PitchClass(pitchClass)
+import Base.Core.PitchClass(pitchClass)
 import qualified Data.Map.Strict as M (lookup, elems)
-import Scale
-import Diatonic
+import Base.Scale.Scale
 import Language.Parser
 
 -- | Removes the P5 interval from a given chord's note if it exists

@@ -1,5 +1,5 @@
 {-|
-Module      : Base.Chord.ChordShape
+Module      : Base.Chord.Shape
 Description : Abstract representation of a chord's shape
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -10,7 +10,7 @@ Portability : POSIX
 @ChordShape@ captures all of the information in a 'Chord', other than the
 chord's root. The only functions exported are a constructor and accessors.
 -}
-module Base.Chord.ChordShape
+module Base.Chord.Shape
   ( ChordShape
   , chordShapeFrom
   ) where
@@ -23,7 +23,7 @@ import Base.Chord.Sus
 
 import Base.Class.Chordal
 
-import Base.Heliotonic
+import Base.Scale.Heliotonic
 
 import Data.Set hiding (foldr)
 

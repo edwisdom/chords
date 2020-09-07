@@ -1,5 +1,5 @@
 {-|
-Module      : Base.PitchClass
+Module      : Base.Core.PitchClass
 Description : Abstract representation of a pitch class
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -10,7 +10,7 @@ Portability : POSIX
 This module provides the PitchClass datatype, its smart constructor,
 and functions to compute with pitch classes.
 -}
-module Base.PitchClass
+module Base.Core.PitchClass
   ( pitchClass
   , PitchClass
   , letterToPitchClass
@@ -21,7 +21,6 @@ module Base.PitchClass
 
 import Base.Core.Letter
 import Base.Core.Accidental
-
 
 -- | A pitch class is just an integer mod 12.
 newtype PitchClass = PitchClass { getPitchClass :: Int }
@@ -43,7 +42,6 @@ infixl 6 @+@
 (@+@) :: PitchClass -> Int -> PitchClass
 (PitchClass p) @+@ i = pitchClass $ p + i
 
-
 -- | Convert a letter to a pitch class. The default is set for C to be 0
 -- and to work upwards from there.
 letterToPitchClass :: Letter -> PitchClass
@@ -54,6 +52,3 @@ letterToPitchClass F = pitchClass 5
 letterToPitchClass G = pitchClass 7
 letterToPitchClass A = pitchClass 9
 letterToPitchClass B = pitchClass 11
-
-
-

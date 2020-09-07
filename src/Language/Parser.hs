@@ -19,12 +19,12 @@ module Language.Parser
 import Data.Maybe ( isJust, fromMaybe )
 
 import Base.Core.Accidental
+import Base.Core.Note
 import Base.Core.Quality.CQuality
 
 import Base.Chord.Extension
 import Base.Chord.HighestNatural
-import Base.Chord.RawChord
-import Base.Chord.Note
+import Base.Chord.Raw
 import Base.Chord.Sus
 
 import Common.Utils (rightToMaybe)

@@ -1,5 +1,5 @@
 {-|
-Module      : Diatonic
+Module      : Base.Chord.Diatonic
 Description : Provides functions related to diatonic function
 Copyright   : (c) Uhhhh
 License     : GPL-3
@@ -12,7 +12,7 @@ and generate diatonic chords given some basic constraints,
 such as the key, degree/function, number of notes, and
 interval structure (e.g. triadic, quartal, quintal).
 -}
-module Diatonic
+module Base.Chord.Diatonic
   ( diatonicChord
   , isDiatonicTo
   , tonic
@@ -24,14 +24,15 @@ module Diatonic
   , subtonic
   ) where
 
-import Scale
+import Base.Scale.BaseMode
+import Base.Scale.Mode
+import Base.Scale.Scale
 import Base.Chord.Chord
-import Base.Chord.Note
+import Base.Core.Note
 import Base.Class.Rooted
 import Data.Maybe(fromJust)
 import Common.Utils
 import Data.List(find)
-
 
 -- | Returns True if a given chord is diatonic to a given scale, i.e.
 -- the notes of the chord are all part of the scale.
@@ -78,11 +79,10 @@ diatonicChord scale@(Scale note mode) numNotes degree jumpSize =
     else
       Just $ fromJust (find (\ c -> root c == notes !! (degree - 1)) (notesToChord chordTones))
 
-
 -- | Given a degree, returns a function that creates a diatonic triadic major chord
 -- from a key (i.e. a Note) and the number of notes.
 getMajorFuncChord :: Int -> Note -> Int -> Maybe Chord
-getMajorFuncChord deg key numNotes = diatonicChord (Scale key (Mode Ionian [])) numNotes deg 2
+getMajorFuncChord deg key numNotes = diatonicChord (Scale key (modeFrom Ionian [])) numNotes deg 2
 
 -- | Given a key and a number of notes, this returns a triadic I chord.
 -- If number of notes is not between 2 and 7, this returns Nothing.
