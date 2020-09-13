@@ -17,7 +17,11 @@ module Common.Utils
   , uncurry4
   , uncurry5
   , getIndices
+  , allUnique
+  , isUnique
   ) where
+
+import Data.Set (fromList)
 
 -- | Given a modulus and the new lower bound, returns a function
 -- to mod a number accordingly.
@@ -48,3 +52,9 @@ uncurry5 f (a, b, c, d, e) = f a b c d e
 -- Note that if the indices are out of bounds, this function will panic.
 getIndices :: [Int] -> [a] -> [a]
 getIndices indices xs = map (xs !!) indices
+
+allUnique :: (Ord a) => [a] -> Bool
+allUnique xs = length xs == length (fromList xs)
+
+isUnique :: (Ord a) => [a] -> a -> Bool
+isUnique xs x = length (filter (== x) xs) == 1
