@@ -12,6 +12,7 @@ function to get the base quality of an interval size.
 -}
 module Base.Core.Quality.IQuality
   ( Quality(..)
+  , iQualFrom
   , baseQuality
   , raisePerfect
   , raiseMajor
@@ -27,9 +28,6 @@ import Common.Utils (modByFrom)
 3. Minor
 4. Diminished (single, doubly, triply, etc.)
 5. Augmented (single, doubly, triply, etc.)
-
-TODO: Make sure that interval qualities are using smart constructors
-so that diminished and augmented only receive integers >= 1.
 -}
 data Quality
  = Major
@@ -48,6 +46,14 @@ instance Show Quality where
   show (Diminished i) = if i == 1 then "dim" else show i ++ "dim"
   show (Augmented i)  = if i == 1 then "aug" else show i ++ "aug"
 
+
+iQualFrom :: Quality -> Maybe Quality
+iQualFrom (Diminished x) = if x > 0 && x < 12 then Just (Diminished x)
+                           else Nothing
+iQualFrom (Augmented x) = if x > 0 && x < 12 then Just (Augmented x)
+                           else Nothing
+iQualFrom q = Just q
+
 -- | Given an interval size, we return the base quality, either Perfect or Major
 baseQuality :: Int -> Quality
 baseQuality n
@@ -58,34 +64,38 @@ baseQuality n
 
 -- | Given an interval quality, this raises that quality by a semitone
 -- assuming that its base quality is Perfect.
-raisePerfect :: Quality -> Quality
-raisePerfect Perfect = Augmented 1
-raisePerfect (Augmented x)  = Augmented $ x + 1
-raisePerfect (Diminished 1) = Perfect
-raisePerfect (Diminished x) = Diminished $ x - 1
+raisePerfect :: Maybe Quality -> Maybe Quality
+raisePerfect (Just Perfect)        = Just $ Augmented 1
+raisePerfect (Just (Augmented x))  = iQualFrom $ Augmented $ x + 1
+raisePerfect (Just (Diminished 1)) = Just Perfect
+raisePerfect (Just (Diminished x)) = iQualFrom $ Diminished $ x - 1
+raisePerfect Nothing               = Nothing
 
 -- | Given an interval quality, this raises that quality by a semitone
 -- assuming that its base quality is Major.
-raiseMajor :: Quality -> Quality
-raiseMajor Major = Augmented 1
-raiseMajor (Augmented x)  = Augmented $ x + 1
-raiseMajor Minor          = Major
-raiseMajor (Diminished 1) = Minor
-raiseMajor (Diminished x) = Diminished $ x - 1
+raiseMajor :: Maybe Quality -> Maybe Quality
+raiseMajor (Just Major)          = Just $ Augmented 1
+raiseMajor (Just (Augmented x))  = iQualFrom $ Augmented $ x + 1
+raiseMajor (Just Minor        )  = Just Major
+raiseMajor (Just (Diminished 1)) = Just Minor
+raiseMajor (Just (Diminished x)) = iQualFrom $ Diminished $ x - 1
+raiseMajor Nothing               = Nothing
 
 -- | Given an interval quality, this lowers that quality by a semitone
 -- assuming that its base quality is Perfect.
-lowerPerfect :: Quality -> Quality
-lowerPerfect Perfect        = Diminished 1
-lowerPerfect (Diminished x) = Diminished $ x + 1
-lowerPerfect (Augmented 1)  = Perfect
-lowerPerfect (Augmented x)  = Augmented $ x-1
+lowerPerfect :: Maybe Quality -> Maybe Quality
+lowerPerfect (Just Perfect)        = Just $ Diminished 1
+lowerPerfect (Just (Diminished x)) = iQualFrom $ Diminished $ x + 1
+lowerPerfect (Just (Augmented 1))  = Just Perfect
+lowerPerfect (Just (Augmented x))  = iQualFrom $ Augmented $ x-1
+lowerPerfect Nothing               = Nothing
 
 -- | Given an interval quality, this lowers that quality by a semitone
 -- assuming that its base quality is Major.
-lowerMajor :: Quality -> Quality
-lowerMajor Major          = Minor
-lowerMajor Minor          = Diminished 1
-lowerMajor (Diminished x) = Diminished $ x + 1
-lowerMajor (Augmented 1)  = Major
-lowerMajor (Augmented x)  = Augmented $ x - 1
+lowerMajor :: Maybe Quality -> Maybe Quality
+lowerMajor (Just Major)          = Just Minor
+lowerMajor (Just Minor)          = Just $ Diminished 1
+lowerMajor (Just (Diminished x)) = iQualFrom $ Diminished $ x + 1
+lowerMajor (Just (Augmented 1))  = Just Major
+lowerMajor (Just (Augmented x))  = iQualFrom $ Augmented $ x - 1
+lowerMajor Nothing               = Nothing

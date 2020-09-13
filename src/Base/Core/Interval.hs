@@ -44,7 +44,7 @@ import Common.Utils (modByFrom)
 
 import Control.Monad (zipWithM)
 
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isJust, fromMaybe)
 import Data.Set as S hiding (filter)
 
 -- | Intervals are defined by a quality and a size.
@@ -74,8 +74,6 @@ normalizeIntervalSize = modByFrom 7 1
 -- TODO: This should probably return an Either String Interval (or an error
 -- type in place of String) instead of Maybe Interval, in order to facilitate
 -- more sophisticated error handling / reporting.
---
--- TODO: Make sure diminished and augmented don't get arguments > 11
 intervalFrom :: Quality -> Int -> Maybe Interval
 intervalFrom q s = if normalizedSize `elem` goodSizes then
                      Just Interval { getQuality = q, getSize = normalizedSize }
@@ -161,16 +159,14 @@ instance Invertible Interval where
 -- the interval's distance is increased by that integer without
 -- changing its size.
 --
--- TODO: Figure out what to do if dim and aug < 11 and this function
--- receives an integer argument > 11.
---
 -- prop> intervalToDistance i + x == intervalToDistance (i <+> x)
 -- prop> getSize (i <+> _) == getSize i
 infixl 6 <+>
 (<+>) :: Interval -> Int -> Interval
-Interval iQual i <+> x =
-  Interval (iterate modFunc iQual !! abs x) i
+Interval iQual i <+> x = Interval (iterate smartMod iQual !! abs x) i
   where
+    unwrapMaybeQ :: (Maybe Quality -> Maybe Quality) -> Quality -> Quality
+    unwrapMaybeQ f qual = fromMaybe (baseQuality i) (f $ Just qual)
     modFunc =
       case (baseQuality i, signum x) of
         (Perfect, 1)  -> raisePerfect
@@ -178,6 +174,8 @@ Interval iQual i <+> x =
         (Perfect, -1) -> lowerPerfect
         (Major, -1)   -> lowerMajor
         (_, 0)         -> id
+    smartMod = unwrapMaybeQ modFunc
+    newQual = iterate smartMod iQual !! abs x
 
 -- | When subtracting an integer from an interval with this infix operator,
 -- the interval's distance is decreased by that integer without
