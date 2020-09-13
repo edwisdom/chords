@@ -39,7 +39,7 @@ import Base.Core.Interval
 import Common.Utils (uncurry4, uncurry5)
 
 import Data.Function (on)
-import Data.List (sortBy, zip4, zip5)
+import Data.List (sortBy, zip4, zip5, intercalate)
 import qualified Data.List as L
 import Data.Map as M
 import Data.Maybe (catMaybes, fromJust)
@@ -48,7 +48,11 @@ import Data.Maybe (catMaybes, fromJust)
 -- but with the specific notes as well.
 data Chord = Chord { getSymbol :: ChordSymbol
                    , getNotes :: [Note]
-                   } deriving (Eq, Show)
+                   } deriving (Eq)
+
+instance Show Chord where
+  show c = show (getSymbol c) ++ ", [" ++ intercalate ", " (show <$> getNotes c) ++ "]"
+
 
 -- | A Chord has all the properties of the Chordal typeclass
 instance Chordal Chord where
