@@ -250,7 +250,5 @@ nthDegreeIntervals ints n = S.map (|-| noteInterval) ints
   where
    noteInterval = toAscList ints !! (n - 1)
 
-zipToIntervalSet :: [Quality] -> [Int] -> Maybe (Set Interval)
-zipToIntervalSet quals sizes =
-  do ints <- zipWithM intervalFrom quals sizes
-     return $ fromList ints
+zipToIntervalSet :: [Quality] -> [Int] -> Set Interval
+zipToIntervalSet quals sizes = fromList (fromJust . uncurry intervalFrom <$> zip quals sizes)
