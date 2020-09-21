@@ -12,7 +12,11 @@ function to get the base quality of an interval size.
 -}
 module Base.Core.Quality.IQuality
   ( Quality(..)
-  , iQualFrom
+  , major
+  , perfect
+  , minor
+  , diminished
+  , augmented
   , baseQuality
   , raisePerfect
   , raiseMajor
@@ -46,13 +50,20 @@ instance Show Quality where
   show (Diminished i) = if i == 1 then "dim" else show i ++ "dim"
   show (Augmented i)  = if i == 1 then "aug" else show i ++ "aug"
 
+major :: Quality
+major = Major
 
-iQualFrom :: Quality -> Maybe Quality
-iQualFrom (Diminished x) = if x > 0 && x < 12 then Just (Diminished x)
-                           else Nothing
-iQualFrom (Augmented x) = if x > 0 && x < 12 then Just (Augmented x)
-                           else Nothing
-iQualFrom q = Just q
+perfect :: Quality
+perfect = Perfect
+
+minor :: Quality
+minor = Minor
+
+diminished :: Int -> Maybe Quality
+diminished x = if x > 0 && x < 12 then Just $ Diminished x else Nothing
+
+augmented :: Int -> Maybe Quality
+augmented x = if x > 0 && x < 12 then Just $ Augmented x else Nothing
 
 -- | Given an interval size, we return the base quality, either Perfect or Major
 baseQuality :: Int -> Quality
@@ -64,38 +75,34 @@ baseQuality n
 
 -- | Given an interval quality, this raises that quality by a semitone
 -- assuming that its base quality is Perfect.
-raisePerfect :: Maybe Quality -> Maybe Quality
-raisePerfect (Just Perfect)        = Just $ Augmented 1
-raisePerfect (Just (Augmented x))  = iQualFrom $ Augmented $ x + 1
-raisePerfect (Just (Diminished 1)) = Just Perfect
-raisePerfect (Just (Diminished x)) = iQualFrom $ Diminished $ x - 1
-raisePerfect Nothing               = Nothing
+raisePerfect :: Quality -> Maybe Quality
+raisePerfect Perfect        = Just $ Augmented 1
+raisePerfect (Augmented x)  = augmented $ x + 1
+raisePerfect (Diminished 1) = Just Perfect
+raisePerfect (Diminished x) = diminished $ x - 1
 
 -- | Given an interval quality, this raises that quality by a semitone
 -- assuming that its base quality is Major.
-raiseMajor :: Maybe Quality -> Maybe Quality
-raiseMajor (Just Major)          = Just $ Augmented 1
-raiseMajor (Just (Augmented x))  = iQualFrom $ Augmented $ x + 1
-raiseMajor (Just Minor        )  = Just Major
-raiseMajor (Just (Diminished 1)) = Just Minor
-raiseMajor (Just (Diminished x)) = iQualFrom $ Diminished $ x - 1
-raiseMajor Nothing               = Nothing
+raiseMajor :: Quality -> Maybe Quality
+raiseMajor Major          = Just $ Augmented 1
+raiseMajor (Augmented x)  = augmented $ x + 1
+raiseMajor Minor          = Just Major
+raiseMajor (Diminished 1) = Just Minor
+raiseMajor (Diminished x) = diminished $ x - 1
 
 -- | Given an interval quality, this lowers that quality by a semitone
 -- assuming that its base quality is Perfect.
-lowerPerfect :: Maybe Quality -> Maybe Quality
-lowerPerfect (Just Perfect)        = Just $ Diminished 1
-lowerPerfect (Just (Diminished x)) = iQualFrom $ Diminished $ x + 1
-lowerPerfect (Just (Augmented 1))  = Just Perfect
-lowerPerfect (Just (Augmented x))  = iQualFrom $ Augmented $ x-1
-lowerPerfect Nothing               = Nothing
+lowerPerfect :: Quality -> Maybe Quality
+lowerPerfect Perfect        = Just $ Diminished 1
+lowerPerfect (Diminished x) = diminished $ x + 1
+lowerPerfect (Augmented 1)  = Just Perfect
+lowerPerfect (Augmented x)  = augmented $ x-1
 
 -- | Given an interval quality, this lowers that quality by a semitone
 -- assuming that its base quality is Major.
-lowerMajor :: Maybe Quality -> Maybe Quality
-lowerMajor (Just Major)          = Just Minor
-lowerMajor (Just Minor)          = Just $ Diminished 1
-lowerMajor (Just (Diminished x)) = iQualFrom $ Diminished $ x + 1
-lowerMajor (Just (Augmented 1))  = Just Major
-lowerMajor (Just (Augmented x))  = iQualFrom $ Augmented $ x - 1
-lowerMajor Nothing               = Nothing
+lowerMajor :: Quality -> Maybe Quality
+lowerMajor Major          = Just Minor
+lowerMajor Minor          = Just $ Diminished 1
+lowerMajor (Diminished x) = diminished $ x + 1
+lowerMajor (Augmented 1)  = Just Major
+lowerMajor (Augmented x)  = augmented $ x - 1

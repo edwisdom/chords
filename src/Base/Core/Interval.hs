@@ -163,17 +163,17 @@ instance Invertible Interval where
 -- prop> getSize (i <+> _) == getSize i
 infixl 6 <+>
 (<+>) :: Interval -> Int -> Interval
-Interval iQual i <+> x = Interval (iterate smartMod iQual !! abs x) i
+Interval iQual i <+> x = Interval newQual i
   where
-    unwrapMaybeQ :: (Maybe Quality -> Maybe Quality) -> Quality -> Quality
-    unwrapMaybeQ f qual = fromMaybe (baseQuality i) (f $ Just qual)
+    unwrapMaybeQ :: (Quality -> Maybe Quality) -> Quality -> Quality
+    unwrapMaybeQ f qual = fromMaybe (baseQuality i) (f qual)
     modFunc =
       case (baseQuality i, signum x) of
         (Perfect, 1)  -> raisePerfect
         (Major, 1)    -> raiseMajor
         (Perfect, -1) -> lowerPerfect
         (Major, -1)   -> lowerMajor
-        (_, 0)         -> id
+        (_, 0)         -> return
     smartMod = unwrapMaybeQ modFunc
     newQual = iterate smartMod iQual !! abs x
 

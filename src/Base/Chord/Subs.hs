@@ -34,7 +34,7 @@ import Base.Class.Rooted
 
 import Base.Core.Note
 import Base.Core.Quality.CQuality as CQ
-import Base.Core.Quality.IQuality as IQ
+import Base.Core.Quality.IQuality as IQ hiding (major)
 
 import Base.Core.Interval hiding (getQuality)
 import qualified Base.Core.Interval as I(getQuality)
