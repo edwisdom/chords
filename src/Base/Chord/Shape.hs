@@ -37,7 +37,7 @@ data ChordShape = ChordShape { getQuality :: Quality
 
 instance Show ChordShape where
   show c = show (getQuality c) ++ show (getHighestNatural c)
-        ++ intercalate "" (show <$> getExtensions c) ++ show (getSus c)
+        ++ concat (show <$> getExtensions c) ++ show (getSus c)
 
 
 -- | ChordShape has all the properties of the Chordal typeclass
