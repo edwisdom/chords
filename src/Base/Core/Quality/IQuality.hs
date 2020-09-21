@@ -50,18 +50,27 @@ instance Show Quality where
   show (Diminished i) = if i == 1 then "dim" else show i ++ "dim"
   show (Augmented i)  = if i == 1 then "aug" else show i ++ "aug"
 
+-- | A smart constructor for the @Major@ interval quality.
 major :: Quality
 major = Major
 
+-- | A smart constructor for the @Perfect@ interval quality.
 perfect :: Quality
 perfect = Perfect
 
+-- | A smart constructor for the @Minor@ interval quality.
 minor :: Quality
 minor = Minor
 
+-- | A smart constructor for the @Diminished@ interval quality. Returns
+-- @Nothing@ just in case the given @Int@ is less than or equal to 0 or
+-- greater than or equal to 12.
 diminished :: Int -> Maybe Quality
 diminished x = if x > 0 && x < 12 then Just $ Diminished x else Nothing
 
+-- | A smart constructor for the @Augmented@ interval quality. Returns
+-- @Nothing@ just in case the given @Int@ is less than or equal to 0 or
+-- greater than or equal to 12.
 augmented :: Int -> Maybe Quality
 augmented x = if x > 0 && x < 12 then Just $ Augmented x else Nothing
 
