@@ -21,7 +21,7 @@ module Common.Utils
   , isUnique
   ) where
 
-import Data.Set (Set, fromList)
+import Data.Set (fromList)
 
 -- | Given a modulus and the new lower bound, returns a function
 -- to mod a number accordingly.
