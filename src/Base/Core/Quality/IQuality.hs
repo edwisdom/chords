@@ -13,10 +13,15 @@ function to get the base quality of an interval size.
 module Base.Core.Quality.IQuality
   ( Quality(..)
   , major
+  , isMajor
   , perfect
+  , isPerfect
   , minor
+  , isMinor
   , diminished
+  , isDiminished
   , augmented
+  , isAugmented
   , baseQuality
   , raisePerfect
   , raiseMajor
@@ -54,13 +59,28 @@ instance Show Quality where
 major :: Quality
 major = Major
 
+-- | Return @True@ if and only if the provided @Quality@ is @Major@.
+isMajor :: Quality -> Bool
+isMajor Major = True
+isMajor _     = False
+
 -- | A smart constructor for the @Perfect@ interval quality.
 perfect :: Quality
 perfect = Perfect
 
+-- | Return @True@ if and only if the provided @Quality@ is @Perfect@.
+isPerfect :: Quality -> Bool
+isPerfect Perfect = True
+isPerfect _       = False
+
 -- | A smart constructor for the @Minor@ interval quality.
 minor :: Quality
 minor = Minor
+
+-- | Return @True@ if and only if the provided @Quality@ is @Minor@.
+isMinor :: Quality -> Bool
+isMinor Minor = True
+isMinor _     = False
 
 -- | A smart constructor for the @Diminished@ interval quality. Returns
 -- @Nothing@ just in case the given @Int@ is less than or equal to 0 or
@@ -68,11 +88,21 @@ minor = Minor
 diminished :: Int -> Maybe Quality
 diminished x = if x > 0 && x < 12 then Just $ Diminished x else Nothing
 
+-- | Return @True@ if and only if the provided @Quality@ is @Diminished@.
+isDiminished :: Quality -> Bool
+isDiminished (Diminished _) = True
+isDiminished _              = False
+
 -- | A smart constructor for the @Augmented@ interval quality. Returns
 -- @Nothing@ just in case the given @Int@ is less than or equal to 0 or
 -- greater than or equal to 12.
 augmented :: Int -> Maybe Quality
 augmented x = if x > 0 && x < 12 then Just $ Augmented x else Nothing
+
+-- | Return @True@ if and only if the provided @Quality@ is @Augmented@.
+isAugmented :: Quality -> Bool
+isAugmented (Augmented _) = True
+isAugmented _             = False
 
 -- | Given an interval size, we return the base quality, either Perfect or Major
 baseQuality :: Int -> Quality
