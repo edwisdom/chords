@@ -111,7 +111,7 @@ intervalToDistance interval =
     -- Minor shifts
     Interval Minor   i ->
       case baseQuality i of
-        Major   -> subtract 1 <$> intervalToDistance (Interval Major i)
+        Major   -> subtract 1 <$> intervalToDistance (Interval major i)
         Perfect -> Nothing
 
     -- Augmented shifts
@@ -147,11 +147,11 @@ instance Invertible Interval where
       newI = normalizeIntervalSize $ 9 - normalizeIntervalSize i
       newQual =
         case iQual of
-          Major          -> Minor
-          Minor          -> Major
-          Perfect        -> Perfect
-          (Augmented x)  -> Diminished x
-          (Diminished x) -> Augmented x
+          Major          -> minor
+          Minor          -> major
+          Perfect        -> perfect
+          (Augmented x)  -> fromJust $ diminished x
+          (Diminished x) -> fromJust $ augmented x
     in
       Interval newQual newI
 

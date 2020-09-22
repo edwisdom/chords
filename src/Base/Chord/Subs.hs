@@ -34,7 +34,7 @@ import Base.Class.Rooted
 
 import Base.Core.Note
 import Base.Core.Quality.CQuality as CQ
-import Base.Core.Quality.IQuality as IQ hiding (major, isMajor)
+import Base.Core.Quality.IQuality as IQ
 
 import Base.Core.Interval hiding (getQuality)
 import qualified Base.Core.Interval as I(getQuality)
@@ -47,7 +47,7 @@ import qualified Data.Set as S (delete)
 import Data.Maybe(fromJust, catMaybes, isJust)
 import Base.Core.PitchClass(pitchClass)
 import qualified Data.Map.Strict as M (lookup, elems)
-import Base.Scale.Scale
+import Base.Scale.Scale as Sc
 import Language.Parser
 
 -- | Removes the P5 interval from a given chord's note if it exists
@@ -59,7 +59,7 @@ import Language.Parser
 -- >>> remove5 (chordFromSymbol c)
 -- CM7, [C, E, B]
 remove5 :: Chord -> Chord
-remove5 chord = updateNotes chord $ toNotes (root chord) $ S.delete (fromJust(intervalFrom Perfect 5)) (toIntervals chord)
+remove5 chord = updateNotes chord $ toNotes (root chord) $ S.delete (fromJust(intervalFrom perfect 5)) (toIntervals chord)
   where
     toNotes :: Note -> Set Interval -> [Note]
     toNotes root intSet = flip jumpIntervalFromNote root <$> toList intSet
@@ -133,8 +133,8 @@ transposeChord chord interval =
 dimFamilySub :: Chord -> [Chord]
 dimFamilySub eChord
   |  quality eChord == CQ.Dominant ||
-    (quality eChord == CQ.Minor && (fromJust (intervalFrom IQ.Major 6) `member` toIntervals eChord))
-    = [transposeBy IQ.Minor 3, transposeBy (IQ.Diminished 1) 5, transposeBy IQ.Major 6]
+    (quality eChord == CQ.Minor && (fromJust (intervalFrom IQ.major 6) `member` toIntervals eChord))
+    = [transposeBy IQ.minor 3, transposeBy (fromJust $ IQ.diminished 1) 5, transposeBy IQ.major 6]
   | otherwise = []
   where
     transposeBy :: IQ.Quality -> Int -> Chord
@@ -145,7 +145,7 @@ dimFamilySub eChord
 -- If applied twice in a row, returns the same chord:
 -- prop> tritoneSub $ tritoneSub (chord, notes) == (_, notes)
 tritoneSub :: Chord -> Chord
-tritoneSub eChord = transposeChord eChord $ fromJust $ intervalFrom (IQ.Augmented 1) 4
+tritoneSub eChord = transposeChord eChord $ fromJust $ intervalFrom (fromJust $ IQ.augmented 1) 4
 
 -- | Given a key, and a chord in the key, this returns
 -- a list of chords that are diatonic functional substitutes.
@@ -162,10 +162,10 @@ diatonicFuncSub key chord
   | validSub && degree == 7 = [fromJust (dominant key numNotes)]
   where
     validSub :: Bool
-    validSub = chord `isDiatonicTo` major key
+    validSub = chord `isDiatonicTo` Sc.major key
 
     degree :: Int
-    degree = 1 + fromJust (elemIndex (root chord) (scaleToNotes (major key)))
+    degree = 1 + fromJust (elemIndex (root chord) (scaleToNotes (Sc.major key)))
 
     numNotes :: Int
     numNotes = length $ toNotes chord

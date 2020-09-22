@@ -94,21 +94,21 @@ baseModeIntervals bm
     bmQualities =
       case bm of
         Ionian ->
-          [Perfect, Major, Major, Perfect, Perfect, Major, Major]
+          [perfect, major, major, perfect, perfect, major, major]
         AugmentedQuality ->
-          [Perfect, Major, Major, Augmented 1, Augmented 1, Major, Minor]
+          [perfect, major, major, fromJust $ augmented 1, fromJust $ augmented 1, major, minor]
         DiminishedQuality ->
-          [Perfect, Major, Minor, Perfect, Diminished 1, Minor, Diminished 1]
+          [perfect, major, minor, perfect, fromJust $ diminished 1, minor, fromJust $ diminished 1]
         MelodicMinor ->
-          [Perfect, Major, Minor, Perfect, Perfect, Major, Major]
+          [perfect, major, minor, perfect, perfect, major, major]
         HarmonicMinor ->
-          [Perfect, Major, Minor, Perfect, Perfect, Minor, Major]
+          [perfect, major, minor, perfect, perfect, minor, major]
         DoubleHarmonicMinor ->
-          [Perfect, Major, Minor, Augmented 1, Perfect, Minor, Major]
+          [perfect, major, minor, fromJust $ augmented 1, perfect, minor, major]
         HarmonicMajor ->
-          [Perfect, Major, Major, Perfect, Perfect, Minor, Major]
+          [perfect, major, major, perfect, perfect, minor, major]
         DoubleHarmonicMajor ->
-          [Perfect, Minor, Major, Perfect, Perfect, Minor, Major]
+          [perfect, minor, major, perfect, perfect, minor, major]
 
     -- The interval sets for the non-heptatonic modes
     nonHepInts :: Set Interval
@@ -117,28 +117,28 @@ baseModeIntervals bm
         (quals, iSizes) =
           case bm of
             Blues ->
-              ([Perfect, Minor, Perfect, Diminished 1, Perfect, Minor],
+              ([perfect, minor, perfect, fromJust $ diminished 1, perfect, minor],
                [1, 3, 4, 5, 5, 7])
             MajorPentatonic ->
-              ([Perfect, Major, Major, Perfect, Major],
+              ([perfect, major, major, perfect, major],
                [1, 2, 3, 5, 6])
             MinorPentatonic ->
-              ([Perfect, Minor, Perfect, Perfect, Minor],
+              ([perfect, minor, perfect, perfect, minor],
                [1, 3, 4, 5, 7])
             Bebop ->
-              ([Perfect, Major, Major, Perfect, Perfect, Major, Minor, Major],
+              ([perfect, major, major, perfect, perfect, major, minor, major],
                [1, 2, 3, 4, 5, 6, 7, 7])
             WholeTone ->
-              ([Perfect, Major, Major, Diminished 1, Minor, Minor],
+              ([perfect, major, major, fromJust $ diminished 1, minor, minor],
                [1, 2, 3, 5, 6, 7])
             Hirajoshi ->
-              ([Perfect, Major, Minor, Perfect, Minor],
+              ([perfect, major, minor, perfect, minor],
                [1, 2, 3, 5, 6])
             HalfWhole ->
-              ([Perfect, Minor, Minor, Major, Augmented 1, Perfect, Major, Minor],
+              ([perfect, minor, minor, major, fromJust $ augmented 1, perfect, major, minor],
                [1, 2, 3, 3, 4, 5, 6, 7])
             WholeHalf ->
-              ([Perfect, Major, Minor, Perfect, Diminished 1, Minor, Major, Major],
+              ([perfect, major, minor, perfect, fromJust $ diminished 1, minor, major, major],
                [1, 2, 3, 4, 5, 6, 6, 7])
 
     -- The starting mode and shift for modal interval sets built from other
