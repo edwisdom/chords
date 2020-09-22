@@ -28,8 +28,9 @@ import Base.Scale.Extension
 import Data.Function (on)
 import Data.List (intercalate, sortBy)
 import Data.Maybe (fromJust)
-import Data.Set (Set(..), insert, delete, elemAt, toAscList)
-import qualified Data.Set as S(filter, map)
+import Data.Set (Set(..), insert, delete, elemAt, toAscList, toList)
+import qualified Data.Set as S (filter, map)
+import Common.Utils
 
 -- | A mode is constructed from a base mode and scale extensions.
 data Mode = Mode BaseMode [Extension]
@@ -41,9 +42,26 @@ instance Show Mode where
                        --Add extensions separated by a comma...
                        ++ intercalate ", " (show <$> exts)
 
--- | Smart constructor for a mode
-modeFrom :: BaseMode -> [Extension] -> Mode
-modeFrom = Mode
+{-|
+-- Smart constructor for a mode. If a mode is invalid,
+-- this returns Nothing. The possible reasons for an invalid mode are:
+--
+-- 1. The list of extensions has a duplicate degree
+-- 2. An extension exists where the degree is not in the base mode
+-- 3. An extension exists for a degree that occurs multiple times in the mode
+-}
+modeFrom :: BaseMode -> [Extension] -> Maybe Mode
+modeFrom base exts =
+  let
+    baseSizes = getSize <$> toList (baseModeIntervals base)
+    extSizes = getDegree <$> exts
+  in
+    if allUnique extSizes
+    || all (`elem` baseSizes) extSizes
+    || all (isUnique baseSizes) extSizes
+    then Just $ Mode base exts
+    else Nothing
+
 
 -- | Converts a mode into a set of intervals.
 modeToIntervals :: Mode -> Set Interval
@@ -53,8 +71,6 @@ modeToIntervals (Mode baseMode exts) =
     extIntervals :: Extension -> Set Interval -> Set Interval
     extIntervals ext intSet = insert (oldInt <+> impliedShift (getAccidental ext)) (delete oldInt intSet)
       where
-        -- TODO: If there isn't only one interval of a certain degree, the mode is
-        -- ambiguously constructed and we should give a warning.
         oldInt = elemAt 0 (S.filter (\a -> getSize a == getDegree ext) intSet)
 
 -- | Given a mode, returns the number of scale extensions.

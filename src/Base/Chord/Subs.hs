@@ -47,20 +47,19 @@ import qualified Data.Set as S (delete)
 import Data.Maybe(fromJust, catMaybes, isJust)
 import Base.Core.PitchClass(pitchClass)
 import qualified Data.Map.Strict as M (lookup, elems)
-import Base.Scale.Scale
+import Base.Scale.Scale as Sc
 import Language.Parser
 
 -- | Removes the P5 interval from a given chord's note if it exists
 -- and returns the same chord symbol.
 --
--- prop> remove5 (chord, _) == chord
+-- prop> getSymbol $ remove5 chord == getSymbol chord
 --
 -- >>> c = canonicalizeChord $ fromJust $ parseChord "CM7"
--- >>> notes = chordToNotes c
--- >>> remove5 (c, notes)
--- (CM7,[C,E,B])
+-- >>> remove5 (chordFromSymbol c)
+-- CM7, [C, E, B]
 remove5 :: Chord -> Chord
-remove5 chord = updateNotes chord $ toNotes (root chord) $ S.delete (fromJust(intervalFrom Perfect 5)) (toIntervals chord)
+remove5 chord = updateNotes chord $ toNotes (root chord) $ S.delete (fromJust(intervalFrom perfect 5)) (toIntervals chord)
   where
     toNotes :: Note -> Set Interval -> [Note]
     toNotes root intSet = flip jumpIntervalFromNote root <$> toList intSet
@@ -118,11 +117,10 @@ negative key chord = head $ notesToChord newNotes
 -- this transposes the chord by that interval. Because this function
 -- is only used internally by the module, it assumes the intervals are
 -- validly constructed.
--- TODO: Make this a safe, general-purpose, exportable function
-transposeChord :: Chord -> IQ.Quality -> Int -> Chord
-transposeChord chord iQual i =
+transposeChord :: Chord -> Interval -> Chord
+transposeChord chord interval =
   let
-    newChord = transposeToRoot (getSymbol chord )$ respell $ jumpIntervalFromNote (fromJust (intervalFrom iQual i)) $ root chord
+    newChord = transposeToRoot (getSymbol chord )$ respell $ jumpIntervalFromNote interval $ root chord
   in
     chordFromSymbol newChord
 
@@ -130,21 +128,24 @@ transposeChord chord iQual i =
 -- a list of chord substitutions from its diminished family.
 --
 -- >>> c = canonicalizeChord $ fromJust $ parseChord "C7"
--- >>> notes = chordToNotes c
--- >>> dimFamilySub (c, notes)
--- [(Eb7,[Eb,G,Bb,Db]),(Gb7,[Gb,Bb,Db,Fb]),(A7,[A,C#,E,G])]
+-- >>> dimFamilySub (chordFromSymbol c)
+-- [Chord {getSymbol = ChordSymbol {getChordRoot = Eb, getShape = ChordShape {getQuality = , getHighestNatural = 7, getExtensions = [], getSus = }}, getNotes = [Eb,G,Bb,Db]},Chord {getSymbol = ChordSymbol {getChordRoot = Gb, getShape = ChordShape {getQuality = , getHighestNatural = 7, getExtensions = [], getSus = }}, getNotes = [Gb,Bb,Db,Fb]},Chord {getSymbol = ChordSymbol {getChordRoot = A, getShape = ChordShape {getQuality = , getHighestNatural = 7, getExtensions = [], getSus = }}, getNotes = [A,C#,E,G]}]
 dimFamilySub :: Chord -> [Chord]
 dimFamilySub eChord
   |  quality eChord == CQ.Dominant ||
-    (quality eChord == CQ.Minor && (fromJust (intervalFrom IQ.Major 6) `member` toIntervals eChord))
-    = [transposeChord eChord IQ.Minor 3, transposeChord eChord (IQ.Diminished 1) 5, transposeChord eChord IQ.Major 6]
+    (quality eChord == CQ.Minor && (fromJust (intervalFrom IQ.major 6) `member` toIntervals eChord))
+    = [transposeBy IQ.minor 3, transposeBy (fromJust $ IQ.diminished 1) 5, transposeBy IQ.major 6]
   | otherwise = []
+  where
+    transposeBy :: IQ.Quality -> Int -> Chord
+    transposeBy iQual i = transposeChord eChord $ fromJust $ intervalFrom iQual i
+
 
 -- | Returns the same chord, but a tritone away.
 -- If applied twice in a row, returns the same chord:
 -- prop> tritoneSub $ tritoneSub (chord, notes) == (_, notes)
 tritoneSub :: Chord -> Chord
-tritoneSub eChord = transposeChord eChord (IQ.Augmented 1) 4
+tritoneSub eChord = transposeChord eChord $ fromJust $ intervalFrom (fromJust $ IQ.augmented 1) 4
 
 -- | Given a key, and a chord in the key, this returns
 -- a list of chords that are diatonic functional substitutes.
@@ -161,10 +162,10 @@ diatonicFuncSub key chord
   | validSub && degree == 7 = [fromJust (dominant key numNotes)]
   where
     validSub :: Bool
-    validSub = chord `isDiatonicTo` major key
+    validSub = chord `isDiatonicTo` Sc.major key
 
     degree :: Int
-    degree = 1 + fromJust (elemIndex (root chord) (scaleToNotes (major key)))
+    degree = 1 + fromJust (elemIndex (root chord) (scaleToNotes (Sc.major key)))
 
     numNotes :: Int
     numNotes = length $ toNotes chord

@@ -36,7 +36,11 @@ import Data.Set
 -- a C and a M7 gives us a CM7.
 data ChordSymbol = ChordSymbol { getChordRoot :: Note
                                , getShape :: ChordShape
-                               } deriving (Eq, Show)
+                               } deriving (Eq)
+
+instance Show ChordSymbol where
+  show c = show (getChordRoot c) ++ show (getShape c)
+
 
 -- | ChordSymbol has all the properties of the Chordal typeclass,
 -- most importantly, that it can be converted to a set of intervals.

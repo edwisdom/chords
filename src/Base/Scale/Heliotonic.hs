@@ -108,4 +108,4 @@ highestNaturalToIntervals scale hn =
         (int, fromJust interval)
 
     insertMajorSeven :: HeliotonicScale -> HeliotonicScale
-    insertMajorSeven hts = insert 7 (fromJust $ intervalFrom IQ.Major 7) hts
+    insertMajorSeven hts = insert 7 (fromJust $ intervalFrom IQ.major 7) hts

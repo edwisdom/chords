@@ -29,6 +29,5 @@ instance Show Extension where
   show ext = show (getAccidental ext) ++ show (getDegree ext)
 
 -- | Smart constructor for a scale extension.
--- TODO: Figure out whether this should exclude the AccNatural possibility
 scaleExtensionFrom :: Accidental -> Int -> Extension
 scaleExtensionFrom = Extension

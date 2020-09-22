@@ -26,13 +26,19 @@ import Base.Class.Chordal
 import Base.Scale.Heliotonic
 
 import Data.Set hiding (foldr)
+import Data.List(intercalate)
 
 -- | A ChordShape, e.g. a M7 chord, is a rootless abstract shape.
 data ChordShape = ChordShape { getQuality :: Quality
                              , getHighestNatural :: HighestNatural
                              , getExtensions :: [Extension]
                              , getSus :: Sus
-                             } deriving (Eq, Show)
+                             } deriving (Eq)
+
+instance Show ChordShape where
+  show c = show (getQuality c) ++ show (getHighestNatural c)
+        ++ concat (show <$> getExtensions c) ++ show (getSus c)
+
 
 -- | ChordShape has all the properties of the Chordal typeclass
 instance Chordal ChordShape where

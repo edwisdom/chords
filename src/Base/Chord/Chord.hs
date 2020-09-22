@@ -39,7 +39,7 @@ import Base.Core.Interval
 import Common.Utils (uncurry4, uncurry5)
 
 import Data.Function (on)
-import Data.List (sortBy, zip4, zip5)
+import Data.List (sortBy, zip4, zip5, intercalate)
 import qualified Data.List as L
 import Data.Map as M
 import Data.Maybe (catMaybes, fromJust)
@@ -48,7 +48,11 @@ import Data.Maybe (catMaybes, fromJust)
 -- but with the specific notes as well.
 data Chord = Chord { getSymbol :: ChordSymbol
                    , getNotes :: [Note]
-                   } deriving (Eq, Show)
+                   } deriving (Eq)
+
+instance Show Chord where
+  show c = show (getSymbol c) ++ ", [" ++ intercalate ", " (show <$> getNotes c) ++ "]"
+
 
 -- | A Chord has all the properties of the Chordal typeclass
 instance Chordal Chord where
@@ -97,13 +101,13 @@ notesToChord notes =
 
     findQuality :: Note -> CQ.Quality
     findQuality root
-      | hasInterval IQ.Major 3 && hasInterval IQ.Minor 7 = CQ.Dominant
-      | hasInterval IQ.Major 3 && hasInterval (IQ.Augmented 1) 5 = CQ.Augmented
-      | hasInterval IQ.Major 3 = CQ.Major
-      | hasInterval IQ.Minor 3 && hasInterval IQ.Minor 7 = CQ.Minor
-      | hasInterval IQ.Minor 3 && hasInterval (IQ.Diminished 1) 5 = CQ.Diminished
-      | hasInterval IQ.Minor 3 = CQ.Minor
-      | hasInterval IQ.Minor 7 = CQ.Dominant
+      | hasInterval IQ.major 3 && hasInterval IQ.minor 7 = CQ.Dominant
+      | hasInterval IQ.major 3 && hasInterval (fromJust $ IQ.augmented 1) 5 = CQ.Augmented
+      | hasInterval IQ.major 3 = CQ.Major
+      | hasInterval IQ.minor 3 && hasInterval IQ.minor 7 = CQ.Minor
+      | hasInterval IQ.minor 3 && hasInterval (fromJust $ IQ.diminished 1) 5 = CQ.Diminished
+      | hasInterval IQ.minor 3 = CQ.Minor
+      | hasInterval IQ.minor 7 = CQ.Dominant
       | otherwise = CQ.Major
       where
         notesContainIntervalFromNote :: [Note] -> Note -> Interval -> Bool
@@ -132,7 +136,7 @@ notesToChord notes =
         cInts = intervalBetweenNotes root <$> roots
 
         majorOrNot :: Int -> HighestNatural
-        majorOrNot = if (quality /= CQ.Major) && fromJust (intervalFrom IQ.Major 7) `elem` cInts
+        majorOrNot = if (quality /= CQ.Major) && fromJust (intervalFrom IQ.major 7) `elem` cInts
                      then majorNatural
                      else nonMajorNatural
 
@@ -159,10 +163,10 @@ notesToChord notes =
         containsThird = 3 `elem` (getSize <$> cInts)
 
         has2 :: Bool
-        has2 = fromJust (intervalFrom IQ.Major 2) `elem` cInts
+        has2 = fromJust (intervalFrom IQ.major 2) `elem` cInts
 
         has4 :: Bool
-        has4 = fromJust (intervalFrom IQ.Perfect 4) `elem` cInts
+        has4 = fromJust (intervalFrom IQ.perfect 4) `elem` cInts
 
     chordSuses :: [Sus]
     chordSuses = uncurry findSus <$> zip roots highNats
@@ -187,10 +191,10 @@ notesToChord notes =
 
         noSusInts :: [Interval]
         noSusInts
-          | chordSus == sus 2 = L.delete (fromJust (intervalFrom IQ.Major 2)) noNatInts
-          | chordSus == sus 4 = L.delete (fromJust (intervalFrom IQ.Perfect 4)) noNatInts
-          | (chordSus == susNoNum && numHighNat < 9) = L.delete (fromJust (intervalFrom IQ.Major 2))
-                                                     $ L.delete (fromJust (intervalFrom IQ.Perfect 4)) noNatInts
+          | chordSus == sus 2 = L.delete (fromJust (intervalFrom IQ.major 2)) noNatInts
+          | chordSus == sus 4 = L.delete (fromJust (intervalFrom IQ.perfect 4)) noNatInts
+          | (chordSus == susNoNum && numHighNat < 9) = L.delete (fromJust (intervalFrom IQ.major 2))
+                                                     $ L.delete (fromJust (intervalFrom IQ.perfect 4)) noNatInts
           | otherwise = noNatInts
 
         intToExt :: Interval -> Extension
